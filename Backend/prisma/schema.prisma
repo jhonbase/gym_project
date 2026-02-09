@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String         @id @default(uuid())
+  nombre       String
+  documento    String         @unique
+  email        String         @unique 
+  createAt     DateTime       @default(now())
+  fingerprints Fingerprint[]
+}
+
+model Fingerprint {
+  id        String   @id @default(uuid()) 
+  userId    String
+  template  String
+  createAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}

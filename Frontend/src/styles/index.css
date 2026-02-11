@@ -1,0 +1,160 @@
+/* ============================================
+   Estilos globales - GymSystem
+   ============================================ */
+
+/* Variables de color - tema oscuro gimnasio */
+:root {
+  --bg-primary: #0f0f0f;
+  --bg-secondary: #1a1a2e;
+  --bg-card: #16213e;
+  --text-primary: #eee;
+  --text-secondary: #aaa;
+  --accent: #e94560;
+  --accent-hover: #ff6b81;
+  --success: #2ecc71;
+  --error: #e74c3c;
+  --warning: #f39c12;
+  --border: #333;
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); }
+
+/* Layout */
+.layout { min-height: 100vh; display: flex; flex-direction: column; }
+.main-content { flex: 1; padding: 2rem; max-width: 1000px; margin: 0 auto; width: 100%; }
+
+/* Navbar */
+.navbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 2rem; background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+}
+.navbar-brand { font-size: 1.3rem; font-weight: bold; color: var(--text-primary); }
+.navbar-links { display: flex; gap: 1.5rem; align-items: center; }
+.navbar-user { color: var(--text-secondary); }
+.btn-logout {
+  background: none; border: 1px solid var(--error); color: var(--error);
+  padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer;
+}
+.btn-logout:hover { background: var(--error); color: white; }
+
+/* Auth pages (login/register) */
+.auth-page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;
+}
+.auth-card {
+  background: var(--bg-card); padding: 2.5rem; border-radius: var(--radius);
+  width: 100%; max-width: 480px; text-align: center;
+}
+.auth-card h1 { margin-bottom: 0.5rem; }
+.auth-card p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+.auth-link { display: block; margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.9rem; }
+.step-indicator { color: var(--accent); font-weight: bold; }
+
+/* Forms */
+form { display: flex; flex-direction: column; gap: 0.8rem; text-align: left; }
+input, select, textarea {
+  width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--bg-primary); color: var(--text-primary); font-size: 0.95rem;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; color: var(--text-secondary); }
+fieldset { border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem; margin-bottom: 1rem; }
+legend { color: var(--accent); font-weight: bold; padding: 0 0.5rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+
+/* Buttons */
+.btn-primary {
+  background: var(--accent); color: white; border: none; padding: 0.85rem;
+  border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: bold; margin-top: 0.5rem;
+}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary {
+  background: transparent; color: var(--text-secondary); border: 1px solid var(--border);
+  padding: 0.6rem; border-radius: 8px; cursor: pointer; margin-top: 0.5rem;
+}
+
+/* Fingerprint button */
+.fingerprint-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  background: var(--bg-secondary); border: 2px solid var(--accent); border-radius: 50%;
+  width: 160px; height: 160px; margin: 1.5rem auto; cursor: pointer;
+  justify-content: center; transition: all 0.3s;
+}
+.fingerprint-btn:hover { box-shadow: 0 0 30px rgba(233, 69, 96, 0.3); }
+.fingerprint-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.fingerprint-icon { font-size: 3rem; }
+.fingerprint-label { font-size: 0.8rem; color: var(--text-secondary); }
+.fingerprint-btn.scanning { animation: pulse 1s infinite; }
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(233, 69, 96, 0.4); }
+  50% { box-shadow: 0 0 0 20px rgba(233, 69, 96, 0); }
+}
+
+/* Enroll step */
+.enroll-step { display: flex; flex-direction: column; align-items: center; }
+
+/* Cards */
+.card {
+  background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem;
+}
+.user-info-grid, .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.8rem; }
+.user-info-grid span, .result-grid span { color: var(--text-secondary); font-size: 0.95rem; }
+
+/* Dashboard */
+.section-header { display: flex; justify-content: space-between; align-items: center; margin: 2rem 0 1rem; }
+.assessments-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.assessment-card { display: flex; justify-content: space-between; align-items: center; color: var(--text-primary); }
+.assessment-card:hover { border-left: 3px solid var(--accent); }
+.empty-state { color: var(--text-secondary); text-align: center; padding: 2rem; }
+
+/* Badges */
+.badge { padding: 0.2rem 0.7rem; border-radius: 20px; font-size: 0.8rem; }
+.badge-pendiente { background: var(--warning); color: #000; }
+.badge-completada { background: var(--accent); color: white; }
+.badge-analizada { background: var(--success); color: white; }
+
+/* Alert messages */
+.alert {
+  padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 1rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.alert-success { background: rgba(46, 204, 113, 0.15); border: 1px solid var(--success); color: var(--success); }
+.alert-error { background: rgba(231, 76, 60, 0.15); border: 1px solid var(--error); color: var(--error); }
+.alert-warning { background: rgba(243, 156, 18, 0.15); border: 1px solid var(--warning); color: var(--warning); }
+.alert-close { background: none; border: none; color: inherit; cursor: pointer; font-size: 1.1rem; }
+
+/* AI card */
+.ai-card h3 { margin-bottom: 1rem; }
+.ai-analysis { white-space: pre-wrap; line-height: 1.6; color: var(--text-secondary); }
+.ai-pending { text-align: center; }
+.ai-pending p { margin-bottom: 1rem; }
+
+/* Assessment form page */
+.assessment-form-page h1 { margin-bottom: 0.3rem; }
+.assessment-form-page > p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+
+/* Back link */
+.back-link { color: var(--text-secondary); font-size: 0.9rem; display: inline-block; margin-bottom: 1rem; }
+
+/* Loading spinner */
+.spinner-container { display: flex; justify-content: center; padding: 3rem; }
+.spinner {
+  width: 40px; height: 40px; border: 4px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Date */
+.date { color: var(--text-secondary); margin-bottom: 1.5rem; }

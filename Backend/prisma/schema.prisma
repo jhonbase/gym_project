@@ -4,22 +4,82 @@ generator client {
 
 datasource db {
   provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
+// ---- USUARIO ----
 model User {
-  id           String         @id @default(uuid())
-  nombre       String
-  documento    String         @unique
-  email        String         @unique 
-  createAt     DateTime       @default(now())
-  fingerprints Fingerprint[]
+  id                 String        @id @default(uuid())
+  nombre             String
+  documento          String        @unique
+  email              String        @unique
+  telefono           String
+  eps                String
+  grupoSanguineo     String        // Ej: "O+", "A-", "B+", "AB-"
+  contactoEmergencia String        // Nombre + teléfono del contacto
+  carrera            String
+  jornada            String        // Ej: "diurna", "nocturna"
+  semestre           Int
+  rol                String        @default("usuario") // "usuario" | "entrenador" | "admin"
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  // Relaciones
+  fingerprints       Fingerprint[]
+  assessments        Assessment[]
 }
 
+// ---- HUELLA DACTILAR ----
+// Almacena el template
+// Un usuario puede tener múltiples huellas registradas (ej: distintos dedos).
 model Fingerprint {
-  id        String   @id @default(uuid()) 
+  id        String   @id @default(uuid())
   userId    String
-  template  String
-  createAt  DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template  String   // String de 64 caracteres (simulación) o datos reales del SDK
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ---- VALORACIÓN FÍSICA ----
+// Datos que el entrenador registra después de la evaluación física.
+model Assessment {
+  id                   String   @id @default(uuid())
+  userId               String
+
+  // Medidas corporales
+  peso                 Float    
+  estatura             Float    
+  grasaCorporal        Float    
+  masaMuscular         Float    
+  imc                  Float    
+  masaMagra            Float    
+  aguaCorporal         Float    
+  grasaVisceral        Int      
+
+  // Datos clínicos
+  presionArterial      String   
+  edadMetabolica       Int      
+  fuerzaAgarre         Float    
+  resistenciaMuscular  String   
+  rmEstimado           Float    
+  ppm                  Int      
+
+  // Contexto
+  nivelActividadFisica String   
+  observacion          String?  
+  objetivoUsuario      String   
+
+  // Análisis IA
+  analisisIA           String?  
+  estadoValoracion     String   @default("pendiente") // "pendiente" | "completada" | "analizada"
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }

@@ -5,7 +5,15 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run src/tests/unit",
+    "test:integration": "vitest run src/tests/integration",
+    "test:blackbox": "vitest run src/tests/blackbox",
+    "test:performance": "vitest run src/tests/performance"
+
   },
   "keywords": [],
   "author": "",
@@ -24,6 +32,9 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/node": "^25.2.2"
+    "@faker-js/faker": "^10.3.0",
+    "@types/node": "^25.2.2",
+    "supertest": "^7.2.2",
+    "vitest": "^4.0.18"
   }
 }

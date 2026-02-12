@@ -15,7 +15,7 @@ export default function RegisterPage() {
   const [alert, setAlert] = useState(null)
 
   const [form, setForm] = useState({
-    nombre: '', documento: '', email: '', telefono: '',
+    nombre: '', tipoDocumento: 'CC', documento: '', email: '', telefono: '',
     eps: '', grupoSanguineo: 'O+',
     nombreEmergencia: '', telefonoEmergencia: '',
     carrera: '', jornada: 'diurna', semestre: 1,
@@ -29,12 +29,11 @@ export default function RegisterPage() {
     }))
   }
 
-  // Construye el payload concatenando los campos de emergencia
-  // en un solo string compatible con el backend
   function buildPayload() {
-    const { nombreEmergencia, telefonoEmergencia, ...rest } = form
+    const { nombreEmergencia, telefonoEmergencia, tipoDocumento, ...rest } = form
     return {
       ...rest,
+      documento: `${tipoDocumento} ${form.documento.trim()}`,
       contactoEmergencia: `${nombreEmergencia.trim()} - ${telefonoEmergencia.trim()}`,
     }
   }
@@ -43,25 +42,50 @@ export default function RegisterPage() {
     e.preventDefault()
     setAlert(null)
 
+    // Nombre: solo letras y espacios
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(form.nombre.trim())) {
+      setAlert({ type: 'error', message: 'El nombre solo debe contener letras' })
+      return
+    }
+
+    // Documento: solo números
+    if (!/^\d+$/.test(form.documento)) {
+      setAlert({ type: 'error', message: 'El documento solo debe contener números' })
+      return
+    }
+
+    if (form.documento.length < 10) {
+      setAlert({ type: 'error', message: 'El documento debe tener al menos 10 dígitos' })
+      return
+    }
+
+    // Email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(form.email)) {
       setAlert({ type: 'error', message: 'Ingresa un correo electrónico válido (ej: usuario@correo.com)' })
       return
     }
 
-    const bloodRegex = /^(A|B|AB|O)[+-]$/
-    if (!bloodRegex.test(form.grupoSanguineo)) {
+    // Teléfono: solo números
+    if (!/^\d+$/.test(form.telefono)) {
+      setAlert({ type: 'error', message: 'El teléfono solo debe contener números' })
+      return
+    }
+
+    if (form.telefono.length < 10) {
+      setAlert({ type: 'error', message: 'El teléfono debe tener al menos 10 dígitos' })
+      return
+    }
+
+    // Grupo sanguíneo
+    if (!/^(A|B|AB|O)[+-]$/.test(form.grupoSanguineo)) {
       setAlert({ type: 'error', message: 'Grupo sanguíneo inválido' })
       return
     }
 
-    if (form.documento.length < 5) {
-      setAlert({ type: 'error', message: 'El documento debe tener al menos 5 caracteres' })
-      return
-    }
-
-    if (form.telefono.length < 7) {
-      setAlert({ type: 'error', message: 'El teléfono debe tener al menos 7 dígitos' })
+    // Contacto de emergencia: nombre solo letras
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(form.nombreEmergencia.trim())) {
+      setAlert({ type: 'error', message: 'El nombre del contacto solo debe contener letras' })
       return
     }
 
@@ -70,8 +94,20 @@ export default function RegisterPage() {
       return
     }
 
-    if (form.telefonoEmergencia.trim().length < 7) {
-      setAlert({ type: 'error', message: 'El teléfono de emergencia debe tener al menos 7 dígitos' })
+    // Contacto de emergencia: teléfono solo números
+    if (!/^\d+$/.test(form.telefonoEmergencia)) {
+      setAlert({ type: 'error', message: 'El teléfono de emergencia solo debe contener números' })
+      return
+    }
+
+    if (form.telefonoEmergencia.trim().length < 10) {
+      setAlert({ type: 'error', message: 'El teléfono de emergencia debe tener al menos 10 dígitos' })
+      return
+    }
+
+    // Carrera: solo letras y espacios
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(form.carrera.trim())) {
+      setAlert({ type: 'error', message: 'La carrera solo debe contener letras' })
       return
     }
 
@@ -117,8 +153,16 @@ export default function RegisterPage() {
                 <input name="nombre" value={form.nombre} onChange={handleChange} required />
               </label>
               <label>
-                Documento de identidad
-                <input name="documento" value={form.documento} onChange={handleChange} required />
+                Tipo de documento
+                <select name="tipoDocumento" value={form.tipoDocumento} onChange={handleChange}>
+                  <option value="CC">Cédula de ciudadanía</option>
+                  <option value="TI">Tarjeta de identidad</option>
+                  <option value="CE">Cédula de extranjería</option>
+                </select>
+              </label>
+              <label>
+                Número de documento
+                <input name="documento" inputMode="numeric" value={form.documento} onChange={handleChange} required />
               </label>
             </fieldset>
 
@@ -130,7 +174,7 @@ export default function RegisterPage() {
               </label>
               <label>
                 Teléfono
-                <input name="telefono" value={form.telefono} onChange={handleChange} required />
+                <input name="telefono" inputMode="numeric" value={form.telefono} onChange={handleChange} required />
               </label>
             </fieldset>
 
@@ -158,7 +202,7 @@ export default function RegisterPage() {
               </label>
               <label>
                 Teléfono del contacto
-                <input name="telefonoEmergencia" value={form.telefonoEmergencia} onChange={handleChange} required />
+                <input name="telefonoEmergencia" inputMode="numeric" value={form.telefonoEmergencia} onChange={handleChange} required />
               </label>
             </fieldset>
 

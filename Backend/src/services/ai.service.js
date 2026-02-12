@@ -1,44 +1,47 @@
-import OpenAI from 'openai'
+import Groq from 'groq-sdk'
 import config from '../config/environment.js'
 import * as logger from '../utils/logger.js'
 
-// Solo creamos el cliente OpenAI si hay API key configurada.
-// Si no hay key → openaiClient es null → las funciones devuelven null.
-let openaiClient = null
+// Solo creamos el cliente Groq si hay API key configurada.
+// Si no hay key → groqClient es null → las funciones devuelven null.
+let groqClient = null
 
-if (config.openaiApiKey) {
-  openaiClient = new OpenAI({ apiKey: config.openaiApiKey })
-  logger.info('Cliente OpenAI inicializado correctamente.')
+if (config.groqApiKey) {
+  groqClient = new Groq({ apiKey: config.groqApiKey })
+  logger.info('Cliente Groq inicializado correctamente.')
 } else {
-  logger.warn('OPENAI_API_KEY no configurada. Las funciones de IA estarán deshabilitadas.')
+  logger.warn('GROQ_API_KEY no configurada. Las funciones de IA estarán deshabilitadas.')
 }
 
 /**
- * Genera un análisis de valoración física usando GPT-4o mini.
+ * Genera un análisis de valoración física usando Llama 3.
  *
  * @param {object} assessmentData - Todos los datos de la valoración
  * @returns {string|null} Análisis en texto, o null si no hay internet/key
  */
 async function generateAssessmentAnalysis(assessmentData) {
-  if (!openaiClient) {
-    logger.warn('Análisis IA omitido: cliente OpenAI no disponible.')
+  if (!groqClient) {
+    logger.warn('Análisis IA omitido: cliente Groq no disponible.')
     return null
   }
 
   const prompt = buildPrompt(assessmentData)
 
   try {
-    const response = await openaiClient.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const response = await groqClient.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
       messages: [
         {
           role: 'system',
           content:
-            'Eres un entrenador profesional certificado y especialista en evaluación física. ' +
-            'Analiza los siguientes datos de valoración física y proporciona un análisis completo ' +
-            'en español. Incluye: resumen general de salud, factores de riesgo identificados, ' +
-            'tipo de ejercicio recomendado, sugerencias de nutrición, y metas a corto plazo. ' +
-            'Sé motivador pero honesto. Usa un lenguaje claro y profesional.',
+            'Eres un asistente de análisis para entrenadores profesionales certificados. ' +
+            'Tu audiencia es el ENTRENADOR, no el paciente. ' +
+            'Analiza los siguientes datos de valoración física y genera un informe técnico en español ' +
+            'dirigido al entrenador para que tome decisiones sobre el plan de entrenamiento del paciente. ' +
+            'Incluye: resumen del estado físico del paciente, factores de riesgo que el entrenador debe ' +
+            'considerar, recomendaciones de tipo de ejercicio y carga apropiada, consideraciones ' +
+            'nutricionales a sugerir, y metas a corto plazo recomendadas para este paciente. ' +
+            'Usa un tono técnico, directo y profesional. Refiérete al sujeto como "el paciente".',
         },
         {
           role: 'user',
@@ -51,14 +54,14 @@ async function generateAssessmentAnalysis(assessmentData) {
 
     return response.choices[0].message.content
   } catch (error) {
-    logger.error(`Error en OpenAI API: ${error.message}`)
+    logger.error(`Error en Groq API: ${error.message}`)
     return null
   }
 }
 
 /**
  * Construye el prompt con los datos de la valoración.
- * Formateado para que GPT-4o mini entienda claramente cada dato.
+ * Formateado para que Llama 3 entienda claramente cada dato.
  */
 function buildPrompt(data) {
   return `

@@ -2,10 +2,11 @@ import * as assessmentService from '../services/assessment.service.js'
 import * as aiService from '../services/ai.service.js'
 import * as response from '../utils/apiResponse.js'
 import * as logger from '../utils/logger.js'
+import * as pdfService from '../services/pdf.service.js'
 
 /**
  * POST /api/assessments
- * Crea una nueva valoración física y intenta generar análisis IA.
+ * Crea una nueva valoración física e intenta generar análisis IA.
  */
 async function createAssessment(req, res, next) {
   try {
@@ -104,4 +105,32 @@ async function retryAnalysis(req, res, next) {
   }
 }
 
-export { createAssessment, getAssessment, getByUser, retryAnalysis }
+/**
+ * GET /api/assessments/:id/pdf
+ * Genera y devuelve el PDF de la valoración.
+ * ?download=true → descarga. Sin query param → previsualiza inline.
+ */
+async function getAssessmentPdf(req, res, next) {
+  try {
+    const assessment = await assessmentService.getById(req.params.id)
+
+    if (!assessment) {
+      return response.error(res, 'Valoración no encontrada.', 404)
+    }
+
+    const disposition = req.query.download === 'true' ? 'attachment' : 'inline'
+
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader(
+      'Content-Disposition',
+      `${disposition}; filename="valoracion-${assessment.id}.pdf"`
+    )
+
+    pdfService.generateAssessmentPdf(assessment, res)
+  } catch (error) {
+    next(error)
+  }
+}
+
+
+export { createAssessment, getAssessment, getByUser, retryAnalysis, getAssessmentPdf }

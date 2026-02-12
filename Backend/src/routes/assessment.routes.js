@@ -8,13 +8,16 @@ const router = Router()
 // POST /api/assessments → Crear valoración + intentar análisis IA
 router.post('/', validateRequest(createAssessmentSchema), assessmentController.createAssessment)
 
-// GET /api/assessments/user/:userId → Todas las valoraciones de un usuario
+// GET /api/assessments/user/:userId -> Todas las valoraciones de un usuario
 router.get('/user/:userId', assessmentController.getByUser)
 
-// GET /api/assessments/:id → Obtener una valoración específica
+// GET /api/assessments/:id/pdf -> Genera pdf de la valoración
+router.get('/:id/pdf', assessmentController.getAssessmentPdf)
+
+// GET /api/assessments/:id -> Obtener una valoración específica
 router.get('/:id', assessmentController.getAssessment)
 
-// POST /api/assessments/:id/analyze → Reintentar análisis IA
+// POST /api/assessments/:id/analyze -> Reintentar análisis IA
 router.post('/:id/analyze', assessmentController.retryAnalysis)
 
 export default router

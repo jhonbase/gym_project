@@ -12,7 +12,7 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <Link to="/dashboard" className="navbar-brand">🏋️ GymSystem</Link>
+      <Link to="/dashboard" className="navbar-brand">🏋️ UNIFIT</Link>
       <div className="navbar-links">
         <Link to="/dashboard">Inicio</Link>
         <Link to="/assessment/new">Nueva Valoración</Link>

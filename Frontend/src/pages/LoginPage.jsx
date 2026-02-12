@@ -5,6 +5,7 @@ import apiClient from '../api/client.js'
 import { getEnrolledTemplate, hasEnrolledFingerprint, mutateTemplate } from '../utils/fingerprint.js'
 import FingerprintButton from '../components/FingerprintButton.jsx'
 import AlertMessage from '../components/AlertMessage.jsx'
+import titleUnifit from '../assets/images/titleUnifit.png'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -43,7 +44,9 @@ export default function LoginPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1>🏋️ GymSystem</h1>
+        <h1>
+          <img src={titleUnifit} alt="404" width="350px"/>
+        </h1>
         <p>Coloca tu huella para ingresar</p>
         <AlertMessage {...alert} onClose={() => setAlert(null)} />
         <FingerprintButton onClick={handleScan} loading={loading} />
@@ -52,3 +55,4 @@ export default function LoginPage() {
     </div>
   )
 }
+

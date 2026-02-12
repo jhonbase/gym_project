@@ -11,6 +11,8 @@ export default function AssessmentResultPage() {
   const [analyzing, setAnalyzing] = useState(false)
   const [alert, setAlert] = useState(null)
 
+  const pdfUrl = `/api/assessments/${id}/pdf`
+
   useEffect(() => {
     apiClient.get(`/assessments/${id}`)
       .then(res => setAssessment(res.data.data.assessment))
@@ -23,6 +25,8 @@ export default function AssessmentResultPage() {
     try {
       const res = await apiClient.post(`/assessments/${id}/analyze`)
       setAssessment(res.data.data.assessment)
+      // Al generar el análisis, abrir el PDF automáticamente
+      window.open(pdfUrl, '_blank')
     } catch {
       setAlert({ type: 'error', message: 'No se pudo generar el análisis. ¿Hay conexión a internet?' })
     } finally {
@@ -73,7 +77,15 @@ export default function AssessmentResultPage() {
       <div className="card ai-card">
         <h3>🤖 Análisis IA</h3>
         {a.analisisIA ? (
-          <div className="ai-analysis">{a.analisisIA}</div>
+          <div className="pdf-actions">
+            <p>Análisis generado correctamente.</p>
+            <button className="btn-primary" onClick={() => window.open(pdfUrl, '_blank')}>
+              📄 Ver PDF
+            </button>
+            <a className="btn-secondary" href={`${pdfUrl}?download=true`} download>
+              ⬇ Descargar PDF
+            </a>
+          </div>
         ) : (
           <div className="ai-pending">
             <p>Análisis pendiente. Necesitas conexión a internet para generarlo.</p>

@@ -18,15 +18,22 @@ export default function AssessmentFormPage() {
     nivelActividadFisica: 'sedentario', observacion: '', objetivoUsuario: '',
   })
 
+  const [fieldErrors, setFieldErrors] = useState({})
+
   function handleChange(e) {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
+    // Limpiar errores al escribir
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: null}))
+    }
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setLoading(true)
     setAlert(null)
+    setFieldErrors({})
     try {
       // Convertir strings numéricos a números
       const data = {
@@ -54,12 +61,25 @@ export default function AssessmentFormPage() {
       const assessment = res.data.data.assessment
       navigate(`/assessment/${assessment.id}`)
     } catch (err) {
-      const msg = err.response?.data?.error || 'Error al guardar'
-      setAlert({ type: 'error', message: msg })
+      const data = err.response?.data
+      const details = data?.details
+      if (details?.length) {
+        const errors = {}
+        details.forEach(d => { errors[d.field] = d.message })
+        setFieldErrors(errors)
+        setAlert({ type: 'error', message: 'Corrige los campos señalados'})
+      } else {
+        setAlert({ type: 'error', message: data?.error || 'Error al guardar la valoración'})
+      }
     } finally {
       setLoading(false)
     }
   }
+
+ function FieldError({ name }) {
+  if (!fieldErrors[name]) return null
+  return <small className="field-error">{fieldErrors[name]}</small>
+ }
 
   return (
     <div className="assessment-form-page">
@@ -71,26 +91,26 @@ export default function AssessmentFormPage() {
         <fieldset>
           <legend>Medidas corporales</legend>
           <div className="form-grid">
-            <label>Peso (kg)<input name="peso" type="number" step="0.1" value={form.peso} onChange={handleChange} required /></label>
-            <label>Estatura (cm)<input name="estatura" type="number" step="0.1" value={form.estatura} onChange={handleChange} required /></label>
-            <label>Grasa corporal (%)<input name="grasaCorporal" type="number" step="0.1" value={form.grasaCorporal} onChange={handleChange} required /></label>
-            <label>Masa muscular (kg)<input name="masaMuscular" type="number" step="0.1" value={form.masaMuscular} onChange={handleChange} required /></label>
-            <label>IMC<input name="imc" type="number" step="0.1" value={form.imc} onChange={handleChange} required /></label>
-            <label>Masa magra (kg)<input name="masaMagra" type="number" step="0.1" value={form.masaMagra} onChange={handleChange} required /></label>
-            <label>Agua corporal (%)<input name="aguaCorporal" type="number" step="0.1" value={form.aguaCorporal} onChange={handleChange} required /></label>
-            <label>Grasa visceral (nivel)<input name="grasaVisceral" type="number" min="1" max="59" value={form.grasaVisceral} onChange={handleChange} required /></label>
+            <label>Peso (kg)<input name="peso" type="number" step="0.1" value={form.peso} onChange={handleChange} required /><FieldError name="peso" /></label>
+            <label>Estatura (cm)<input name="estatura" type="number" step="0.1" value={form.estatura} onChange={handleChange} required /><FieldError name="estatura" /></label>
+            <label>Grasa corporal (%)<input name="grasaCorporal" type="number" step="0.1" value={form.grasaCorporal} onChange={handleChange} required /><FieldError name="grasaCorporal" /></label>
+            <label>Masa muscular (kg)<input name="masaMuscular" type="number" step="0.1" value={form.masaMuscular} onChange={handleChange} required /><FieldError name="masaMuscular" /></label>
+            <label>IMC<input name="imc" type="number" step="0.1" value={form.imc} onChange={handleChange} required /><FieldError name="number" /></label>
+            <label>Masa magra (kg)<input name="masaMagra" type="number" step="0.1" value={form.masaMagra} onChange={handleChange} required /><FieldError name="masaMagra" /></label>
+            <label>Agua corporal (%)<input name="aguaCorporal" type="number" step="0.1" value={form.aguaCorporal} onChange={handleChange} required /><FieldError name="aguaCorporal" /></label>
+            <label>Grasa visceral (nivel)<input name="grasaVisceral" type="number" min="1" max="59" value={form.grasaVisceral} onChange={handleChange} required /><FieldError name="grasaVisceral" /></label>
           </div>
         </fieldset>
 
         <fieldset>
           <legend>Datos clínicos</legend>
           <div className="form-grid">
-            <label>Presión arterial<input name="presionArterial" placeholder="120/80" value={form.presionArterial} onChange={handleChange} required /></label>
-            <label>Edad metabólica<input name="edadMetabolica" type="number" value={form.edadMetabolica} onChange={handleChange} required /></label>
-            <label>Fuerza de agarre (kg)<input name="fuerzaAgarre" type="number" step="0.1" value={form.fuerzaAgarre} onChange={handleChange} required /></label>
-            <label>Resistencia muscular<input name="resistenciaMuscular" value={form.resistenciaMuscular} onChange={handleChange} required /></label>
-            <label>RM estimado<input name="rmEstimado" type="number" step="0.1" value={form.rmEstimado} onChange={handleChange} required /></label>
-            <label>PPM<input name="ppm" type="number" min="30" max="250" value={form.ppm} onChange={handleChange} required /></label>
+            <label>Presión arterial<input name="presionArterial" placeholder="120/80" value={form.presionArterial} onChange={handleChange} required /><FieldError name="presionArterial" /></label>
+            <label>Edad metabólica<input name="edadMetabolica" type="number" value={form.edadMetabolica} onChange={handleChange} required /><FieldError name="edadMetabolica" /></label>
+            <label>Fuerza de agarre (kg)<input name="fuerzaAgarre" type="number" step="0.1" value={form.fuerzaAgarre} onChange={handleChange} required /><FieldError name="fuerzaAgarre" /></label>
+            <label>Resistencia muscular<input name="resistenciaMuscular" value={form.resistenciaMuscular} onChange={handleChange} required /><FieldError name="resistenciaMuscular" /></label>
+            <label>RM estimado<input name="rmEstimado" type="number" step="0.1" value={form.rmEstimado} onChange={handleChange} required /><FieldError name="rmEstimado" /></label>
+            <label>PPM<input name="ppm" type="number" min="30" max="250" value={form.ppm} onChange={handleChange} required /><FieldError name="ppm" /></label>
           </div>
         </fieldset>
 

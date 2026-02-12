@@ -1,8 +1,3 @@
-/* ============================================
-   Estilos globales - GymSystem
-   ============================================ */
-
-/* Variables de color - tema oscuro gimnasio */
 :root {
   --bg-primary: #0f0f0f;
   --bg-secondary: #1a1a2e;
@@ -144,6 +139,19 @@ legend { color: var(--accent); font-weight: bold; padding: 0 0.5rem; }
 /* Assessment form page */
 .assessment-form-page h1 { margin-bottom: 0.3rem; }
 .assessment-form-page > p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+
+/* PDF */
+.pdf-actions { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.pdf-actions p { width: 100%; color: var(--text-secondary); margin-bottom: 0.5rem; }
+
+/* Field validation errors */
+.field-error {
+  color: #e74c3c;
+  font-size: 0.78rem;
+  margin-top: 2px;
+  display: block;
+  font-weight: 500;
+}
 
 /* Back link */
 .back-link { color: var(--text-secondary); font-size: 0.9rem; display: inline-block; margin-bottom: 1rem; }

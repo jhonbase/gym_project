@@ -13,7 +13,6 @@
     "test:integration": "vitest run src/tests/integration",
     "test:blackbox": "vitest run src/tests/blackbox",
     "test:performance": "vitest run src/tests/performance"
-
   },
   "keywords": [],
   "author": "",

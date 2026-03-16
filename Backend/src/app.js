@@ -9,6 +9,12 @@ import config from './config/environment.js'
 
 const app = express()
 
+// ─── Trust proxy ────────────────────────────────────────────────────────────
+// Necesario en entornos serverless/cloud (Netlify, Railway, etc.) donde las
+// peticiones pasan por un proxy/load balancer. Sin esto, express-rate-limit
+// lanza ERR_ERL_UNDEFINED_IP_ADDRESS porque req.ip viene undefined.
+app.set('trust proxy', 1)
+
 // ─── Seguridad: headers HTTP ────────────────────────────────────────────────
 // helmet() activa 14 headers de seguridad automáticamente:
 // - X-Frame-Options: DENY → evita Clickjacking (iframe malicioso)

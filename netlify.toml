@@ -3,10 +3,7 @@
 
 [build]
   # Netlify corre este comando desde la raíz del repo
-  command = """
-    cd Backend && npm install && npx prisma generate && cd .. &&
-    cd Frontend && npm install && npm run build
-  """
+  command = "cd Backend && npm install --include=dev && npx prisma generate && cd .. && cd Frontend && npm install --include=dev && npm run build"
   # La carpeta que Netlify publica como sitio estático
   publish = "Frontend/dist"
   # Carpeta donde viven las Netlify Functions (el backend serverless)

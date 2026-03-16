@@ -391,8 +391,8 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 2.5rem;
-  /* Degradé sutil: un toque más claro que el fondo sin saturar */
-  background: linear-gradient(180deg, #202020 0%, #161616 100%);
+  /* Degradé: oscuro a la izquierda, más claro hacia la derecha donde está el perfil */
+  background: linear-gradient(90deg, #161616 0%, #161616 40%, #252525 100%);
   border-bottom: 1px solid #2A2A2A;
   position: sticky;
   top: 0;

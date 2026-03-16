@@ -2,31 +2,30 @@
 # Documentación: https://docs.netlify.com/configure-builds/file-based-configuration/
 
 [build]
-  # Netlify corre este comando desde la raíz del repo
-  command = "cd Backend && npm install --include=dev && npx prisma generate && npx prisma migrate deploy && cd .. && cd Frontend && npm install --include=dev && npm run build"
-  # La carpeta que Netlify publica como sitio estático
+  # Build command:
+  # 1. Backend: instala deps, genera Prisma client, aplica migraciones
+  # 2. Copia fuentes .afm de pdfkit a netlify/functions/data/
+  #    (pdfkit las busca en runtime relativo al archivo de la function)
+  # 3. Frontend: instala deps (incluyendo devDeps para Vite) y compila
+  command = "cd Backend && npm install --include=dev && npx prisma generate && npx prisma migrate deploy && mkdir -p netlify/functions/data && cp node_modules/pdfkit/js/data/*.afm netlify/functions/data/ && cd .. && cd Frontend && npm install --include=dev && npm run build"
   publish = "Frontend/dist"
-  # Carpeta donde viven las Netlify Functions (el backend serverless)
   functions = "Backend/netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20"
 
 # ─── Functions config ─────────────────────────────────────────────────────────
-# zisi es el bundler predeterminado y más estable con pdfkit.
-# included_files fuerza el empaquetado de los .afm (fuentes Helvetica, etc.)
-# que pdfkit necesita en runtime serverless para renderizar el PDF.
+# esbuild bundlea correctamente entrypoints ESM (.mjs) como api.mjs
+# included_files fuerza que los .afm copiados viajen con la function en deploy
 [functions]
-  node_bundler = "zisi"
+  node_bundler = "esbuild"
 
 [functions."api"]
-  included_files = ["Backend/node_modules/pdfkit/js/data/**"]
+  included_files = ["Backend/netlify/functions/data/**"]
 
 # ─── Redirects ───────────────────────────────────────────────────────────────
 
 # 1) /api/* → Netlify Function (backend Express serverless)
-#    :splat captura todo lo que viene después de /api/
-#    Ejemplo: /api/users → /.netlify/functions/api/users
 [[redirects]]
   from   = "/api/*"
   to     = "/.netlify/functions/api/:splat"
@@ -34,7 +33,6 @@
   force  = true
 
 # 2) SPA fallback — React Router maneja rutas del lado cliente
-#    Sin esto, al refrescar /dashboard Netlify daría 404
 [[redirects]]
   from   = "/*"
   to     = "/index.html"

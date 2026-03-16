@@ -1,0 +1,34 @@
+# ─── Netlify Configuration ──────────────────────────────────────────────────
+# Documentación: https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  # Netlify corre este comando desde la raíz del repo
+  command = """
+    cd Backend && npm install && npx prisma generate && cd .. &&
+    cd Frontend && npm install && npm run build
+  """
+  # La carpeta que Netlify publica como sitio estático
+  publish = "Frontend/dist"
+  # Carpeta donde viven las Netlify Functions (el backend serverless)
+  functions = "Backend/netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# ─── Redirects ───────────────────────────────────────────────────────────────
+
+# 1) /api/* → Netlify Function (backend Express serverless)
+#    :splat captura todo lo que viene después de /api/
+#    Ejemplo: /api/users → /.netlify/functions/api/users
+[[redirects]]
+  from   = "/api/*"
+  to     = "/.netlify/functions/api/:splat"
+  status = 200
+  force  = true
+
+# 2) SPA fallback — React Router maneja rutas del lado cliente
+#    Sin esto, al refrescar /dashboard Netlify daría 404
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200

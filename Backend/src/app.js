@@ -59,11 +59,16 @@ app.use(generalLimiter)
 app.use(express.json())
 
 // ─── Rutas ──────────────────────────────────────────────────────────────────
-// El rate limit de login se aplica solo al endpoint específico
+// En local: peticiones llegan como /api/users, /api/fingerprint/login, etc.
+// En Netlify serverless: el redirect strips /api, llegan como /users, /fingerprint/login, etc.
+// Montamos en ambos prefijos para que funcione en los dos entornos sin cambios.
 app.use('/api/fingerprint/login', loginLimiter)
-app.use('/api', routes)
+app.use('/fingerprint/login', loginLimiter)
 
-// Health check: para verificar que el backend está corriendo
+app.use('/api', routes)   // local dev
+app.use('/', routes)      // Netlify serverless
+
+// Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })

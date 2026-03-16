@@ -3,6 +3,36 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import apiClient from '../api/client.js'
 import AlertMessage from '../components/AlertMessage.jsx'
+import SectionCard from '../components/SectionCard.jsx'
+import FieldError from '../components/FieldError.jsx'
+
+/* ─── Iconos ──────────────────────────────────── */
+const IconBody = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="5" r="2"/><path d="M12 7v8m-4-5 4 5 4-5M8 19h8"/>
+  </svg>
+)
+const IconClinical = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+  </svg>
+)
+const IconContext = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+  </svg>
+)
+
+/* ─── Campo con label + input + error ─────────── */
+function FormField({ label, error, children }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+      <label className="ui-label">{label}</label>
+      {children}
+      <FieldError error={error} />
+    </div>
+  )
+}
 
 export default function AssessmentFormPage() {
   const { user } = useAuth()
@@ -23,9 +53,8 @@ export default function AssessmentFormPage() {
   function handleChange(e) {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
-    // Limpiar errores al escribir
     if (fieldErrors[name]) {
-      setFieldErrors(prev => ({ ...prev, [name]: null}))
+      setFieldErrors(prev => ({ ...prev, [name]: null }))
     }
   }
 
@@ -35,7 +64,6 @@ export default function AssessmentFormPage() {
     setAlert(null)
     setFieldErrors({})
     try {
-      // Convertir strings numéricos a números
       const data = {
         userId: user.id,
         peso: Number(form.peso),
@@ -67,71 +95,119 @@ export default function AssessmentFormPage() {
         const errors = {}
         details.forEach(d => { errors[d.field] = d.message })
         setFieldErrors(errors)
-        setAlert({ type: 'error', message: 'Corrige los campos señalados'})
+        setAlert({ type: 'error', message: 'Corrige los campos señalados' })
       } else {
-        setAlert({ type: 'error', message: data?.error || 'Error al guardar la valoración'})
+        setAlert({ type: 'error', message: data?.error || 'Error al guardar la valoración' })
       }
     } finally {
       setLoading(false)
     }
   }
 
- function FieldError({ name }) {
-  if (!fieldErrors[name]) return null
-  return <small className="field-error">{fieldErrors[name]}</small>
- }
+  const fe = fieldErrors
 
   return (
     <div className="assessment-form-page">
-      <h1>📋 Nueva Valoración Física</h1>
-      <p>Paciente: <strong>{user.nombre}</strong></p>
+      {/* Encabezado de página */}
+      <div className="page-header">
+        <h1 className="page-title">
+          Nueva Valoración
+          <span className="page-title-line" />
+        </h1>
+        <p className="page-subtitle">
+          Paciente: <strong>{user.nombre}</strong>
+        </p>
+      </div>
+
       <AlertMessage {...alert} onClose={() => setAlert(null)} />
 
-      <form onSubmit={handleSubmit} className="assessment-form">
-        <fieldset>
-          <legend>Medidas corporales</legend>
-          <div className="form-grid">
-            <label>Peso (kg)<input name="peso" type="number" step="0.1" value={form.peso} onChange={handleChange} required /><FieldError name="peso" /></label>
-            <label>Estatura (cm)<input name="estatura" type="number" step="0.1" value={form.estatura} onChange={handleChange} required /><FieldError name="estatura" /></label>
-            <label>Grasa corporal (%)<input name="grasaCorporal" type="number" step="0.1" value={form.grasaCorporal} onChange={handleChange} required /><FieldError name="grasaCorporal" /></label>
-            <label>Masa muscular (kg)<input name="masaMuscular" type="number" step="0.1" value={form.masaMuscular} onChange={handleChange} required /><FieldError name="masaMuscular" /></label>
-            <label>IMC<input name="imc" type="number" step="0.1" value={form.imc} onChange={handleChange} required /><FieldError name="number" /></label>
-            <label>Masa magra (kg)<input name="masaMagra" type="number" step="0.1" value={form.masaMagra} onChange={handleChange} required /><FieldError name="masaMagra" /></label>
-            <label>Agua corporal (%)<input name="aguaCorporal" type="number" step="0.1" value={form.aguaCorporal} onChange={handleChange} required /><FieldError name="aguaCorporal" /></label>
-            <label>Grasa visceral (nivel)<input name="grasaVisceral" type="number" min="1" max="59" value={form.grasaVisceral} onChange={handleChange} required /><FieldError name="grasaVisceral" /></label>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+
+        {/* Medidas corporales */}
+        <SectionCard icon={<IconBody />} title="Medidas corporales">
+          <div className="ui-grid-2">
+            <FormField label="Peso (kg)" error={fe.peso}>
+              <input className="ui-input" name="peso" type="number" step="0.1" value={form.peso} onChange={handleChange} required />
+            </FormField>
+            <FormField label="Estatura (cm)" error={fe.estatura}>
+              <input className="ui-input" name="estatura" type="number" step="0.1" value={form.estatura} onChange={handleChange} required />
+            </FormField>
+            <FormField label="Grasa corporal (%)" error={fe.grasaCorporal}>
+              <input className="ui-input" name="grasaCorporal" type="number" step="0.1" value={form.grasaCorporal} onChange={handleChange} required />
+            </FormField>
+            <FormField label="Masa muscular (kg)" error={fe.masaMuscular}>
+              <input className="ui-input" name="masaMuscular" type="number" step="0.1" value={form.masaMuscular} onChange={handleChange} required />
+            </FormField>
+            <FormField label="IMC" error={fe.imc}>
+              {/* Bug corregido: era name="number", ahora usa fe.imc correctamente */}
+              <input className="ui-input" name="imc" type="number" step="0.1" value={form.imc} onChange={handleChange} required />
+            </FormField>
+            <FormField label="Masa magra (kg)" error={fe.masaMagra}>
+              <input className="ui-input" name="masaMagra" type="number" step="0.1" value={form.masaMagra} onChange={handleChange} required />
+            </FormField>
+            <FormField label="Agua corporal (%)" error={fe.aguaCorporal}>
+              <input className="ui-input" name="aguaCorporal" type="number" step="0.1" value={form.aguaCorporal} onChange={handleChange} required />
+            </FormField>
+            <FormField label="Grasa visceral (nivel)" error={fe.grasaVisceral}>
+              <input className="ui-input" name="grasaVisceral" type="number" min="1" max="59" value={form.grasaVisceral} onChange={handleChange} required />
+            </FormField>
           </div>
-        </fieldset>
+        </SectionCard>
 
-        <fieldset>
-          <legend>Datos clínicos</legend>
-          <div className="form-grid">
-            <label>Presión arterial<input name="presionArterial" placeholder="120/80" value={form.presionArterial} onChange={handleChange} required /><FieldError name="presionArterial" /></label>
-            <label>Edad metabólica<input name="edadMetabolica" type="number" value={form.edadMetabolica} onChange={handleChange} required /><FieldError name="edadMetabolica" /></label>
-            <label>Fuerza de agarre (kg)<input name="fuerzaAgarre" type="number" step="0.1" value={form.fuerzaAgarre} onChange={handleChange} required /><FieldError name="fuerzaAgarre" /></label>
-            <label>Resistencia muscular<input name="resistenciaMuscular" value={form.resistenciaMuscular} onChange={handleChange} required /><FieldError name="resistenciaMuscular" /></label>
-            <label>RM estimado<input name="rmEstimado" type="number" step="0.1" value={form.rmEstimado} onChange={handleChange} required /><FieldError name="rmEstimado" /></label>
-            <label>PPM<input name="ppm" type="number" min="30" max="250" value={form.ppm} onChange={handleChange} required /><FieldError name="ppm" /></label>
+        {/* Datos clínicos */}
+        <SectionCard icon={<IconClinical />} title="Datos clínicos">
+          <div className="ui-grid-2">
+            <FormField label="Presión arterial" error={fe.presionArterial}>
+              <input className="ui-input" name="presionArterial" placeholder="120/80" value={form.presionArterial} onChange={handleChange} required />
+            </FormField>
+            <FormField label="Edad metabólica" error={fe.edadMetabolica}>
+              <input className="ui-input" name="edadMetabolica" type="number" value={form.edadMetabolica} onChange={handleChange} required />
+            </FormField>
+            <FormField label="Fuerza de agarre (kg)" error={fe.fuerzaAgarre}>
+              <input className="ui-input" name="fuerzaAgarre" type="number" step="0.1" value={form.fuerzaAgarre} onChange={handleChange} required />
+            </FormField>
+            <FormField label="Resistencia muscular" error={fe.resistenciaMuscular}>
+              <input className="ui-input" name="resistenciaMuscular" value={form.resistenciaMuscular} onChange={handleChange} required />
+            </FormField>
+            <FormField label="RM estimado" error={fe.rmEstimado}>
+              <input className="ui-input" name="rmEstimado" type="number" step="0.1" value={form.rmEstimado} onChange={handleChange} required />
+            </FormField>
+            <FormField label="PPM (frec. cardíaca)" error={fe.ppm}>
+              <input className="ui-input" name="ppm" type="number" min="30" max="250" value={form.ppm} onChange={handleChange} required />
+            </FormField>
           </div>
-        </fieldset>
+        </SectionCard>
 
-        <fieldset>
-          <legend>Contexto</legend>
-          <label>Nivel de actividad física
-            <select name="nivelActividadFisica" value={form.nivelActividadFisica} onChange={handleChange}>
-              <option value="sedentario">Sedentario</option>
-              <option value="ligero">Ligero</option>
-              <option value="moderado">Moderado</option>
-              <option value="activo">Activo</option>
-              <option value="muy_activo">Muy activo</option>
-            </select>
-          </label>
-          <label>Observaciones (opcional)<textarea name="observacion" value={form.observacion} onChange={handleChange} rows="3" /></label>
-          <label>Objetivo del usuario<textarea name="objetivoUsuario" value={form.objetivoUsuario} onChange={handleChange} rows="3" required /></label>
-        </fieldset>
+        {/* Contexto */}
+        <SectionCard icon={<IconContext />} title="Contexto del usuario">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <FormField label="Nivel de actividad física" error={fe.nivelActividadFisica}>
+              <select className="ui-input" name="nivelActividadFisica" value={form.nivelActividadFisica} onChange={handleChange}>
+                <option value="sedentario">Sedentario</option>
+                <option value="ligero">Ligero</option>
+                <option value="moderado">Moderado</option>
+                <option value="activo">Activo</option>
+                <option value="muy_activo">Muy activo</option>
+              </select>
+            </FormField>
+            <FormField label="Objetivo del usuario" error={fe.objetivoUsuario}>
+              <textarea className="ui-input" name="objetivoUsuario" value={form.objetivoUsuario} onChange={handleChange} rows="3" required style={{ resize: 'vertical', minHeight: '80px' }} />
+            </FormField>
+            <FormField label="Observaciones (opcional)" error={fe.observacion}>
+              <textarea className="ui-input" name="observacion" value={form.observacion} onChange={handleChange} rows="3" style={{ resize: 'vertical', minHeight: '80px' }} />
+            </FormField>
+          </div>
+        </SectionCard>
 
-        <button type="submit" className="btn-primary" disabled={loading}>
-          {loading ? 'Guardando...' : 'Completar Valoración'}
-        </button>
+        {/* Acciones */}
+        <div className="form-actions">
+          <button type="button" className="ui-btn-secondary" onClick={() => navigate('/dashboard')}>
+            Cancelar
+          </button>
+          <button type="submit" className="ui-btn-primary" disabled={loading}>
+            {loading ? 'Guardando...' : 'Completar Valoración →'}
+          </button>
+        </div>
       </form>
     </div>
   )

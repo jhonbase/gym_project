@@ -4,9 +4,9 @@ import Navbar from './Navbar.jsx'
 
 export default function Layout() {
   return (
-    <div className="layout">
+    <div className="app-layout">
       <Navbar />
-      <main className="main-content">
+      <main className="app-main">
         <Outlet />
       </main>
     </div>

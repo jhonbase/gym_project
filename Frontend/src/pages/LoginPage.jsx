@@ -5,7 +5,7 @@ import apiClient from '../api/client.js'
 import { getEnrolledTemplate, hasEnrolledFingerprint, mutateTemplate } from '../utils/fingerprint.js'
 import FingerprintButton from '../components/FingerprintButton.jsx'
 import AlertMessage from '../components/AlertMessage.jsx'
-import titleUnifit from '../assets/images/titleUnifit.png'
+import BrandLogo from '../components/BrandLogo.jsx'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -23,13 +23,13 @@ export default function LoginPage() {
     setAlert(null)
     try {
       const original = getEnrolledTemplate()
-      const scanned = mutateTemplate(original) // Simula variación natural
+      const scanned = mutateTemplate(original)
 
       const res = await apiClient.post('/fingerprint/login', { template: scanned })
-      const { access, user, similarity } = res.data.data
+      const { access, token, similarity } = res.data.data
 
       if (access) {
-        login(user)
+        login(token)
         navigate('/dashboard')
       } else {
         setAlert({ type: 'error', message: `Acceso denegado. Similitud: ${similarity?.toFixed(1)}%` })
@@ -42,17 +42,25 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <h1>
-          <img src={titleUnifit} alt="404" width="350px"/>
-        </h1>
-        <p>Coloca tu huella para ingresar</p>
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-accent-line" />
+
+        {/* Logo + nombre */}
+        <BrandLogo size="lg" />
+
+        <p className="login-subtitle">Sistema de valoración física universitaria</p>
+        <p className="login-hint">Coloca tu huella para ingresar</p>
+
         <AlertMessage {...alert} onClose={() => setAlert(null)} />
+
         <FingerprintButton onClick={handleScan} loading={loading} />
-        <Link to="/register" className="auth-link">¿No tienes cuenta? Regístrate</Link>
+
+        <Link to="/register" className="login-register-link">
+          ¿No tienes cuenta?{' '}
+          <span className="login-register-link-accent">Regístrate</span>
+        </Link>
       </div>
     </div>
   )
 }
-

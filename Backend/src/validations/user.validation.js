@@ -58,7 +58,7 @@ const createUserSchema = z.object({
     .number({ required_error: 'El semestre es obligatorio.' })
     .int('El semestre debe ser un número entero.')
     .min(1, 'El semestre mínimo es 1.')
-    .max(12, 'El semestre máximo es 12.'),
+    .max(9, 'El semestre máximo es 9.'),
 })
 
 export { createUserSchema }

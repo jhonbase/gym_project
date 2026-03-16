@@ -1,30 +1,75 @@
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import routes from './routes/index.js'
 import errorHandler from './middlewares/errorHandler.js'
 import notFound from './middlewares/notFound.js'
+import config from './config/environment.js'
 
 const app = express()
 
-// ---- Middleware ----
-// cors() permite que el frontend (puerto 5173) hable con el backend (puerto 3000)
-app.use(cors())
-// express.json() parsea el body de las peticiones que vienen en formato JSON
+// ─── Seguridad: headers HTTP ────────────────────────────────────────────────
+// helmet() activa 14 headers de seguridad automáticamente:
+// - X-Frame-Options: DENY → evita Clickjacking (iframe malicioso)
+// - X-Content-Type-Options: nosniff → evita MIME sniffing / XSS via tipo de contenido
+// - Content-Security-Policy → evita inyección de scripts externos
+// - Strict-Transport-Security → fuerza HTTPS en producción
+// - Referrer-Policy → evita fuga de URLs internas a terceros
+// Sin helmet: el navegador no tiene instrucciones de seguridad, vulnerable a múltiples ataques.
+app.use(helmet())
+
+// ─── Seguridad: CORS restringido ────────────────────────────────────────────
+// cors() sin opciones permite CUALQUIER origen del mundo → riesgo de CSRF.
+// Con origin específico: solo el frontend autorizado puede hacer peticiones.
+app.use(cors({
+  origin: config.allowedOrigin,
+  credentials: true,
+}))
+
+// ─── Seguridad: Rate limiting general ───────────────────────────────────────
+// Limita las peticiones por IP para prevenir abuso de la API en general.
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Demasiadas peticiones desde esta IP. Intenta de nuevo en 15 minutos.',
+  },
+})
+
+// ─── Seguridad: Rate limiting específico para login ─────────────────────────
+// Sin límite: un atacante puede enviar miles de templates por segundo buscando
+// una coincidencia con las huellas almacenadas (fuerza bruta biométrica).
+// Con límite: 10 intentos por IP cada 15 minutos → ataque automatizado bloqueado.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Demasiados intentos de inicio de sesión. Intenta de nuevo en 15 minutos.',
+  },
+})
+
+app.use(generalLimiter)
 app.use(express.json())
 
-// ---- Rutas ----
-// Todas las rutas de la API viven bajo /api
+// ─── Rutas ──────────────────────────────────────────────────────────────────
+// El rate limit de login se aplica solo al endpoint específico
+app.use('/api/fingerprint/login', loginLimiter)
 app.use('/api', routes)
 
-// Health check: para verificar rápidamente que el backend está corriendo
+// Health check: para verificar que el backend está corriendo
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-// ---- Manejo de errores ----
+// ─── Manejo de errores ──────────────────────────────────────────────────────
 // IMPORTANTE: estos van DESPUÉS de las rutas.
-// notFound atrapa rutas que no existen (404)
-// errorHandler atrapa errores que ocurran en las rutas (500, etc.)
 app.use(notFound)
 app.use(errorHandler)
 

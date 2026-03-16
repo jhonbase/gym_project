@@ -1,13 +1,14 @@
-// Botón grande animado que simula el escaneo de huella
+// Botón de huella dactilar — estilo dark fitness premium
 export default function FingerprintButton({ onClick, loading, disabled, label }) {
   return (
     <button
-      className={`fingerprint-btn ${loading ? 'scanning' : ''}`}
+      className={`fp-btn ${loading ? 'scanning' : ''}`}
       onClick={onClick}
       disabled={disabled || loading}
+      type="button"
     >
-      <span className="fingerprint-icon">🖐️</span>
-      <span className="fingerprint-label">
+      <span className="fp-btn-icon">🖐️</span>
+      <span className="fp-btn-label">
         {loading ? 'Escaneando...' : label || 'Escanear Huella'}
       </span>
     </button>

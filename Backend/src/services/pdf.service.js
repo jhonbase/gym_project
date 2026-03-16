@@ -4,10 +4,13 @@ function generateAssessmentPdf(assessment, outputStream) {
   const doc = new PDFDocument({ margin: 50, size: 'LETTER' })
   doc.pipe(outputStream)
 
+  const left = doc.page.margins.left
+  const usableWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right
+
   const user = assessment.user
 
   // ── HEADER ──
-  doc.fontSize(20).font('Helvetica-Bold').text('Valoracion Fisica', { align: 'center' })
+  doc.fontSize(20).font('Helvetica-Bold').text('Valoración Física', { align: 'center' })
   doc.fontSize(10).font('Helvetica').text(
     `Fecha: ${new Date(assessment.createdAt).toLocaleDateString('es-CO')}`,
     { align: 'center' }
@@ -17,8 +20,8 @@ function generateAssessmentPdf(assessment, outputStream) {
   // ── DATOS DEL PACIENTE ──
   sectionTitle(doc, 'Datos del Paciente')
   row2(doc, 'Nombre', user.nombre, 'Documento', user.documento)
-  row2(doc, 'Email', user.email, 'Telefono', user.telefono)
-  row2(doc, 'EPS', user.eps, 'Grupo Sanguineo', user.grupoSanguineo)
+  row2(doc, 'Email', user.email, 'Teléfono', user.telefono)
+  row2(doc, 'EPS', user.eps, 'Grupo Sanguíneo', user.grupoSanguineo)
   row2(doc, 'Carrera', user.carrera, 'Semestre', String(user.semestre))
   doc.moveDown()
 
@@ -31,11 +34,11 @@ function generateAssessmentPdf(assessment, outputStream) {
   doc.moveDown()
 
   // ── DATOS CLÍNICOS ──
-  sectionTitle(doc, 'Datos Clinicos')
-  row2(doc, 'Presion arterial', assessment.presionArterial, 'Edad metabolica', `${assessment.edadMetabolica} anos`)
+  sectionTitle(doc, 'Datos Clínicos')
+  row2(doc, 'Presión arterial', assessment.presionArterial, 'Edad metabólica', `${assessment.edadMetabolica} años`)
   row2(doc, 'Fuerza de agarre', `${assessment.fuerzaAgarre} kg`, 'Resistencia muscular', assessment.resistenciaMuscular)
   row2(doc, 'RM estimado', String(assessment.rmEstimado), 'PPM', String(assessment.ppm))
-  row2(doc, 'Actividad fisica', assessment.nivelActividadFisica, 'Objetivo', assessment.objetivoUsuario)
+  row2(doc, 'Actividad física', assessment.nivelActividadFisica, 'Objetivo', assessment.objetivoUsuario)
   if (assessment.observacion) {
     row1(doc, 'Observaciones', assessment.observacion)
   }
@@ -43,8 +46,9 @@ function generateAssessmentPdf(assessment, outputStream) {
 
   // ── ANÁLISIS IA ──
   if (assessment.analisisIA) {
-    sectionTitle(doc, 'Analisis del Entrenador (IA)')
-    doc.fontSize(10).font('Helvetica').text(assessment.analisisIA, {
+    sectionTitle(doc, 'Análisis del Entrenador (IA)')
+    doc.fontSize(10).font('Helvetica').text(assessment.analisisIA, left, doc.y, {
+      width: usableWidth,
       align: 'justify',
       lineGap: 3,
     })
@@ -63,8 +67,11 @@ function generateAssessmentPdf(assessment, outputStream) {
 // ── Helpers ──
 
 function sectionTitle(doc, title) {
-  doc.fontSize(14).font('Helvetica-Bold').fillColor('#333333').text(title)
-  doc.moveTo(doc.x, doc.y).lineTo(doc.x + 500, doc.y).strokeColor('#cccccc').stroke()
+  const left = doc.page.margins.left
+  const right = doc.page.margins.right
+  doc.x = left
+  doc.fontSize(14).font('Helvetica-Bold').fillColor('#333333').text(title, left, doc.y)
+  doc.moveTo(left, doc.y).lineTo(doc.page.width - right, doc.y).strokeColor('#cccccc').stroke()
   doc.moveDown(0.5)
 }
 

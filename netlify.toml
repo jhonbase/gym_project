@@ -12,6 +12,13 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# ─── Functions config ─────────────────────────────────────────────────────────
+# Incluir los assets de pdfkit (.afm font files) en el bundle de la function.
+# Sin esto, PDFDocument lanza ENOENT buscando Helvetica.afm en runtime serverless.
+[functions]
+  included_files = ["Backend/node_modules/pdfkit/js/data/**"]
+  node_bundler = "esbuild"
+
 # ─── Redirects ───────────────────────────────────────────────────────────────
 
 # 1) /api/* → Netlify Function (backend Express serverless)

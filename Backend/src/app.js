@@ -33,13 +33,28 @@ app.use(cors({
   credentials: true,
 }))
 
+// ─── Extrae IP real en entornos serverless/proxy ────────────────────────────
+// En Netlify Functions req.ip puede ser undefined porque la petición llega
+// a través de un proxy. Usamos x-nf-client-connection-ip (Netlify), luego
+// x-forwarded-for, y como último recurso un fallback para no romper.
+function getClientIp(req) {
+  return (
+    req.headers['x-nf-client-connection-ip'] ||
+    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+    req.ip ||
+    req.socket?.remoteAddress ||
+    '0.0.0.0'
+  )
+}
+
 // ─── Seguridad: Rate limiting general ───────────────────────────────────────
-// Limita las peticiones por IP para prevenir abuso de la API en general.
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
+  windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: getClientIp,
+  validate: { ip: false, xForwardedForHeader: false },
   message: {
     success: false,
     error: 'Demasiadas peticiones desde esta IP. Intenta de nuevo en 15 minutos.',
@@ -47,14 +62,13 @@ const generalLimiter = rateLimit({
 })
 
 // ─── Seguridad: Rate limiting específico para login ─────────────────────────
-// Sin límite: un atacante puede enviar miles de templates por segundo buscando
-// una coincidencia con las huellas almacenadas (fuerza bruta biométrica).
-// Con límite: 10 intentos por IP cada 15 minutos → ataque automatizado bloqueado.
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
+  windowMs: 15 * 60 * 1000,
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: getClientIp,
+  validate: { ip: false, xForwardedForHeader: false },
   message: {
     success: false,
     error: 'Demasiados intentos de inicio de sesión. Intenta de nuevo en 15 minutos.',

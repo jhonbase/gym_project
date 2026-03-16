@@ -13,11 +13,14 @@
   NODE_VERSION = "20"
 
 # ─── Functions config ─────────────────────────────────────────────────────────
-# Incluir los assets de pdfkit (.afm font files) en el bundle de la function.
-# Sin esto, PDFDocument lanza ENOENT buscando Helvetica.afm en runtime serverless.
+# zisi es el bundler predeterminado y más estable con pdfkit.
+# included_files fuerza el empaquetado de los .afm (fuentes Helvetica, etc.)
+# que pdfkit necesita en runtime serverless para renderizar el PDF.
 [functions]
+  node_bundler = "zisi"
+
+[functions."api"]
   included_files = ["Backend/node_modules/pdfkit/js/data/**"]
-  node_bundler = "esbuild"
 
 # ─── Redirects ───────────────────────────────────────────────────────────────
 

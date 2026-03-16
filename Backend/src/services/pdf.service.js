@@ -1,20 +1,7 @@
 import PDFDocument from 'pdfkit'
-import { createRequire } from 'module'
-import path from 'path'
-
-// En entornos serverless (Netlify Functions) los assets de pdfkit (.afm, fuentes)
-// no se resuelven automáticamente. Necesitamos pasar la ruta explícita del
-// directorio de fuentes para que PDFDocument las encuentre.
-const require = createRequire(import.meta.url)
-const pdfkitDir = path.dirname(require.resolve('pdfkit/package.json'))
 
 function generateAssessmentPdf(assessment, outputStream) {
-  const doc = new PDFDocument({
-    margin: 50,
-    size: 'LETTER',
-    // Apunta al directorio de fuentes dentro del paquete pdfkit
-    fontRegisterPath: path.join(pdfkitDir, 'js', 'data'),
-  })
+  const doc = new PDFDocument({ margin: 50, size: 'LETTER' })
   doc.pipe(outputStream)
 
   const left = doc.page.margins.left

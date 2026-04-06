@@ -13,14 +13,17 @@ model User {
   id                 String        @id @default(uuid())
   nombre             String
   documento          String        @unique
+  numeroCarnet       String
   email              String        @unique
   telefono           String
   eps                String
   grupoSanguineo     String        // Ej: "O+", "A-", "B+", "AB-"
   contactoEmergencia String        // Nombre + teléfono del contacto
-  carrera            String
+  programa           String
+  modalidad          String
   jornada            String        // Ej: "diurna", "nocturna"
   semestre           Int
+  esEgresado         Boolean       @default(false)
   rol                String        @default("usuario") // "usuario" | "entrenador" | "admin"
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt

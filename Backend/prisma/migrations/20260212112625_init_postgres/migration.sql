@@ -8,7 +8,7 @@ CREATE TABLE "User" (
     "eps" TEXT NOT NULL,
     "grupoSanguineo" TEXT NOT NULL,
     "contactoEmergencia" TEXT NOT NULL,
-    "carrera" TEXT NOT NULL,
+    "programa" TEXT NOT NULL,
     "jornada" TEXT NOT NULL,
     "semestre" INTEGER NOT NULL,
     "rol" TEXT NOT NULL DEFAULT 'usuario',

@@ -41,4 +41,24 @@ async function updateAnalysis(id, analysis) {
   })
 }
 
-export { create, getById, getByUserId, updateAnalysis }
+/**
+ * Actualiza la evidencia de lesión de una valoración.
+ */
+async function updateLesion(id, data) {
+  return prisma.assessment.update({
+    where: { id },
+    data,
+  })
+}
+
+/**
+ * Actualiza una valoración completa.
+ */
+async function update(id, data) {
+  return prisma.assessment.update({
+    where: { id },
+    data,
+  })
+}
+
+export { create, getById, getByUserId, updateAnalysis, updateLesion, update }

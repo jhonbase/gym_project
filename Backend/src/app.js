@@ -17,6 +17,11 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true })
 }
 
+const lesionesDir = path.join(process.cwd(), 'uploads', 'lesiones')
+if (!fs.existsSync(lesionesDir)) {
+  fs.mkdirSync(lesionesDir, { recursive: true })
+}
+
 // ─── Trust proxy ────────────────────────────────────────────────────────────
 app.set('trust proxy', 1)
 

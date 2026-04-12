@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import apiClient from '../api/client.js'
 import AlertMessage from '../components/AlertMessage.jsx'
@@ -76,11 +76,15 @@ function AntecedenteField({ label, name, form, setForm, error }) {
     </div>
   )
 }
+  )
+}
 
-export default function AssessmentFormPage() {
+export default function AssessmentEditPage() {
+  const { id } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [alert, setAlert] = useState(null)
 
   const [form, setForm] = useState({
@@ -99,7 +103,51 @@ export default function AssessmentFormPage() {
   })
 
   const [lesionFile, setLesionFile] = useState(null)
+  const [lesionExisting, setLesionExisting] = useState(null)
+  const [lesionRemove, setLesionRemove] = useState(false)
   const [fieldErrors, setFieldErrors] = useState({})
+
+  const hasLesionFile = lesionFile || (lesionExisting && !lesionRemove)
+  const showLesionGreen = lesionFile || (lesionExisting && !lesionRemove)
+
+  useEffect(() => {
+    apiClient.get(`/assessments/${id}`)
+      .then(res => {
+        const a = res.data.data.assessment
+        setForm({
+          peso: a.peso || '',
+          estatura: a.estatura || '',
+          grasaCorporal: a.grasaCorporal || '',
+          masaMuscular: a.masaMuscular || '',
+          imc: a.imc || '',
+          masaMagra: a.masaMagra || '',
+          aguaCorporal: a.aguaCorporal || '',
+          grasaVisceral: a.grasaVisceral || '',
+          presionArterial: a.presionArterial || '',
+          edadMetabolica: a.edadMetabolica || '',
+          resistenciaMuscular: a.resistenciaMuscular || '',
+          nivelActividadFisica: a.nivelActividadFisica || 'sedentario',
+          observacion: a.observacion || '',
+          objetivoUsuario: a.objetivoUsuario || '',
+          tieneLesion: !!a.lesionDescripcion || !!a.lesionEvidencia,
+          lesionDescripcion: a.lesionDescripcion || '',
+          anteOsteomuscular: a.anteOsteomuscular || false,
+          anteOsteomuscularDesc: a.anteOsteomuscularDesc || '',
+          anteCardiovascular: a.anteCardiovascular || false,
+          anteCardiovascularDesc: a.anteCardiovascularDesc || '',
+          anteRespiratorio: a.anteRespiratorio || false,
+          anteRespiratorioDesc: a.anteRespiratorioDesc || '',
+          anteMetabolico: a.anteMetabolico || false,
+          anteMetabolicoDesc: a.anteMetabolicoDesc || '',
+          antePsiquiatrico: a.antePsiquiatrico || false,
+          antePsiquiatricoDesc: a.antePsiquiatricoDesc || '',
+          antePsicologico: a.antePsicologico || false,
+          antePsicologicoDesc: a.antePsicologicoDesc || '',
+        })
+      })
+      .catch(() => setAlert({ type: 'error', message: 'Error al cargar la valoración' }))
+      .finally(() => setLoading(false))
+  }, [id])
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target
@@ -141,13 +189,12 @@ export default function AssessmentFormPage() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setLoading(true)
+    setSaving(true)
     setAlert(null)
     setFieldErrors({})
     
     try {
       const data = {
-        userId: user.id,
         peso: Number(form.peso),
         estatura: Number(form.estatura),
         grasaCorporal: Number(form.grasaCorporal),
@@ -163,38 +210,40 @@ export default function AssessmentFormPage() {
         rmEstimado: 1,
         ppm: 30,
         nivelActividadFisica: form.nivelActividadFisica,
-        observacion: form.observacion || undefined,
+        observacion: form.observacion || null,
         objetivoUsuario: form.objetivoUsuario,
-        lesionDescripcion: form.tieneLesion ? (form.lesionDescripcion || undefined) : undefined,
+        lesionDescripcion: form.tieneLesion && form.lesionDescripcion ? form.lesionDescripcion : null,
         anteOsteomuscular: form.anteOsteomuscular,
-        anteOsteomuscularDesc: form.anteOsteomuscular ? form.anteOsteomuscularDesc || undefined : undefined,
+        anteOsteomuscularDesc: form.anteOsteomuscular ? (form.anteOsteomuscularDesc || null) : null,
         anteCardiovascular: form.anteCardiovascular,
-        anteCardiovascularDesc: form.anteCardiovascular ? form.anteCardiovascularDesc || undefined : undefined,
+        anteCardiovascularDesc: form.anteCardiovascular ? (form.anteCardiovascularDesc || null) : null,
         anteRespiratorio: form.anteRespiratorio,
-        anteRespiratorioDesc: form.anteRespiratorio ? form.anteRespiratorioDesc || undefined : undefined,
+        anteRespiratorioDesc: form.anteRespiratorio ? (form.anteRespiratorioDesc || null) : null,
         anteMetabolico: form.anteMetabolico,
-        anteMetabolicoDesc: form.anteMetabolico ? form.anteMetabolicoDesc || undefined : undefined,
+        anteMetabolicoDesc: form.anteMetabolico ? (form.anteMetabolicoDesc || null) : null,
         antePsiquiatrico: form.antePsiquiatrico,
-        antePsiquiatricoDesc: form.antePsiquiatrico ? form.antePsiquiatricoDesc || undefined : undefined,
+        antePsiquiatricoDesc: form.antePsiquiatrico ? (form.antePsiquiatricoDesc || null) : null,
         antePsicologico: form.antePsicologico,
-        antePsicologicoDesc: form.antePsicologico ? form.antePsicologicoDesc || undefined : undefined,
+        antePsicologicoDesc: form.antePsicologico ? (form.antePsicologicoDesc || null) : null,
       }
 
-      const res = await apiClient.post('/assessments', data)
-      const assessment = res.data.data.assessment
+      await apiClient.put(`/assessments/${id}`, data)
 
-      if (lesionFile) {
+      if (lesionRemove) {
+        await apiClient.put(`/assessments/${id}`, { lesionDescripcion: null, lesionEvidencia: null })
+      } else if (lesionFile) {
         const formData = new FormData()
         formData.append('evidencia', lesionFile)
         if (form.tieneLesion && form.lesionDescripcion) {
           formData.append('descripcion', form.lesionDescripcion)
         }
-        await apiClient.post(`/assessments/${assessment.id}/lesion`, formData, {
+        await apiClient.post(`/assessments/${id}/lesion`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
       }
 
-      navigate(`/assessment/${assessment.id}`)
+      setAlert({ type: 'success', message: 'Valoración actualizada correctamente' })
+      setTimeout(() => navigate(`/assessment/${id}`), 1500)
     } catch (err) {
       const data = err.response?.data
       const details = data?.details
@@ -207,9 +256,11 @@ export default function AssessmentFormPage() {
         setAlert({ type: 'error', message: data?.error || 'Error al guardar la valoración' })
       }
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
   }
+
+  if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Cargando...</div>
 
   const fe = fieldErrors
   const antecedenteFields = [
@@ -225,7 +276,7 @@ export default function AssessmentFormPage() {
     <div className="assessment-form-page">
       <div className="page-header">
         <h1 className="page-title">
-          Nueva Valoración
+          Editar Valoración
           <span className="page-title-line" />
         </h1>
         <p className="page-subtitle">
@@ -237,7 +288,6 @@ export default function AssessmentFormPage() {
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-        {/* Medidas corporales */}
         <SectionCard icon={<IconBody />} title="Medidas corporales">
           <div className="ui-grid-2">
             <FormField label="Peso (kg)" error={fe.peso}>
@@ -264,7 +314,6 @@ export default function AssessmentFormPage() {
           </div>
         </SectionCard>
 
-        {/* Datos clínicos */}
         <SectionCard icon={<IconClinical />} title="Datos clínicos">
           <div className="ui-grid-2">
             <FormField label="Presión arterial" error={fe.presionArterial}>
@@ -292,7 +341,7 @@ export default function AssessmentFormPage() {
                   <button 
                     type="button" 
                     className="lesion-edit-remove"
-                    onClick={() => setForm(prev => ({ ...prev, tieneLesion: false, lesionDescripcion: '' }))}
+                    onClick={() => { setForm(prev => ({ ...prev, tieneLesion: false })); setLesionRemove(true); }}
                   >
                     Quitar
                   </button>
@@ -311,30 +360,40 @@ export default function AssessmentFormPage() {
                 <div className="lesion-upload" style={{ marginTop: '0.75rem' }}>
                   <input
                     type="file"
-                    id="lesionFile"
+                    id="lesionFileEdit"
                     accept=".pdf,image/jpeg,image/png,image/jpg,image/webp"
                     onChange={handleLesionFileChange}
                     className="lesion-input"
                   />
-                  {lesionFile ? (
+                  {lesionFile || (lesionExisting && !lesionRemove) ? (
                     <div className="lesion-file-selected">
-                      <span>✓ {lesionFile.name}</span>
+                      <span>✓ {lesionFile ? lesionFile.name : 'Archivo existente'}</span>
                       <button 
                         type="button"
-                        onClick={() => setLesionFile(null)}
+                        onClick={() => { setLesionFile(null); setLesionRemove(true); }}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E10600', fontSize: '1rem' }}
                       >
                         ✕
                       </button>
                     </div>
                   ) : (
-                    <label htmlFor="lesionFile" className="lesion-label">
+                    <label htmlFor="lesionFileEdit" className="lesion-label">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                       </svg>
                       Adjuntar evidencia
                     </label>
                   )}
+                </div>
+              </div>
+            ) : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        Adjuntar evidencia
+                      </>
+                    )}
+                  </label>
                 </div>
               </div>
             ) : (
@@ -350,7 +409,6 @@ export default function AssessmentFormPage() {
           </div>
         </SectionCard>
 
-        {/* Antecedentes de salud */}
         <SectionCard icon={<IconHistory />} title="Antecedentes de salud">
           <div className="antecedentes-grid">
             {antecedenteFields.map(({ label, name }) => (
@@ -366,7 +424,6 @@ export default function AssessmentFormPage() {
           </div>
         </SectionCard>
 
-        {/* Contexto */}
         <SectionCard icon={<IconContext />} title="Contexto del usuario">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             <FormField label="Nivel de actividad física" error={fe.nivelActividadFisica}>
@@ -400,13 +457,12 @@ export default function AssessmentFormPage() {
           </div>
         </SectionCard>
 
-        {/* Acciones */}
         <div className="form-actions">
-          <button type="button" className="ui-btn-secondary" onClick={() => navigate('/dashboard')}>
+          <button type="button" className="ui-btn-secondary" onClick={() => navigate(`/assessment/${id}`)}>
             Cancelar
           </button>
-          <button type="submit" className="ui-btn-primary" disabled={loading}>
-            {loading ? 'Guardando...' : 'Completar Valoración →'}
+          <button type="submit" className="ui-btn-primary" disabled={saving}>
+            {saving ? 'Guardando...' : 'Guardar cambios →'}
           </button>
         </div>
       </form>

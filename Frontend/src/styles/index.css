@@ -696,4 +696,305 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   .result-grid { grid-template-columns: 1fr 1fr; }
   .navbar-right { gap: 0.75rem; }
   .navbar-link { display: none; }
+  .antecedentes-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Evidencia de lesión ───────────────────────── */
+.lesion-upload { position: relative; }
+.lesion-input { position: absolute; width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; z-index: -1; }
+.lesion-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--color-surface2) !important;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-muted) !important;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.lesion-label:hover { border-color: var(--color-accent); color: var(--color-text); }
+.lesion-label.lesion-success,
+.lesion-label.lesion-success:hover,
+.lesion-label.lesion-success:visited,
+.lesion-label.lesion-success:active {
+  border: 2px solid #22c55e !important;
+  color: #22c55e !important;
+  background-color: rgba(34, 197, 94, 0.2) !important;
+  background-image: none !important;
+}
+.lesion-file-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 0.9rem;
+  background: rgba(34, 197, 94, 0.15);
+  border: 2px solid #22c55e;
+  border-radius: var(--radius-sm);
+  color: #22c55e;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* ─── Antecedentes de salud ────────────────────── */
+.antecedentes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.antecedente-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.65rem;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.antecedente-check {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.antecedente-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  font-weight: 500;
+  cursor: pointer;
+}
+.antecedente-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+.antecedente-desc {
+  font-size: 0.75rem;
+  padding: 0.4rem 0.6rem;
+}
+
+/* ─── Antecedentes estilo chips ─────────────────── */
+.antecedente-chip-wrapper { display: flex; flex-direction: column; gap: 0.3rem; }
+.antecedente-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.antecedente-chip:hover { border-color: var(--color-accent); color: var(--color-text); }
+.antecedente-chip-active {
+  background: var(--color-surface);
+  border-color: #E10600;
+  color: #E10600;
+}
+.antecedente-chip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.antecedente-chip-active .antecedente-chip-icon { background: #E10600; color: white; border-radius: 50%; }
+.antecedente-chip-wrapper .antecedente-desc { margin-top: 0.25rem; border: 1px dashed var(--color-border); }
+
+/* ─── Objetivo destacado (estilo trofeo) ───── */
+.objetivo-wrapper { position: relative; }
+.objetivo-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #F59E0B;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+.objetivo-icon { font-size: 1.2rem; filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.5)); }
+.objetivo-input {
+  border: 1px solid var(--color-border) !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+.objetivo-input:focus {
+  border: 2px solid #F59E0B !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3) !important;
+}
+.objetivo-input:not(:placeholder-shown) {
+  border: 2px solid #F59E0B !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3) !important;
+}
+
+/* ─── Resultado de antecedentes ───────────────── */
+.antecedentes-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.antecedente-result-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-surface2);
+  border-left: 3px solid var(--color-warning);
+  border-radius: var(--radius-sm);
+}
+.antecedente-result-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-warning);
+  text-transform: uppercase;
+}
+.antecedente-result-desc {
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+/* ─── Resultado de lesión ─────────────────────── */
+.lesion-result { display: flex; flex-direction: column; gap: 0.5rem; }
+.lesion-result-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.4rem 0.75rem;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  width: fit-content;
+  transition: border-color 0.2s, background 0.2s;
+}
+.lesion-result-link:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+}
+
+/* ─── Resultado header actions ─────────────────── */
+.result-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.result-edit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.2s, color 0.2s;
+}
+.result-edit-link:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+/* ─── Lesión edit ───────────────────────────────── */
+.lesion-edit-section { display: flex; flex-direction: column; gap: 0.5rem; }
+.lesion-edit-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.lesion-edit-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent);
+}
+.lesion-edit-file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.lesion-edit-file-name {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+.lesion-edit-remove {
+  background: none;
+  border: none;
+  color: var(--color-dim);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 0.3rem;
+}
+.lesion-edit-remove:hover { color: var(--color-error); }
+
+.lesion-edit-active { display: flex; flex-direction: column; gap: 0.5rem; }
+.lesion-edit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.lesion-edit-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  background: rgba(225, 6, 0, 0.15);
+  color: var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.lesion-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem;
+  background: var(--color-surface2);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.lesion-add-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+.lesion-add-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--color-surface);
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-accent);
 }

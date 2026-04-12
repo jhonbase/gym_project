@@ -2,13 +2,10 @@ import { Router } from 'express'
 import * as assessmentController from '../controllers/assessment.controller.js'
 import { validateRequest } from '../middlewares/validateRequest.js'
 import { authenticate } from '../middlewares/authenticate.js'
-import { createAssessmentSchema } from '../validations/assessment.validation.js'
+import { createAssessmentSchema, updateAssessmentSchema } from '../validations/assessment.validation.js'
+import uploadLesion from '../config/multer.lesion.js'
 
 const router = Router()
-
-// Todas las rutas de valoraciones requieren autenticación.
-// Sin authenticate: cualquiera puede crear, leer o descargar PDF de cualquier valoración
-// y consumir créditos de la API de IA sin autorización.
 
 // POST /api/assessments → Crear valoración + intentar análisis IA
 router.post('/', authenticate, validateRequest(createAssessmentSchema), assessmentController.createAssessment)
@@ -22,7 +19,16 @@ router.get('/:id/pdf', authenticate, assessmentController.getAssessmentPdf)
 // GET /api/assessments/:id → Obtener una valoración específica
 router.get('/:id', authenticate, assessmentController.getAssessment)
 
+// PUT /api/assessments/:id → Actualizar valoración
+router.put('/:id', authenticate, validateRequest(updateAssessmentSchema), assessmentController.updateAssessment)
+
 // POST /api/assessments/:id/analyze → Reintentar análisis IA
 router.post('/:id/analyze', authenticate, assessmentController.retryAnalysis)
+
+// POST /api/assessments/:id/lesion → Subir evidencia de lesión
+router.post('/:id/lesion', authenticate, uploadLesion.single('evidencia'), assessmentController.uploadLesion)
+
+// GET /api/assessments/:id/lesion → Descargar evidencia de lesión
+router.get('/:id/lesion', authenticate, assessmentController.getLesion)
 
 export default router

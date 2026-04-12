@@ -1,88 +1,44 @@
 import { z } from 'zod/v4'
 
+const baseSchema = {
+  peso: z.number().positive().max(500).optional(),
+  estatura: z.number().positive().max(300).optional(),
+  grasaCorporal: z.number().min(0).max(100).optional(),
+  masaMuscular: z.number().positive().optional(),
+  imc: z.number().positive().optional(),
+  masaMagra: z.number().positive().optional(),
+  aguaCorporal: z.number().min(0).max(100).optional(),
+  grasaVisceral: z.number().int().min(1).max(59).optional(),
+  presionArterial: z.string().regex(/^\d{2,3}\/\d{2,3}$/).optional(),
+  edadMetabolica: z.number().int().positive().optional(),
+  fuerzaAgarre: z.number().positive().optional(),
+  resistenciaMuscular: z.string().min(1).optional(),
+  rmEstimado: z.number().positive().optional(),
+  ppm: z.number().int().min(30).max(250).optional(),
+  lesionDescripcion: z.string().optional().nullable(),
+  lesionEvidencia: z.string().optional().nullable(),
+  anteOsteomuscular: z.coerce.boolean().optional(),
+  anteOsteomuscularDesc: z.string().optional().nullable(),
+  anteCardiovascular: z.coerce.boolean().optional(),
+  anteCardiovascularDesc: z.string().optional().nullable(),
+  anteRespiratorio: z.coerce.boolean().optional(),
+  anteRespiratorioDesc: z.string().optional().nullable(),
+  anteMetabolico: z.coerce.boolean().optional(),
+  anteMetabolicoDesc: z.string().optional().nullable(),
+  antePsiquiatrico: z.coerce.boolean().optional(),
+  antePsiquiatricoDesc: z.string().optional().nullable(),
+  antePsicologico: z.coerce.boolean().optional(),
+  antePsicologicoDesc: z.string().optional().nullable(),
+  nivelActividadFisica: z.string().optional(),
+  observacion: z.string().optional().nullable(),
+  objetivoUsuario: z.string().min(1).optional(),
+}
+
 const createAssessmentSchema = z.object({
-  userId: z
-    .string({ required_error: 'El userId es obligatorio.' })
-    .uuid('Debe ser un UUID válido.'),
-
-  // Medidas corporales
-  peso: z
-    .number({ required_error: 'El peso es obligatorio.' })
-    .positive('El peso debe ser positivo.')
-    .max(500, 'El peso máximo es 500 kg.'),
-
-  estatura: z
-    .number({ required_error: 'La estatura es obligatoria.' })
-    .positive('La estatura debe ser positiva.')
-    .max(300, 'La estatura máxima es 300 cm.'),
-
-  grasaCorporal: z
-    .number({ required_error: 'La grasa corporal es obligatoria.' })
-    .min(0, 'La grasa corporal mínima es 0%.')
-    .max(100, 'La grasa corporal máxima es 100%.'),
-
-  masaMuscular: z
-    .number({ required_error: 'La masa muscular es obligatoria.' })
-    .positive('La masa muscular debe ser positiva.'),
-
-  imc: z
-    .number({ required_error: 'El IMC es obligatorio.' })
-    .positive('El IMC debe ser positivo.'),
-
-  masaMagra: z
-    .number({ required_error: 'La masa magra es obligatoria.' })
-    .positive('La masa magra debe ser positiva.'),
-
-  aguaCorporal: z
-    .number({ required_error: 'El agua corporal es obligatoria.' })
-    .min(0, 'El agua corporal mínima es 0%.')
-    .max(100, 'El agua corporal máxima es 100%.'),
-
-  grasaVisceral: z
-    .number({ required_error: 'La grasa visceral es obligatoria.' })
-    .int('La grasa visceral debe ser un número entero.')
-    .min(1, 'La grasa visceral mínima es nivel 1.')
-    .max(59, 'La grasa visceral máxima es nivel 59.'),
-
-  // Datos clínicos
-  presionArterial: z
-    .string({ required_error: 'La presión arterial es obligatoria.' })
-    .regex(/^\d{2,3}\/\d{2,3}$/, 'Formato: 120/80'),
-
-  edadMetabolica: z
-    .number({ required_error: 'La edad metabólica es obligatoria.' })
-    .int('La edad metabólica debe ser un número entero.')
-    .positive('La edad metabólica debe ser positiva.'),
-
-  fuerzaAgarre: z
-    .number({ required_error: 'La fuerza de agarre es obligatoria.' })
-    .positive('La fuerza de agarre debe ser positiva.'),
-
-  resistenciaMuscular: z
-    .string({ required_error: 'La resistencia muscular es obligatoria.' })
-    .min(1, 'La resistencia muscular no puede estar vacía.'),
-
-  rmEstimado: z
-    .number({ required_error: 'El RM estimado es obligatorio.' })
-    .positive('El RM estimado debe ser positivo.'),
-
-  ppm: z
-    .number({ required_error: 'Las PPM son obligatorias.' })
-    .int('Las PPM deben ser un número entero.')
-    .min(30, 'Las PPM mínimas son 30.')
-    .max(250, 'Las PPM máximas son 250.'),
-
-  // Contexto
-  nivelActividadFisica: z
-    .string({ required_error: 'El nivel de actividad física es obligatorio.' }),
-
-  observacion: z
-    .string()
-    .optional(),
-
-  objetivoUsuario: z
-    .string({ required_error: 'El objetivo del usuario es obligatorio.' })
-    .min(1, 'El objetivo del usuario no puede estar vacío.'),
+  userId: z.string({ required_error: 'El userId es obligatorio.' }).uuid('Debe ser un UUID válido.'),
+  ...baseSchema,
 })
 
-export { createAssessmentSchema }
+const updateAssessmentSchema = z.object(baseSchema)
+
+export { createAssessmentSchema, updateAssessmentSchema }

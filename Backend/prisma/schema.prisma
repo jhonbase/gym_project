@@ -70,7 +70,25 @@ model Assessment {
   fuerzaAgarre         Float    
   resistenciaMuscular  String   
   rmEstimado           Float    
-  ppm                  Int      
+  ppm                   Int      
+
+  // Evidencia de lesión
+  lesionEvidencia      String?  // Ruta del archivo de evidencia (imagen/PDF)
+  lesionDescripcion    String?  // Descripción de la lesión
+
+  // Antecedentes de salud
+  anteOsteomuscular    Boolean  @default(false)
+  anteOsteomuscularDesc String?
+  anteCardiovascular   Boolean  @default(false)
+  anteCardiovascularDesc String?
+  anteRespiratorio     Boolean  @default(false)
+  anteRespiratorioDesc String?
+  anteMetabolico       Boolean  @default(false)
+  anteMetabolicoDesc   String?
+  antePsiquiatrico    Boolean  @default(false)
+  antePsiquiatricoDesc String?
+  antePsicologico      Boolean  @default(false)
+  antePsicologicoDesc String?
 
   // Contexto
   nivelActividadFisica String   

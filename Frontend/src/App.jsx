@@ -9,6 +9,7 @@ import RegisterPage from './pages/RegisterPage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import AssessmentFormPage from './pages/AssessmentFormPage.jsx'
 import AssessmentResultPage from './pages/AssessmentResultPage.jsx'
+import AssessmentEditPage from './pages/AssessmentEditPage.jsx'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/assessment/new" element={<AssessmentFormPage />} />
               <Route path="/assessment/:id" element={<AssessmentResultPage />} />
+              <Route path="/assessment/:id/edit" element={<AssessmentEditPage />} />
             </Route>
           </Route>
 

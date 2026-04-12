@@ -3,6 +3,12 @@ import * as aiService from '../services/ai.service.js'
 import * as response from '../utils/apiResponse.js'
 import * as logger from '../utils/logger.js'
 import * as pdfService from '../services/pdf.service.js'
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 /**
  * POST /api/assessments
@@ -132,5 +138,97 @@ async function getAssessmentPdf(req, res, next) {
   }
 }
 
+/**
+ * POST /api/assessments/:id/lesion
+ * Sube evidencia de lesión (imagen o PDF)
+ */
+async function uploadLesion(req, res, next) {
+  try {
+    if (!req.file) {
+      return response.error(res, 'No se ha proporcionado ningún archivo.', 400)
+    }
 
-export { createAssessment, getAssessment, getByUser, retryAnalysis, getAssessmentPdf }
+    const filePath = `/uploads/lesiones/${req.file.filename}`
+    const descripcion = req.body.descripcion || null
+
+    const assessment = await assessmentService.updateLesion(req.params.id, {
+      lesionEvidencia: filePath,
+      lesionDescripcion: descripcion,
+    })
+
+    if (!assessment) {
+      return response.error(res, 'Valoración no encontrada.', 404)
+    }
+
+    return response.success(res, { 
+      assessment,
+      lesionUrl: filePath 
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
+ * GET /api/assessments/:id/lesion
+ * Descarga la evidencia de lesión
+ */
+async function getLesion(req, res, next) {
+  try {
+    const assessment = await assessmentService.getById(req.params.id)
+
+    if (!assessment) {
+      return response.error(res, 'Valoración no encontrada.', 404)
+    }
+
+    if (!assessment.lesionEvidencia) {
+      return response.error(res, 'No hay evidencia de lesión.', 404)
+    }
+
+    const absolutePath = path.join(process.cwd(), assessment.lesionEvidencia)
+
+    if (!fs.existsSync(absolutePath)) {
+      return response.error(res, 'El archivo no existe.', 404)
+    }
+
+    const ext = path.extname(absolutePath).toLowerCase()
+    const contentType = ext === '.pdf' ? 'application/pdf' : 'image/jpeg'
+
+    res.setHeader('Content-Type', contentType)
+    res.setHeader('Content-Disposition', 'inline')
+    res.sendFile(absolutePath)
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
+ * PUT /api/assessments/:id
+ * Actualiza una valoración completa.
+ */
+async function updateAssessment(req, res, next) {
+  try {
+    const data = req.body
+    
+    if (data.lesionDescripcion !== undefined && data.lesionDescripcion === '') {
+      data.lesionDescripcion = null
+    }
+    
+    if (data.lesionEvidencia !== undefined && data.lesionEvidencia === null) {
+      data.lesionEvidencia = null
+    }
+    
+    const assessment = await assessmentService.update(req.params.id, data)
+
+    if (!assessment) {
+      return response.error(res, 'Valoración no encontrada.', 404)
+    }
+
+    return response.success(res, { assessment })
+  } catch (error) {
+    next(error)
+  }
+}
+
+
+export { createAssessment, getAssessment, getByUser, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, updateAssessment }

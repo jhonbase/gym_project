@@ -21,6 +21,16 @@ const IconAI = () => (
     <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
   </svg>
 )
+const IconLesion = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/>
+  </svg>
+)
+const IconHistory = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+  </svg>
+)
 
 /* ─── Item de resultado ───────────────────────── */
 function ResultItem({ label, value }) {
@@ -111,10 +121,16 @@ export default function AssessmentResultPage() {
   return (
     <div className="result-page">
       {/* Back */}
-      <Link to="/dashboard" className="result-back-link">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        Volver al dashboard
-      </Link>
+      <div className="result-header-actions">
+        <Link to="/dashboard" className="result-back-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Volver al dashboard
+        </Link>
+        <Link to={`/assessment/${id}/edit`} className="result-edit-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Editar valoración
+        </Link>
+      </div>
 
       {/* Header */}
       <div className="page-header">
@@ -158,6 +174,46 @@ export default function AssessmentResultPage() {
           </p>
         )}
       </SectionCard>
+
+      {/* Evidencia de lesión */}
+      {(a.lesionEvidencia || a.lesionDescripcion) && (
+        <SectionCard icon={<IconLesion />} title="Evidencia de lesión">
+          <div className="lesion-result">
+            {a.lesionDescripcion && (
+              <p className="result-obs">
+                <strong style={{ color: 'var(--color-muted)' }}>Descripción: </strong>{a.lesionDescripcion}
+              </p>
+            )}
+            {a.lesionEvidencia && (
+              <a 
+                href={`http://localhost:3000${a.lesionEvidencia}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="lesion-result-link"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                </svg>
+                Ver evidencia adjunta
+              </a>
+            )}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Antecedentes de salud */}
+      {(a.anteOsteomuscular || a.anteCardiovascular || a.anteRespiratorio || a.anteMetabolico || a.antePsiquiatrico || a.antePsicologico) && (
+        <SectionCard icon={<IconHistory />} title="Antecedentes de salud">
+          <div className="result-grid">
+            {a.anteOsteomuscular && <ResultItem label="Osteomuscular" value={a.anteOsteomuscularDesc || 'Sí'} />}
+            {a.anteCardiovascular && <ResultItem label="Cardiovascular" value={a.anteCardiovascularDesc || 'Sí'} />}
+            {a.anteRespiratorio && <ResultItem label="Respiratorio" value={a.anteRespiratorioDesc || 'Sí'} />}
+            {a.anteMetabolico && <ResultItem label="Metabólico" value={a.anteMetabolicoDesc || 'Sí'} />}
+            {a.antePsiquiatrico && <ResultItem label="Psiquiátrico" value={a.antePsiquiatricoDesc || 'Sí'} />}
+            {a.antePsicologico && <ResultItem label="Psicológico" value={a.antePsicologicoDesc || 'Sí'} />}
+          </div>
+        </SectionCard>
+      )}
 
       {/* Análisis IA */}
       <SectionCard icon={<IconAI />} title="Análisis con IA">

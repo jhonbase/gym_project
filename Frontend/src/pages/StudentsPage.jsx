@@ -5,7 +5,7 @@ import apiClient from '../api/client.js'
 import LoadingSpinner from '../components/LoadingSpinner.jsx'
 import AlertMessage from '../components/AlertMessage.jsx'
 import SectionCard from '../components/SectionCard.jsx'
-import { saveEnrolledTemplate, hasEnrolledFingerprint } from '../utils/fingerprint.js'
+import { saveEnrolledTemplate, hasEnrolledFingerprint, getEnrolledTemplate } from '../utils/fingerprint.js'
 import FingerprintButton from '../components/FingerprintButton.jsx'
 
 const IconUser = () => (
@@ -44,6 +44,8 @@ export default function StudentsPage() {
   const [alert, setAlert] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [step, setStep] = useState(1)
+  const [tempUserId, setTempUserId] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
 
   const [form, setForm] = useState({
@@ -120,6 +122,7 @@ export default function StudentsPage() {
 
     if (!hasEnrolledFingerprint()) {
       setAlert({ type: 'error', message: 'No hay huella registrada en este dispositivo. Primero registra una huella en este equipo.' })
+      setLoading(false)
       return
     }
 
@@ -137,11 +140,29 @@ export default function StudentsPage() {
       const res = await apiClient.post('/users', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
-      const newUserId = res.data.data.user.id
-      
-      const template = saveEnrolledTemplate()
+      setTempUserId(res.data.data.user.id)
+      setStep(2)
+      setAlert({ type: 'success', message: 'Datos guardados. Ahora registra la huella del estudiante.' })
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Error al registrar estudiante'
+      setAlert({ type: 'error', message: msg })
+    } finally {
+      setSaving(false)
+      setLoading(false)
+    }
+  }
+
+  async function handleEnrollFingerprint() {
+    if (!hasEnrolledFingerprint()) {
+      setAlert({ type: 'error', message: 'No hay huella registrada.' })
+      return
+    }
+
+    setSaving(true)
+    try {
+      const template = getEnrolledTemplate()
       await apiClient.post('/fingerprint', {
-        userId: newUserId,
+        userId: tempUserId,
         template
       })
       
@@ -150,7 +171,7 @@ export default function StudentsPage() {
       resetForm()
       loadStudents()
     } catch (err) {
-      const msg = err.response?.data?.error || 'Error al registrar estudiante'
+      const msg = err.response?.data?.error || 'Error al registrar huella'
       setAlert({ type: 'error', message: msg })
     } finally {
       setSaving(false)
@@ -160,13 +181,14 @@ export default function StudentsPage() {
   function resetForm() {
     setForm({
       primerNombre: '', segundoNombre: '', primerApellido: '', segundoApellido: '',
-      tipoDocumento: 'CC', documento: '', eps: 'Sura', grupoSanguineo: 'O+',
+      tipoDocumento: 'CC', documento: '', eps: '', grupoSanguineo: 'O+',
       email: '', telefono: '',
       nombreEmergencia: '', telefonoEmergencia: '',
       numeroCarnet: '', programa: '', esEgresado: false, modalidad: 'Presencial', jornada: 'diurna', semestre: 1,
     })
     setCertificadoEps(null)
     setStep(1)
+    setTempUserId(null)
   }
 
   function handleCertificadoChange(e) {
@@ -283,9 +305,23 @@ export default function StudentsPage() {
               <button className="modal-close" onClick={() => { setShowModal(false); resetForm(); }}>×</button>
             </div>
 
+            {/* Step indicator */}
+            <div className="step-indicator">
+              <div className={`step ${step >= 1 ? 'step-active' : ''}`}>
+                <span className="step-num">1</span>
+                <span className="step-label">Datos</span>
+              </div>
+              <div className="step-line"></div>
+              <div className={`step ${step >= 2 ? 'step-active' : ''}`}>
+                <span className="step-num">2</span>
+                <span className="step-label">Huella</span>
+              </div>
+            </div>
+
             <AlertMessage {...alert} onClose={() => setAlert(null)} />
 
-            <form onSubmit={handleSubmitStep1} className="student-form">
+            {step === 1 ? (
+              <form onSubmit={handleSubmitStep1} className="student-form">
                 <div className="form-section">
                   <h3 className="form-section-title">Información Personal</h3>
                   <div className="form-grid">
@@ -460,10 +496,19 @@ export default function StudentsPage() {
                 <div className="form-actions">
                   <button type="button" className="ui-btn-secondary" onClick={() => { setShowModal(false); resetForm(); }}>Cancelar</button>
                   <button type="submit" className="ui-btn-primary" disabled={saving}>
-                    {saving ? 'Registrando...' : 'Registrar estudiante'}
+                    {saving ? 'Guardando...' : 'Continuar →'}
                   </button>
                 </div>
               </form>
+            ) : (
+              <div className="fingerprint-step">
+                <p className="fingerprint-instruction">Coloca el dedo del estudiante en el lector para registrar su huella.</p>
+                <FingerprintButton onClick={handleEnrollFingerprint} loading={saving} />
+                <button className="ui-btn-secondary" onClick={() => setStep(1)} style={{ marginTop: '1rem' }}>
+                  ← Volver
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

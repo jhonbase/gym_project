@@ -8,6 +8,9 @@ const router = Router()
 // POST /api/fingerprint/enroll → Registrar huella de un usuario
 router.post('/enroll', validateRequest(enrollSchema), fpController.enroll)
 
+// POST /api/fingerprint → Registrar huella (alias para /enroll)
+router.post('/', validateRequest(enrollSchema), fpController.enroll)
+
 // POST /api/fingerprint/login → Autenticar por huella (solo template, sin userId)
 router.post('/login', validateRequest(loginSchema), fpController.login)
 

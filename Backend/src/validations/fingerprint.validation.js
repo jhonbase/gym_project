@@ -1,10 +1,9 @@
 import { z } from 'zod/v4'
 
-// Para el enrolamiento: solo necesitamos el userId
+// Para el enrolamiento: userId obligatorio, template opcional
 const enrollSchema = z.object({
-  userId: z
-    .string({ required_error: 'El userId es obligatorio.' })
-    .uuid('Debe ser un UUID válido.'),
+  userId: z.string().min(1, 'El userId es obligatorio.'),
+  template: z.string().min(1, 'El template es obligatorio.'),
 })
 
 const loginSchema = z.object({

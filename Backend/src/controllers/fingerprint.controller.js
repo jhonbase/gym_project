@@ -7,16 +7,17 @@ import config from '../config/environment.js'
 
 async function enroll(req, res, next) {
   try {
-    const { userId } = req.body
+    const { userId, template } = req.body
 
-    const template = generateTemplate()
-    logger.info(`Huella generada localmente para usuario ${userId}`)
+    if (!template) {
+      return response.error(res, 'El template es obligatorio.', 400)
+    }
+
+    logger.info(`Registrando huella para usuario ${userId}`)
 
     const fingerprint = await fingerprintService.enrollFingerprint(userId, template)
 
-    // Devolvemos el template para que el frontend lo guarde en localStorage (simulación)
-    // En producción con lector real, esto no sería necesario
-    return response.success(res, { fingerprint, template, source: 'local' }, 201)
+    return response.success(res, { fingerprint, template }, 201)
   } catch (error) {
     next(error)
   }

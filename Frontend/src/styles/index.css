@@ -1373,3 +1373,55 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   background: #10B981;
   color: white;
 }
+
+/* ─── Step indicator ───────────────────────────── */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-surface2);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 1rem;
+}
+.step {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+.step-active {
+  opacity: 1;
+}
+.step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-border);
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+.step-active .step-num {
+  background: var(--color-accent);
+  color: white;
+}
+.step-label {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+.step-active .step-label {
+  color: var(--color-text);
+}
+.step-line {
+  width: 30px;
+  height: 2px;
+  background: var(--color-border);
+}

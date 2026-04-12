@@ -404,6 +404,10 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
 .login-register-link:hover { color: var(--color-text); }
 .login-register-link-accent { color: var(--color-accent); font-weight: 600; }
 
+.login-form { display: flex; flex-direction: column; gap: 1rem; width: 100%; }
+.login-form .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+.login-btn { width: 100%; margin-top: 0.5rem; }
+
 /* ─── Layout / Navbar ─────────────────────────── */
 .app-layout { min-height: 100vh; display: flex; flex-direction: column; background: var(--color-bg); }
 .app-main { flex: 1; padding: 2rem 2.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
@@ -1002,4 +1006,370 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   font-size: 1.2rem;
   font-weight: 600;
   color: var(--color-accent);
+}
+
+/* ─── Students Page ─────────────────────────── */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+}
+.search-bar svg { color: var(--color-dim); flex-shrink: 0; }
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  outline: none;
+}
+.search-input::placeholder { color: var(--color-dim); }
+
+.students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.student-row-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.student-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.student-row-wrapper:hover .student-row {
+  border-color: var(--color-accent);
+  background: var(--color-surface2);
+}
+.student-delete-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-dim);
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.student-delete-btn:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+  background: rgba(225, 6, 0, 0.05);
+}
+.student-delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.student-row {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.student-row:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface2);
+}
+.student-row-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+.student-row-arrow {
+  color: var(--color-dim);
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+.student-row:hover .student-row-arrow {
+  color: var(--color-accent);
+}
+.student-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+.student-info {
+  flex: 1;
+  min-width: 0;
+}
+.student-name {
+  display: block;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.student-meta {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+.student-stats {
+  text-align: center;
+  padding: 0 1rem;
+  border-left: 1px solid var(--color-border);
+  margin-left: 1rem;
+}
+.student-stats .stat-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+.student-stats .stat-label {
+  font-size: 0.7rem;
+  color: var(--color-dim);
+  text-transform: uppercase;
+}
+.fingerprints-list {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.fingerprint-tag {
+  padding: 0.25rem 0.75rem;
+  background: var(--color-surface2);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.back-btn:hover {
+  border-color: var(--color-accent);
+}
+
+/* ─── Modal styles ─────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+.modal-content {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.modal-header h2 { margin: 0; font-size: 1.25rem; color: var(--color-text); }
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  color: var(--color-dim);
+  cursor: pointer;
+  line-height: 1;
+}
+.modal-close:hover { color: var(--color-text); }
+
+.student-form { padding: 1.5rem; }
+.form-section { margin-bottom: 1.5rem; }
+.form-section-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.form-checkbox input { width: 18px; height: 18px; }
+.form-checkbox label { font-size: 0.9rem; color: var(--color-text); }
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.fingerprint-step {
+  padding: 2rem;
+  text-align: center;
+}
+.fingerprint-instruction {
+  margin-bottom: 1.5rem;
+  color: var(--color-muted);
+}
+.error-text { color: var(--color-error); margin-top: 1rem; }
+.form-hint {
+  padding: 0.75rem 1rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-sm);
+  color: #F59E0B;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+/* ─── Certificate upload box ───────────────────── */
+.cert-upload-box {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+.cert-upload-box:hover {
+  border-color: var(--color-accent);
+}
+.cert-uploaded {
+  border: 2px solid #10B981;
+  background: rgba(16, 185, 129, 0.05);
+}
+.cert-upload-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+.cert-upload-label:hover {
+  color: var(--color-accent);
+}
+.cert-uploaded-state {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cert-check {
+  color: #10B981;
+  font-weight: 700;
+  font-size: 1rem;
+}
+.cert-name {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cert-remove {
+  background: none;
+  border: none;
+  color: var(--color-error);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+.cert-remove:hover {
+  color: #B91C1C;
+}
+
+/* ─── Toggle button for Egresado ───────────────── */
+.form-toggle {
+  margin-top: 1rem;
+}
+.toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.toggle-btn:hover {
+  border-color: var(--color-accent);
+}
+.toggle-btn-active {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10B981;
+  color: #10B981;
+}
+.toggle-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--color-surface);
+  transition: all 0.2s;
+}
+.toggle-btn-active .toggle-icon {
+  background: #10B981;
+  color: white;
 }

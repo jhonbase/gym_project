@@ -7,6 +7,8 @@ import Layout from './components/Layout.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
+import StudentsPage from './pages/StudentsPage.jsx'
+import StudentProfilePage from './pages/StudentProfilePage.jsx'
 import AssessmentFormPage from './pages/AssessmentFormPage.jsx'
 import AssessmentResultPage from './pages/AssessmentResultPage.jsx'
 import AssessmentEditPage from './pages/AssessmentEditPage.jsx'
@@ -20,10 +22,13 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* Rutas protegidas (requieren login con huella) */}
+          {/* Rutas protegidas (requieren login) */}
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/students" element={<StudentsPage />} />
+              <Route path="/student/:id" element={<StudentProfilePage />} />
+              <Route path="/student/:userId/assessment/new" element={<AssessmentFormPage />} />
               <Route path="/assessment/new" element={<AssessmentFormPage />} />
               <Route path="/assessment/:id" element={<AssessmentResultPage />} />
               <Route path="/assessment/:id/edit" element={<AssessmentEditPage />} />

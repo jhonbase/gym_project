@@ -33,10 +33,12 @@ async function createUser(req, res, next) {
 /**
  * GET /api/users
  * Obtiene todos los usuarios con sus huellas.
+ * Soporta filtro por rol: /api/users?rol=usuario
  */
 async function getUsers(req, res, next) {
   try {
-    const users = await userService.getAllUsers()
+    const { rol } = req.query
+    const users = await userService.getAllUsers(rol)
     return response.success(res, { users })
   } catch (error) {
     next(error)
@@ -123,4 +125,21 @@ async function downloadCertificado(req, res, next) {
   }
 }
 
-export { createUser, getUsers, getUserById, updateUser, uploadCertificado, downloadCertificado }
+async function deleteUser(req, res, next) {
+  try {
+    const { id } = req.params
+    
+    const user = await userService.getUserById(id)
+    if (!user) {
+      return response.error(res, 'Usuario no encontrado.', 404)
+    }
+    
+    await userService.deleteUser(id)
+    
+    return response.success(res, { message: 'Usuario eliminado correctamente.' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export { createUser, getUsers, getUserById, updateUser, uploadCertificado, downloadCertificado, deleteUser }

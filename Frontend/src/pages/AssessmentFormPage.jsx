@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import apiClient from '../api/client.js'
 import AlertMessage from '../components/AlertMessage.jsx'
@@ -79,7 +79,11 @@ function AntecedenteField({ label, name, form, setForm, error }) {
 
 export default function AssessmentFormPage() {
   const { user } = useAuth()
+  const { userId } = useParams()
   const navigate = useNavigate()
+  
+  const targetUserId = userId || user.id
+  const targetUserName = userId ? 'Estudiante' : user.nombre
   const [loading, setLoading] = useState(false)
   const [alert, setAlert] = useState(null)
 
@@ -147,7 +151,7 @@ export default function AssessmentFormPage() {
     
     try {
       const data = {
-        userId: user.id,
+        userId: targetUserId,
         peso: Number(form.peso),
         estatura: Number(form.estatura),
         grasaCorporal: form.grasaCorporal ? Number(form.grasaCorporal) : undefined,
@@ -194,7 +198,11 @@ export default function AssessmentFormPage() {
         })
       }
 
-      navigate(`/assessment/${assessment.id}`)
+      if (userId) {
+        navigate(`/student/${userId}`)
+      } else {
+        navigate(`/assessment/${assessment.id}`)
+      }
     } catch (err) {
       const data = err.response?.data
       const details = data?.details
@@ -229,7 +237,7 @@ export default function AssessmentFormPage() {
           <span className="page-title-line" />
         </h1>
         <p className="page-subtitle">
-          Paciente: <strong>{user.nombre}</strong>
+          Paciente: <strong>{targetUserName}</strong>
         </p>
       </div>
 
@@ -402,7 +410,7 @@ export default function AssessmentFormPage() {
 
         {/* Acciones */}
         <div className="form-actions">
-          <button type="button" className="ui-btn-secondary" onClick={() => navigate('/dashboard')}>
+          <button type="button" className="ui-btn-secondary" onClick={() => navigate(userId ? `/student/${userId}` : '/dashboard')}>
             Cancelar
           </button>
           <button type="submit" className="ui-btn-primary" disabled={loading}>

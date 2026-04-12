@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
       const payload = decodeToken(token)
       if (payload && payload.exp * 1000 > Date.now()) {
         // Token presente y no expirado → restaurar sesión
-        setUser({ id: payload.sub, nombre: payload.nombre })
+        setUser({ id: payload.sub, nombre: payload.nombre, rol: payload.rol })
       } else {
         // Token expirado → limpiar
         localStorage.removeItem('gym_token')
@@ -48,14 +48,18 @@ export function AuthProvider({ children }) {
   }, [])
 
   /**
-   * login(token) — recibe el JWT devuelto por /api/fingerprint/login
-   * y extrae solo { id, nombre } del payload para el estado en memoria.
-   * NUNCA se persisten datos médicos en localStorage.
+   * login(token, userData) — recibe el JWT devuelto por /api/auth/login
+   * o /api/fingerprint/login y extrae los datos del payload para el estado.
    */
-  function login(token) {
+  function login(token, userData = null) {
     localStorage.setItem('gym_token', token)
     const payload = decodeToken(token)
-    setUser({ id: payload.sub, nombre: payload.nombre })
+    setUser({ 
+      id: payload.sub, 
+      nombre: payload.nombre, 
+      rol: payload.rol,
+      ...userData
+    })
   }
 
   function logout() {

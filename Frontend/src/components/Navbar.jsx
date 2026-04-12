@@ -51,6 +51,9 @@ export default function Navbar() {
 
       <div className="navbar-right">
         <Link to="/dashboard" className="navbar-link">Inicio</Link>
+        {user?.rol === 'entrenador' && (
+          <Link to="/students" className="navbar-link">Estudiantes</Link>
+        )}
 
         {/* Avatar con dropdown */}
         <div className="navbar-profile" ref={menuRef}>
@@ -80,7 +83,7 @@ export default function Navbar() {
                 <div className="navbar-dropdown-avatar">{initials}</div>
                 <div>
                   <p className="navbar-dropdown-name">{short}</p>
-                  <p className="navbar-dropdown-role">Usuario</p>
+                  <p className="navbar-dropdown-role">{user?.rol === 'entrenador' ? 'Entrenador' : 'Usuario'}</p>
                 </div>
               </div>
               <div className="navbar-dropdown-divider" />

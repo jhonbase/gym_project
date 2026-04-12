@@ -1,9 +1,7 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import apiClient from '../api/client.js'
-import { getEnrolledTemplate, hasEnrolledFingerprint, mutateTemplate } from '../utils/fingerprint.js'
-import FingerprintButton from '../components/FingerprintButton.jsx'
 import AlertMessage from '../components/AlertMessage.jsx'
 import BrandLogo from '../components/BrandLogo.jsx'
 
@@ -12,30 +10,28 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [alert, setAlert] = useState(null)
+  const [form, setForm] = useState({ email: '', password: '' })
 
-  async function handleScan() {
-    if (!hasEnrolledFingerprint()) {
-      setAlert({ type: 'warning', message: 'No hay huella registrada en este dispositivo. Regístrate primero.' })
+  async function handleSubmit(e) {
+    e.preventDefault()
+    if (!form.email || !form.password) {
+      setAlert({ type: 'warning', message: 'Completa todos los campos.' })
       return
     }
 
     setLoading(true)
     setAlert(null)
     try {
-      const original = getEnrolledTemplate()
-      const scanned = mutateTemplate(original)
-
-      const res = await apiClient.post('/fingerprint/login', { template: scanned })
-      const { access, token, similarity } = res.data.data
-
-      if (access) {
-        login(token)
-        navigate('/dashboard')
-      } else {
-        setAlert({ type: 'error', message: `Acceso denegado. Similitud: ${similarity?.toFixed(1)}%` })
-      }
-    } catch {
-      setAlert({ type: 'error', message: 'Error al escanear. Intenta de nuevo.' })
+      const res = await apiClient.post('/auth/login', {
+        email: form.email,
+        password: form.password
+      })
+      
+      login(res.data.data.token, res.data.data.user)
+      setTimeout(() => navigate('/dashboard'), 100)
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Error al iniciar sesión.'
+      setAlert({ type: 'error', message: msg })
     } finally {
       setLoading(false)
     }
@@ -46,20 +42,46 @@ export default function LoginPage() {
       <div className="login-card">
         <div className="login-accent-line" />
 
-        {/* Logo + nombre */}
         <BrandLogo size="lg" />
 
         <p className="login-subtitle">Sistema de valoración física universitaria</p>
-        <p className="login-hint">Coloca tu huella para ingresar</p>
+        <p className="login-hint">Ingresa con tus credenciales</p>
 
         <AlertMessage {...alert} onClose={() => setAlert(null)} />
 
-        <FingerprintButton onClick={handleScan} loading={loading} />
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label className="ui-label">Email</label>
+            <input
+              type="email"
+              className="ui-input"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              placeholder="entrenador@unifit.edu"
+              disabled={loading}
+            />
+          </div>
 
-        <Link to="/register" className="login-register-link">
-          ¿No tienes cuenta?{' '}
-          <span className="login-register-link-accent">Regístrate</span>
-        </Link>
+          <div className="form-group">
+            <label className="ui-label">Password</label>
+            <input
+              type="password"
+              className="ui-input"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              placeholder="••••••••"
+              disabled={loading}
+            />
+          </div>
+
+          <button type="submit" className="ui-btn-primary login-btn" disabled={loading}>
+            {loading ? 'Ingresando...' : 'Ingresar'}
+          </button>
+        </form>
+
+        <p className="login-hint" style={{ marginTop: '1rem', fontSize: '0.8rem' }}>
+          ¿Olvidaste tu password? Contacta al administrador.
+        </p>
       </div>
     </div>
   )

@@ -9,10 +9,13 @@ async function createUser(data) {
 
 /**
  * Obtiene todos los usuarios con sus huellas asociadas.
+ * Soporta filtro por rol.
  */
-async function getAllUsers() {
+async function getAllUsers(rol = null) {
+  const where = rol ? { rol } : {}
   return prisma.user.findMany({
-    include: { fingerprints: true },
+    where,
+    include: { fingerprints: true, assessments: true },
   })
 }
 
@@ -31,6 +34,15 @@ async function getUserById(id) {
   })
 }
 
+/**
+ * Obtiene un usuario por su email.
+ */
+async function getUserByEmail(email) {
+  return prisma.user.findUnique({
+    where: { email },
+  })
+}
+
 async function updateUser(id, data) {
   return prisma.user.update({
     where: { id },
@@ -38,4 +50,10 @@ async function updateUser(id, data) {
   })
 }
 
-export { createUser, getAllUsers, getUserById, updateUser }
+async function deleteUser(id) {
+  return prisma.user.delete({
+    where: { id },
+  })
+}
+
+export { createUser, getAllUsers, getUserById, getUserByEmail, updateUser, deleteUser }

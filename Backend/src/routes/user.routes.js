@@ -24,4 +24,7 @@ router.post('/:id/certificado', authenticate, upload.single('certificado'), user
 // GET /api/users/:id/certificado → Descargar certificado de EPS (PROTEGIDO)
 router.get('/:id/certificado', authenticate, userController.downloadCertificado)
 
+// DELETE /api/users/:id → Eliminar usuario (PROTEGIDO)
+router.delete('/:id', authenticate, userController.deleteUser)
+
 export default router

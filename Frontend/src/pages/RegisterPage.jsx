@@ -16,11 +16,15 @@ export default function RegisterPage() {
   const [alert, setAlert] = useState(null)
 
   const [form, setForm] = useState({
+    // Variables Información Personal
     primerNombre: '', segundoNombre: '', primerApellido: '', segundoApellido: '',
-    tipoDocumento: 'CC', documento: '', email: '', telefono: '',
-    eps: '', grupoSanguineo: 'O+',
+    tipoDocumento: 'CC', documento: '', eps: 'Sura', grupoSanguineo: 'O+',
+    // Contacto
+    email: '', telefono: '',
+    // Variables Contacto de Emergencia
     nombreEmergencia: '', telefonoEmergencia: '',
-    carrera: '', jornada: 'diurna', semestre: 1,
+    // Variables Información Académica
+    numeroCarnet: '', programa: '', esEgresado: false, modalidad: 'Presencial', jornada: 'diurna', semestre: 1,
   })
 
   function handleChange(e) {
@@ -32,40 +36,50 @@ export default function RegisterPage() {
   }
 
   function buildPayload() {
-    const {
-      primerNombre, segundoNombre, primerApellido, segundoApellido,
-      nombreEmergencia, telefonoEmergencia, tipoDocumento, ...rest
-    } = form
+      // 1. Extraemos los campos del formulario
+      const {
+        primerNombre, segundoNombre, primerApellido, segundoApellido,
+        nombreEmergencia, telefonoEmergencia, tipoDocumento, 
+        programa, numeroCarnet, esEgresado, modalidad, ...rest 
+      } = form
 
-    // Construye el nombre completo concatenando los campos no vacíos
-    const nombre = [
-      primerNombre.trim(),
-      segundoNombre.trim(),
-      primerApellido.trim(),
-      segundoApellido.trim(),
-    ].filter(Boolean).join(' ')
+      // 2. Función segura para limpiar texto (si es null o undefined, devuelve texto vacío)
+      const safeTrim = (str) => (str ? String(str).trim() : '')
 
-    return {
-      ...rest,
-      nombre,
-      documento: `${tipoDocumento} ${form.documento.trim()}`,
-      contactoEmergencia: `${nombreEmergencia.trim()} - ${telefonoEmergencia.trim()}`,
+      // 3. Construimos el nombre completo sin que se rompa por campos vacíos
+      const nombre = [
+        safeTrim(primerNombre),
+        safeTrim(segundoNombre),
+        safeTrim(primerApellido),
+        safeTrim(segundoApellido),
+      ].filter(Boolean).join(' ')
+
+      // 4. Retornamos el objeto final que la base de datos espera
+      return {
+        ...rest,
+        nombre,
+        programa: safeTrim(programa),
+        numeroCarnet: safeTrim(numeroCarnet),
+        modalidad: safeTrim(modalidad),
+        esEgresado: esEgresado,
+        documento: `${tipoDocumento} ${safeTrim(form.documento)}`,
+        contactoEmergencia: `${safeTrim(nombreEmergencia)} - ${safeTrim(telefonoEmergencia)}`,
+      }
     }
-  }
 
   async function handleNext(e) {
     e.preventDefault()
     setAlert(null)
 
     // Primer nombre: obligatorio, solo letras
-    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+$/.test(form.primerNombre.trim())) {
-      setAlert({ type: 'error', message: 'El primer nombre solo debe contener letras' })
+    if (!form.primerNombre || !/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+$/.test(form.primerNombre.trim())) {
+      setAlert({ type: 'error', message: 'El primer nombre es obligatorio y solo debe contener letras' })
       return
     }
 
-    // Primer apellido: obligatorio, solo letras
-    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+$/.test(form.primerApellido.trim())) {
-      setAlert({ type: 'error', message: 'El primer apellido solo debe contener letras' })
+    // Para campos opcionales como segundoNombre, hazlo así:
+    if (form.segundoNombre && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+$/.test(form.segundoNombre.trim())) {
+      setAlert({ type: 'error', message: 'El segundo nombre solo debe contener letras' })
       return
     }
 
@@ -138,9 +152,9 @@ export default function RegisterPage() {
       return
     }
 
-    // Carrera: solo letras y espacios
-    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(form.carrera.trim())) {
-      setAlert({ type: 'error', message: 'La carrera solo debe contener letras' })
+    // Programa: solo letras y espacios
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(form.programa.trim())) {
+      setAlert({ type: 'error', message: 'El programa solo debe contener letras' })
       return
     }
 
@@ -254,30 +268,59 @@ export default function RegisterPage() {
                     />
                   </div>
                 </div>
-                <div className="register-row">
-                  <div className="register-field">
-                    <label className="register-label">Tipo de documento</label>
-                    <select className="register-input" name="tipoDocumento" value={form.tipoDocumento} onChange={handleChange}>
-                      <option value="CC">Cédula de ciudadanía</option>
-                      <option value="TI">Tarjeta de identidad</option>
-                      <option value="CE">Cédula de extranjería</option>
-                    </select>
+                  <div className="register-row">
+                    <div className="register-field">
+                      <label className="register-label">Tipo de documento</label>
+                      <select className="register-input" name="tipoDocumento" value={form.tipoDocumento} onChange={handleChange}>
+                        <option value="CC">Cédula de ciudadanía</option>
+                        <option value="TI">Tarjeta de identidad</option>
+                        <option value="CE">Cédula de extranjería</option>
+                        <option value="PPT">PPT</option>
+                        <option value="PAS">Pasaporte</option>
+                      </select>
+                    </div>
+                    <div className="register-field">
+                      <label className="register-label">Número de documento</label>
+                      <input
+                        className="register-input"
+                        name="documento"
+                        inputMode="numeric"
+                        value={form.documento}
+                        onChange={handleChange}
+                        placeholder="1234567890"
+                        required
+                      />
+                    </div>
                   </div>
-                  <div className="register-field">
-                    <label className="register-label">Número de documento</label>
-                    <input
-                      className="register-input"
-                      name="documento"
-                      inputMode="numeric"
-                      value={form.documento}
-                      onChange={handleChange}
-                      placeholder="1234567890"
-                      required
-                    />
+
+                  {/* Fila de Salud independiente para que se estiren los campos */}
+                  <div className="register-row">
+                    <div className="register-field">
+                      <label className="register-label">EPS *</label>
+                      <select className="register-input" name="eps" value={form.eps} onChange={handleChange} required>
+                        <option value="">Selecciona tu EPS</option>
+                        <option value="Sura">Sura</option>
+                        <option value="Salud Total">Salud Total</option>
+                        <option value="Sanitas">Sanitas</option>
+                        <option value="Compensar">Compensar</option>
+                        <option value="Nueva EPS">Nueva EPS</option>
+                        <option value="Coosalud">Coosalud</option>
+                        <option value="Famisanar">Famisanar</option>
+                        <option value="Savia Salud">Savia Salud</option>
+                        <option value="Otro">Otro / Particular</option>
+                      </select>
+                    </div>
+                    <div className="register-field">
+                      <label className="register-label">Tipo de sangre</label>
+                      <select className="register-input" name="grupoSanguineo" value={form.grupoSanguineo} onChange={handleChange}>
+                        {['O+','O-','A+','A-','B+','B-','AB+','AB-'].map(g => (
+                          <option key={g} value={g}>{g}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
             {/* Sección 2: Contacto */}
             <div className="register-section">
@@ -317,46 +360,13 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Sección 3: Información Médica */}
-            <div className="register-section">
-              <div className="register-section-header">
-                <span className="register-section-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                </span>
-                <span className="register-section-title">3. Información Médica</span>
-              </div>
-              <div className="register-section-body">
-                <div className="register-row">
-                  <div className="register-field">
-                    <label className="register-label">EPS</label>
-                    <input
-                      className="register-input"
-                      name="eps"
-                      value={form.eps}
-                      onChange={handleChange}
-                      placeholder="Nombre de tu EPS"
-                      required
-                    />
-                  </div>
-                  <div className="register-field">
-                    <label className="register-label">Tipo de sangre</label>
-                    <select className="register-input" name="grupoSanguineo" value={form.grupoSanguineo} onChange={handleChange}>
-                      {['O+','O-','A+','A-','B+','B-','AB+','AB-'].map(g => (
-                        <option key={g} value={g}>{g}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Sección 4: Contacto de Emergencia */}
+            {/* Sección 3: Contacto de Emergencia */}
             <div className="register-section">
               <div className="register-section-header">
                 <span className="register-section-icon">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 </span>
-                <span className="register-section-title">4. Contacto de Emergencia</span>
+                <span className="register-section-title">3. Contacto de Emergencia</span>
               </div>
               <div className="register-section-body">
                 <div className="register-row">
@@ -387,26 +397,86 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Sección 5: Información Académica */}
+            {/* Sección 3: Información Académica */}
             <div className="register-section">
               <div className="register-section-header">
                 <span className="register-section-icon">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                 </span>
-                <span className="register-section-title">5. Información Académica</span>
+                <span className="register-section-title">4. Información Académica</span>
               </div>
+              
               <div className="register-section-body">
-                <div className="register-row register-row-3">
+                {/* Fila 1: Carnet y Programa */}
+                <div className="register-row">
                   <div className="register-field">
-                    <label className="register-label">Carrera</label>
+                    <label className="register-label">Número de carnet *</label>
                     <input
                       className="register-input"
-                      name="carrera"
-                      value={form.carrera}
+                      name="numeroCarnet"
+                      value={form.numeroCarnet}
                       onChange={handleChange}
-                      placeholder="Tu programa"
+                      placeholder="Mismo número de documento"
                       required
                     />
+                  </div>
+                  <div className="register-field">
+                    <label className="register-label">Programa académico *</label>
+                    <select 
+                      className="register-input" 
+                      name="programa" 
+                      value={form.programa} 
+                      onChange={handleChange} 
+                      required
+                    >
+                      <option value="">Seleccione un programa</option>
+                      <optgroup label="Profesional">
+                        <option value="Administración de Empresas">Administración de Empresas</option>
+                        <option value="Ingeniería de Sistemas">Arquitectura</option>
+                        <option value="Administración de Empresas">Contaduria Publica</option>
+                        <option value="Ingeniería Industrial">Derecho</option>
+                        <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+                        <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
+                        <option value="Administración de Empresas">Ingenieria de Software</option>
+                        <option value="Ingeniería de Sistemas">Psicologia</option>
+                        <option value="Ingeniería Industrial">Medicina Veterinaria y Zootecnia</option>
+                      </optgroup>
+                      <optgroup label="Técnico / Tecnológico">
+                        <option value="Técnico en Desarrollo de Software">Auxiliar Administrativo</option>
+                        <option value="Técnico en Desarrollo de Software">Cocina Nacional e Internacional</option>
+                        <option value="Técnico en Desarrollo de Software">Auxiliar en Clinica Veterinaria</option>
+                        <option value="Técnico en Desarrollo de Software">Animación 2D y 3D</option>
+                        <option value="Técnico en Desarrollo de Software">Diseño Grafico</option>
+                        <option value="Técnico en Desarrollo de Software">Auxiliar Contable y Financiero</option>
+                        <option value="Técnico en Desarrollo de Software">Investigadores Criminalisticos y Judiciales</option>
+                        <option value="Técnico en Desarrollo de Software">Auxiliar en Enfermeria</option>
+                        <option value="Técnico en Desarrollo de Software">Seguridad Ocupacional</option>
+                        <option value="Técnico en Desarrollo de Software">Auxiliar en Productos Interactivos y Digitales</option>
+                        <option value="Técnico en Desarrollo de Software">Auxiliar de Talento Humano</option>
+                        <option value="Técnico en Desarrollo de Software">Diseño, Confección y Mercadeo de Modas</option>
+                        <option value="Técnico en Desarrollo de Software">Conocimientos Acádemicos en Inglés y Francés</option>
+                        <option value="Técnico en Desarrollo de Software">Operaciones de Software y Redes de Cómputo</option>
+                      </optgroup>
+                      <optgroup label="Especialización">
+                        <option value="Gerencia de Proyectos">Derecho Administrativo y Contractual</option>
+                        <option value="Seguridad de la Información">Gerencia de Empresas</option>
+                        <option value="Gerencia de Proyectos">Gerencia del Talento Humano</option>
+                        <option value="Seguridad de la Información">Derecho Penal y Criminalistica</option>
+                        <option value="Gerencia de Proyectos">Gerencia Financiera</option>
+                      </optgroup>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Fila 2: Modalidad, Jornada y Semestre */}
+                <div className="register-row register-row-3">
+                  <div className="register-field">
+                    <label className="register-label">Modalidad</label>
+                    <select className="register-input" name="modalidad" value={form.modalidad} onChange={handleChange}>
+                      <option value="Presencial">Presencial</option>
+                      <option value="Virtual">Virtual</option>
+                      <option value="Fin de semana">Fin de semana</option>
+                    </select>
                   </div>
                   <div className="register-field">
                     <label className="register-label">Jornada</label>
@@ -417,16 +487,31 @@ export default function RegisterPage() {
                   </div>
                   <div className="register-field">
                     <label className="register-label">Semestre</label>
-                    <select
-                      className="register-input"
-                      name="semestre"
-                      value={form.semestre}
+                    <select 
+                      className="register-input" 
+                      name="semestre" 
+                      value={form.semestre} 
                       onChange={e => setForm(prev => ({ ...prev, semestre: Number(e.target.value) }))}
                     >
                       {[1,2,3,4,5,6,7,8,9].map(s => (
                         <option key={s} value={s}>{s}</option>
                       ))}
                     </select>
+                  </div>
+                </div>
+
+                {/* Fila 3: Estado de egresado */}
+                <div className="register-row">
+                  <div className="register-field-checkbox">
+                    <label className="register-label-check">
+                      <input
+                        type="checkbox"
+                        name="esEgresado"
+                        checked={form.esEgresado}
+                        onChange={(e) => setForm(prev => ({ ...prev, esEgresado: e.target.checked }))}
+                      />
+                      ¿Ya eres egresado de la institución?
+                    </label>
                   </div>
                 </div>
               </div>

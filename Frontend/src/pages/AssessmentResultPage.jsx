@@ -148,10 +148,7 @@ export default function AssessmentResultPage() {
         <div className="result-grid">
           <ResultItem label="Presión arterial"    value={a.presionArterial} />
           <ResultItem label="Edad metabólica"     value={a.edadMetabolica} />
-          <ResultItem label="Fuerza de agarre"    value={`${a.fuerzaAgarre} kg`} />
           <ResultItem label="Resistencia musc."   value={a.resistenciaMuscular} />
-          <ResultItem label="RM estimado"         value={a.rmEstimado} />
-          <ResultItem label="PPM"                 value={a.ppm} />
           <ResultItem label="Actividad física"    value={a.nivelActividadFisica} />
           <ResultItem label="Objetivo"            value={a.objetivoUsuario} />
         </div>

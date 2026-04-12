@@ -44,13 +44,16 @@ export default function DashboardPage() {
 
   const userFields = [
     { key: 'Documento',       val: u.documento },
+    { key: 'Número de carnet', val: u.numeroCarnet },
     { key: 'Email',           val: u.email },
     { key: 'Teléfono',        val: u.telefono },
     { key: 'EPS',             val: u.eps },
     { key: 'Grupo sanguíneo', val: u.grupoSanguineo },
-    { key: 'Carrera',         val: u.carrera },
+    { key: 'Programa',        val: u.programa },
+    { key: 'Modalidad',       val: u.modalidad },
     { key: 'Jornada',         val: u.jornada },
     { key: 'Semestre',        val: u.semestre },
+    { key: 'Egresado',        val: u.esEgresado ? 'Sí' : 'No' },
   ]
 
   return (

@@ -44,10 +44,22 @@ const createUserSchema = z.object({
     .max(200, 'El contacto de emergencia debe tener máximo 200 caracteres.')
     .trim(),
 
-  carrera: z
-    .string({ required_error: 'La carrera es obligatoria.' })
-    .min(2, 'La carrera debe tener al menos 2 caracteres.')
-    .max(100, 'La carrera debe tener máximo 100 caracteres.')
+  programa: z
+    .string({ required_error: 'El programa es obligatorio.' })
+    .min(2, 'El programa debe tener al menos 2 caracteres.')
+    .max(100, 'El programa debe tener máximo 100 caracteres.')
+    .trim(),
+
+  numeroCarnet: z
+    .string({ required_error: 'El número de carnet es obligatorio.' })
+    .min(1, 'El número de carnet no puede estar vacío.')
+    .max(50, 'El número de carnet debe tener máximo 50 caracteres.')
+    .trim(),
+
+  modalidad: z
+    .string({ required_error: 'La modalidad es obligatoria.' })
+    .min(2, 'La modalidad debe tener al menos 2 caracteres.')
+    .max(50, 'La modalidad debe tener máximo 50 caracteres.')
     .trim(),
 
   jornada: z
@@ -59,6 +71,11 @@ const createUserSchema = z.object({
     .int('El semestre debe ser un número entero.')
     .min(1, 'El semestre mínimo es 1.')
     .max(9, 'El semestre máximo es 9.'),
+
+  esEgresado: z
+    .boolean({ required_error: 'El estado de egresado es obligatorio.' })
+    .optional()
+    .default(false),
 })
 
 export { createUserSchema }

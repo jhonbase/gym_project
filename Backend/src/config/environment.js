@@ -8,7 +8,7 @@ const config = {
   jwtSecret:      process.env.JWT_SECRET || 'cambiar-en-produccion',
   jwtExpiresIn:   process.env.JWT_EXPIRES_IN || '8h',
   // CORS — origins permitidos (separados por coma si son varios)
-  allowedOrigin:  process.env.ALLOWED_ORIGIN || 'http://localhost:5173',
+  allowedOrigin:  process.env.ALLOWED_ORIGIN || 'http://localhost:3000',
 }
 
 export default config

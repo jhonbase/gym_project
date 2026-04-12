@@ -43,8 +43,8 @@ export default function AssessmentFormPage() {
   const [form, setForm] = useState({
     peso: '', estatura: '', grasaCorporal: '', masaMuscular: '',
     imc: '', masaMagra: '', aguaCorporal: '', grasaVisceral: '',
-    presionArterial: '', edadMetabolica: '', fuerzaAgarre: '',
-    resistenciaMuscular: '', rmEstimado: '', ppm: '',
+    presionArterial: '', edadMetabolica: '',
+    resistenciaMuscular: '',
     nivelActividadFisica: 'sedentario', observacion: '', objetivoUsuario: '',
   })
 
@@ -76,10 +76,10 @@ export default function AssessmentFormPage() {
         grasaVisceral: Number(form.grasaVisceral),
         presionArterial: form.presionArterial,
         edadMetabolica: Number(form.edadMetabolica),
-        fuerzaAgarre: Number(form.fuerzaAgarre),
+        fuerzaAgarre: 1,
         resistenciaMuscular: form.resistenciaMuscular,
-        rmEstimado: Number(form.rmEstimado),
-        ppm: Number(form.ppm),
+        rmEstimado: 1,
+        ppm: 30,
         nivelActividadFisica: form.nivelActividadFisica,
         observacion: form.observacion || undefined,
         objetivoUsuario: form.objetivoUsuario,
@@ -145,9 +145,6 @@ export default function AssessmentFormPage() {
             <FormField label="Masa magra (kg)" error={fe.masaMagra}>
               <input className="ui-input" name="masaMagra" type="number" step="0.1" value={form.masaMagra} onChange={handleChange} required />
             </FormField>
-            <FormField label="Agua corporal (%)" error={fe.aguaCorporal}>
-              <input className="ui-input" name="aguaCorporal" type="number" step="0.1" value={form.aguaCorporal} onChange={handleChange} required />
-            </FormField>
             <FormField label="Grasa visceral (nivel)" error={fe.grasaVisceral}>
               <input className="ui-input" name="grasaVisceral" type="number" min="1" max="59" value={form.grasaVisceral} onChange={handleChange} required />
             </FormField>
@@ -163,17 +160,11 @@ export default function AssessmentFormPage() {
             <FormField label="Edad metabólica" error={fe.edadMetabolica}>
               <input className="ui-input" name="edadMetabolica" type="number" value={form.edadMetabolica} onChange={handleChange} required />
             </FormField>
-            <FormField label="Fuerza de agarre (kg)" error={fe.fuerzaAgarre}>
-              <input className="ui-input" name="fuerzaAgarre" type="number" step="0.1" value={form.fuerzaAgarre} onChange={handleChange} required />
+            <FormField label="Agua corporal (%)" error={fe.aguaCorporal}>
+              <input className="ui-input" name="aguaCorporal" type="number" step="0.1" value={form.aguaCorporal} onChange={handleChange} required />
             </FormField>
             <FormField label="Resistencia muscular" error={fe.resistenciaMuscular}>
               <input className="ui-input" name="resistenciaMuscular" value={form.resistenciaMuscular} onChange={handleChange} required />
-            </FormField>
-            <FormField label="RM estimado" error={fe.rmEstimado}>
-              <input className="ui-input" name="rmEstimado" type="number" step="0.1" value={form.rmEstimado} onChange={handleChange} required />
-            </FormField>
-            <FormField label="PPM (frec. cardíaca)" error={fe.ppm}>
-              <input className="ui-input" name="ppm" type="number" min="30" max="250" value={form.ppm} onChange={handleChange} required />
             </FormField>
           </div>
         </SectionCard>

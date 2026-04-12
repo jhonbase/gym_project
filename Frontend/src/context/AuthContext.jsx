@@ -14,10 +14,14 @@ import { createContext, useState, useEffect } from 'react'
 export const AuthContext = createContext(null)
 
 // Decodifica el payload de un JWT sin verificar la firma (solo para UI)
+// Soporta texto UTF-8 para nombres con acentos.
 function decodeToken(token) {
   try {
     const payload = token.split('.')[1]
-    return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')))
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const binary = atob(base64)
+    const bytes = Uint8Array.from(binary, char => char.charCodeAt(0))
+    return JSON.parse(new TextDecoder().decode(bytes))
   } catch {
     return null
   }

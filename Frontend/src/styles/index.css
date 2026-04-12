@@ -339,6 +339,28 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
 .register-btn-back:hover { border-color: var(--color-muted); color: var(--color-text); }
 .register-btn-back:disabled { opacity: 0.4; cursor: not-allowed; }
 
+.certificado-upload { position: relative; }
+.certificado-input { position: absolute; width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; z-index: -1; }
+.certificado-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.certificado-label:hover { border-color: var(--color-accent); color: var(--color-text); }
+.certificado-label.certificado-check { border-color: var(--color-success); color: var(--color-success); background: rgba(34, 197, 94, 0.1); }
+
 /* ─── Login Page ─────────────────────────────── */
 .login-page {
   min-height: 100vh;
@@ -547,6 +569,34 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
 .dashboard-user-item { display: flex; flex-direction: column; gap: 0.15rem; }
 .dashboard-user-key { font-size: 0.68rem; font-weight: 600; color: var(--color-dim); text-transform: uppercase; letter-spacing: 0.05em; }
 .dashboard-user-val { font-size: 0.875rem; color: var(--color-text); font-weight: 500; }
+.dashboard-user-val-link { font-size: 0.875rem; color: var(--color-accent); font-weight: 500; text-decoration: none; }
+.dashboard-user-val-link:hover { text-decoration: underline; }
+.dashboard-user-val-pending { font-size: 0.875rem; color: var(--color-warning); font-weight: 500; }
+.dashboard-certificado-pending { display: flex; align-items: center; gap: 0.5rem; }
+.dashboard-certificado-btn {
+  font-size: 0.7rem;
+  color: var(--color-muted);
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.dashboard-certificado-btn:hover { border-color: var(--color-accent); color: var(--color-text); }
+.dashboard-eps-cert { display: flex; align-items: center; gap: 0.5rem; }
+.dashboard-cert-icon { font-size: 0.875rem; color: var(--color-success); text-decoration: none; }
+.dashboard-cert-upload { 
+  font-size: 0.75rem; 
+  color: var(--color-muted); 
+  background: var(--color-surface2); 
+  border: 1px solid var(--color-border); 
+  padding: 0.15rem 0.4rem; 
+  border-radius: var(--radius-sm); 
+  cursor: pointer; 
+  transition: border-color 0.2s, color 0.2s;
+}
+.dashboard-cert-upload:hover { border-color: var(--color-accent); color: var(--color-text); }
 .dashboard-user-name { font-size: 1.25rem; font-weight: 800; color: var(--color-text); text-transform: uppercase; letter-spacing: -0.3px; margin-bottom: 1rem; }
 .assessments-section-header {
   display: flex;

@@ -3,12 +3,18 @@ import { z } from 'zod/v4'
 function validateRequest(schema) {
   return (req, res, next) => {
     try {
-      // schema.parse() lanza un error si los datos son inválidos
-      // Si son válidos, devuelve los datos "limpios" (trimmed, lowercase, etc.)
-      req.body = schema.parse(req.body)
+      const dataToValidate = { ...req.body }
+      
+      if (dataToValidate.semestre !== undefined) {
+        dataToValidate.semestre = parseInt(dataToValidate.semestre, 10)
+      }
+      if (dataToValidate.esEgresado !== undefined) {
+        dataToValidate.esEgresado = dataToValidate.esEgresado === 'true' || dataToValidate.esEgresado === true
+      }
+
+      req.body = schema.parse(dataToValidate)
       next()
     } catch (error) {
-      // Zod v4 usa 'issues' (no 'errors') y z.ZodError para la clase
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           success: false,

@@ -67,15 +67,21 @@ const createUserSchema = z.object({
     .trim(),
 
   semestre: z
+    .coerce
     .number({ required_error: 'El semestre es obligatorio.' })
     .int('El semestre debe ser un número entero.')
     .min(1, 'El semestre mínimo es 1.')
     .max(9, 'El semestre máximo es 9.'),
 
   esEgresado: z
+    .coerce
     .boolean({ required_error: 'El estado de egresado es obligatorio.' })
     .optional()
     .default(false),
+
+  certificadoEps: z
+    .string()
+    .optional(),
 })
 
 export { createUserSchema }

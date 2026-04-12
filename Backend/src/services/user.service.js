@@ -31,4 +31,11 @@ async function getUserById(id) {
   })
 }
 
-export { createUser, getAllUsers, getUserById }
+async function updateUser(id, data) {
+  return prisma.user.update({
+    where: { id },
+    data,
+  })
+}
+
+export { createUser, getAllUsers, getUserById, updateUser }

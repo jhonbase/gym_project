@@ -27,12 +27,29 @@ export default function RegisterPage() {
     numeroCarnet: '', programa: '', esEgresado: false, modalidad: 'Presencial', jornada: 'diurna', semestre: 1,
   })
 
+  const [certificadoEps, setCertificadoEps] = useState(null)
+
   function handleChange(e) {
     const { name, value, type } = e.target
     setForm(prev => ({
       ...prev,
       [name]: type === 'number' ? Number(value) : value,
     }))
+  }
+
+  function handleCertificadoChange(e) {
+    const file = e.target.files[0]
+    if (file) {
+      if (file.type !== 'application/pdf') {
+        setAlert({ type: 'error', message: 'Solo se permiten archivos PDF' })
+        return
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setAlert({ type: 'error', message: 'El archivo no puede exceder 5MB' })
+        return
+      }
+      setCertificadoEps(file)
+    }
   }
 
   function buildPayload() {
@@ -166,7 +183,18 @@ export default function RegisterPage() {
     setAlert(null)
     try {
       const payload = buildPayload()
-      const userRes = await apiClient.post('/users', payload)
+      
+      const formData = new FormData()
+      Object.keys(payload).forEach(key => {
+        formData.append(key, payload[key])
+      })
+      if (certificadoEps) {
+        formData.append('certificado', certificadoEps)
+      }
+      
+      const userRes = await apiClient.post('/users', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
       const user = userRes.data.data.user
 
       const fpRes = await apiClient.post('/fingerprint/enroll', { userId: user.id })
@@ -294,21 +322,41 @@ export default function RegisterPage() {
                   </div>
 
                   {/* Fila de Salud independiente para que se estiren los campos */}
-                  <div className="register-row">
+                  <div className="register-row register-row-3">
                     <div className="register-field">
                       <label className="register-label">EPS *</label>
-                      <select className="register-input" name="eps" value={form.eps} onChange={handleChange} required>
-                        <option value="">Selecciona tu EPS</option>
-                        <option value="Sura">Sura</option>
-                        <option value="Salud Total">Salud Total</option>
-                        <option value="Sanitas">Sanitas</option>
-                        <option value="Compensar">Compensar</option>
-                        <option value="Nueva EPS">Nueva EPS</option>
-                        <option value="Coosalud">Coosalud</option>
-                        <option value="Famisanar">Famisanar</option>
-                        <option value="Savia Salud">Savia Salud</option>
-                        <option value="Otro">Otro / Particular</option>
-                      </select>
+                      <input
+                        className="register-input"
+                        name="eps"
+                        value={form.eps}
+                        onChange={handleChange}
+                        placeholder="Nombre de EPS"
+                        required
+                      />
+                    </div>
+                    <div className="register-field">
+                      <label className="register-label">Certificado EPS</label>
+                      <div className="certificado-upload">
+                        <input
+                          type="file"
+                          id="certificadoEps"
+                          accept=".pdf"
+                          onChange={handleCertificadoChange}
+                          className="certificado-input"
+                        />
+                        <label htmlFor="certificadoEps" className={`certificado-label ${certificadoEps ? 'certificado-check' : ''}`}>
+                          {certificadoEps ? (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                          ) : (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                          )}
+                          {certificadoEps ? 'Subido' : 'Subir PDF'}
+                        </label>
+                      </div>
                     </div>
                     <div className="register-field">
                       <label className="register-label">Tipo de sangre</label>

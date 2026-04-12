@@ -3,18 +3,25 @@ import * as userController from '../controllers/user.controller.js'
 import { validateRequest } from '../middlewares/validateRequest.js'
 import { authenticate } from '../middlewares/authenticate.js'
 import { createUserSchema } from '../validations/user.validation.js'
+import upload from '../config/multer.js'
 
 const router = Router()
 
-// POST /api/users → Crear usuario (público — es el registro)
-router.post('/', validateRequest(createUserSchema), userController.createUser)
+router.post('/', upload.single('certificado'), validateRequest(createUserSchema), userController.createUser)
 
 // GET /api/users → Listar todos los usuarios (PROTEGIDO)
-// Sin authenticate: cualquiera puede ver datos médicos de todos los usuarios
 router.get('/', authenticate, userController.getUsers)
 
 // GET /api/users/:id → Obtener un usuario por ID (PROTEGIDO)
-// Sin authenticate: cualquiera puede ver datos médicos de cualquier usuario con su ID
 router.get('/:id', authenticate, userController.getUserById)
+
+// PUT /api/users/:id → Actualizar usuario (PROTEGIDO)
+router.put('/:id', authenticate, userController.updateUser)
+
+// POST /api/users/:id/certificado → Subir certificado de EPS (PROTEGIDO)
+router.post('/:id/certificado', authenticate, upload.single('certificado'), userController.uploadCertificado)
+
+// GET /api/users/:id/certificado → Descargar certificado de EPS (PROTEGIDO)
+router.get('/:id/certificado', authenticate, userController.downloadCertificado)
 
 export default router

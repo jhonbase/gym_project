@@ -25,6 +25,7 @@ model User {
   semestre           Int
   esEgresado         Boolean       @default(false)
   rol                String        @default("usuario") // "usuario" | "entrenador" | "admin"
+  certificadoEps     String?       // Ruta del certificado de EPS (PDF)
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 

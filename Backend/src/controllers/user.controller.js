@@ -1,5 +1,11 @@
 import * as userService from '../services/user.service.js'
 import * as response from '../utils/apiResponse.js'
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 /**
  * POST /api/users
@@ -7,10 +13,20 @@ import * as response from '../utils/apiResponse.js'
  */
 async function createUser(req, res, next) {
   try {
-    const user = await userService.createUser(req.body)
+    const data = req.body
+    
+    if (req.file) {
+      data.certificadoEps = `/uploads/certificados/${req.file.filename}`
+    }
+    
+    if (data.eps) {
+      data.eps = data.eps.trim().toLowerCase()
+    }
+    
+    const user = await userService.createUser(data)
     return response.success(res, { user }, 201)
   } catch (error) {
-    next(error) // → va al errorHandler global
+    next(error)
   }
 }
 
@@ -45,4 +61,66 @@ async function getUserById(req, res, next) {
   }
 }
 
-export { createUser, getUsers, getUserById }
+async function updateUser(req, res, next) {
+  try {
+    const data = req.body
+    
+    if (data.eps) {
+      data.eps = data.eps.trim().toLowerCase()
+    }
+    
+    const user = await userService.updateUser(req.params.id, data)
+
+    if (!user) {
+      return response.error(res, 'Usuario no encontrado.', 404)
+    }
+
+    return response.success(res, { user })
+  } catch (error) {
+    next(error)
+  }
+}
+
+async function uploadCertificado(req, res, next) {
+  try {
+    if (!req.file) {
+      return response.error(res, 'No se ha proporcionado ningún archivo.', 400)
+    }
+
+    const filePath = `/uploads/certificados/${req.file.filename}`
+    const user = await userService.updateUser(req.params.id, { certificadoEps: filePath })
+
+    return response.success(res, { 
+      user,
+      certificadoUrl: filePath 
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+async function downloadCertificado(req, res, next) {
+  try {
+    const user = await userService.getUserById(req.params.id)
+
+    if (!user) {
+      return response.error(res, 'Usuario no encontrado.', 404)
+    }
+
+    if (!user.certificadoEps) {
+      return response.error(res, 'El usuario no tiene certificado de EPS.', 404)
+    }
+
+    const absolutePath = path.join(__dirname, '../../', user.certificadoEps)
+
+    if (!fs.existsSync(absolutePath)) {
+      return response.error(res, 'El archivo no existe.', 404)
+    }
+
+    res.download(absolutePath, `certificado_eps_${user.nombre}.pdf`)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export { createUser, getUsers, getUserById, updateUser, uploadCertificado, downloadCertificado }

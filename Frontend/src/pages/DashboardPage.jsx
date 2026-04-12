@@ -30,6 +30,7 @@ export default function DashboardPage() {
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [alert, setAlert]   = useState(null)
+  const [uploadingCert, setUploadingCert] = useState(false)
 
   useEffect(() => {
     apiClient.get(`/users/${user.id}`)
@@ -37,6 +38,36 @@ export default function DashboardPage() {
       .catch(() => setAlert({ type: 'error', message: 'No se pudieron cargar tus datos. Revisa tu conexión.' }))
       .finally(() => setLoading(false))
   }, [user.id])
+
+  async function handleCertificadoUpload(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    
+    if (file.type !== 'application/pdf') {
+      setAlert({ type: 'error', message: 'Solo se permiten archivos PDF' })
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setAlert({ type: 'error', message: 'El archivo no puede exceder 5MB' })
+      return
+    }
+    
+    setUploadingCert(true)
+    const formData = new FormData()
+    formData.append('certificado', file)
+    
+    try {
+      const res = await apiClient.post(`/users/${user.id}/certificado`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      setUserData(prev => ({ ...prev, certificadoEps: res.data.data.certificadoUrl }))
+      setAlert({ type: 'success', message: 'Certificado subido exitosamente' })
+    } catch (err) {
+      setAlert({ type: 'error', message: 'Error al subir el certificado' })
+    } finally {
+      setUploadingCert(false)
+    }
+  }
 
   if (loading) return <LoadingSpinner />
 
@@ -48,6 +79,7 @@ export default function DashboardPage() {
     { key: 'Email',           val: u.email },
     { key: 'Teléfono',        val: u.telefono },
     { key: 'EPS',             val: u.eps },
+    { key: 'Certificado EPS', val: u.certificadoEps ? 'Subido' : 'Pendiente', isCertificado: true },
     { key: 'Grupo sanguíneo', val: u.grupoSanguineo },
     { key: 'Programa',        val: u.programa },
     { key: 'Modalidad',       val: u.modalidad },
@@ -72,10 +104,37 @@ export default function DashboardPage() {
       <SectionCard icon={<IconUser />} title="Información personal">
         <p className="dashboard-user-name">{u.nombre}</p>
         <div className="dashboard-user-grid">
-          {userFields.map(({ key, val }) => (
+          {userFields.map(({ key, val, isCertificado }) => (
             <div key={key} className="dashboard-user-item">
               <span className="dashboard-user-key">{key}</span>
-              <span className="dashboard-user-val">{val}</span>
+              {isCertificado ? (
+                u.certificadoEps ? (
+                  <a 
+                    href={`http://localhost:3000${u.certificadoEps}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="dashboard-user-val-link"
+                  >
+                    📄 Ver certificado
+                  </a>
+                ) : (
+                  <div className="dashboard-certificado-pending">
+                    <span className="dashboard-user-val-pending">Pendiente</span>
+                    <label className="dashboard-certificado-btn">
+                      {uploadingCert ? 'Subiendo...' : 'Subir PDF'}
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={handleCertificadoUpload}
+                        disabled={uploadingCert}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                  </div>
+                )
+              ) : (
+                <span className="dashboard-user-val">{val}</span>
+              )}
             </div>
           ))}
         </div>

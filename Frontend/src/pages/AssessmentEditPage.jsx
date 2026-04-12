@@ -91,6 +91,7 @@ export default function AssessmentEditPage() {
     presionArterial: '', edadMetabolica: '',
     resistenciaMuscular: '',
     nivelActividadFisica: 'sedentario', observacion: '', objetivoUsuario: '',
+    proximaFechaValoracion: '',
     tieneLesion: false, lesionDescripcion: '',
     anteOsteomuscular: false, anteOsteomuscularDesc: '',
     anteCardiovascular: false, anteCardiovascularDesc: '',
@@ -127,6 +128,7 @@ export default function AssessmentEditPage() {
           nivelActividadFisica: a.nivelActividadFisica || 'sedentario',
           observacion: a.observacion || '',
           objetivoUsuario: a.objetivoUsuario || '',
+          proximaFechaValoracion: a.proximaFechaValoracion ? new Date(a.proximaFechaValoracion).toISOString().split('T')[0] : '',
           tieneLesion: !!a.lesionDescripcion || !!a.lesionEvidencia,
           lesionDescripcion: a.lesionDescripcion || '',
           anteOsteomuscular: a.anteOsteomuscular || false,
@@ -210,6 +212,7 @@ export default function AssessmentEditPage() {
         nivelActividadFisica: form.nivelActividadFisica,
         observacion: form.observacion || null,
         objetivoUsuario: form.objetivoUsuario,
+        proximaFechaValoracion: form.proximaFechaValoracion ? new Date(form.proximaFechaValoracion).toISOString() : null,
         lesionDescripcion: form.tieneLesion && form.lesionDescripcion ? form.lesionDescripcion : null,
         anteOsteomuscular: form.anteOsteomuscular,
         anteOsteomuscularDesc: form.anteOsteomuscular ? (form.anteOsteomuscularDesc || null) : null,
@@ -437,6 +440,20 @@ export default function AssessmentEditPage() {
                 required 
                 style={{ resize: 'vertical', minHeight: '80px' }}
                 placeholder="¿Qué objetivos tiene el usuario?"
+              />
+            </div>
+            <div className="proxima-fecha-wrapper">
+              <label className="proxima-fecha-label">
+                <span className="proxima-fecha-icon">📅</span>
+                Próxima fecha de valoración
+              </label>
+              <input 
+                type="date" 
+                className="ui-input proxima-fecha-input"
+                name="proximaFechaValoracion"
+                value={form.proximaFechaValoracion}
+                onChange={handleChange}
+                min={new Date().toISOString().split('T')[0]}
               />
             </div>
             <FormField label="Observaciones (opcional)" error={fe.observacion}>

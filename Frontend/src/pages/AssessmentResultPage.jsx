@@ -158,8 +158,8 @@ export default function AssessmentResultPage() {
           <ResultItem label="IMC"            value={a.imc} />
           <ResultItem label="Grasa corporal" value={`${a.grasaCorporal}%`} />
           <ResultItem label="Masa muscular"  value={`${a.masaMuscular} kg`} />
-          <ResultItem label="Masa magra"     value={`${a.masaMagra} kg`} />
-          <ResultItem label="Agua corporal"  value={`${a.aguaCorporal}%`} />
+          {a.masaMagra && <ResultItem label="Masa magra" value={`${a.masaMagra} kg`} />}
+          {a.aguaCorporal && <ResultItem label="Agua corporal" value={`${a.aguaCorporal}%`} />}
           <ResultItem label="Grasa visceral" value={`Nivel ${a.grasaVisceral}`} />
         </div>
       </SectionCard>
@@ -266,6 +266,23 @@ export default function AssessmentResultPage() {
           </div>
         )}
       </SectionCard>
+
+      {/* Próxima fecha de valoración */}
+      {a.proximaFechaValoracion && (
+        <SectionCard icon={<span>📅</span>} title="Próxima valoración" className="proxima-fecha-result">
+          <div className="proxima-fecha-display">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span className="proxima-fecha-icon">📅</span>
+              <span className="proxima-fecha-date">
+                {new Date(a.proximaFechaValoracion).toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </span>
+            </div>
+            {new Date(a.proximaFechaValoracion) < new Date() && (
+              <span className="proxima-fecha-overdue">⚠️ Vencida</span>
+            )}
+          </div>
+        </SectionCard>
+      )}
     </div>
   )
 }

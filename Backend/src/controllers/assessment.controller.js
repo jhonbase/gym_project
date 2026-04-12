@@ -230,5 +230,26 @@ async function updateAssessment(req, res, next) {
   }
 }
 
+/**
+ * DELETE /api/assessments/:id
+ * Elimina una valoración.
+ */
+async function deleteAssessment(req, res, next) {
+  try {
+    const { id } = req.params
+    
+    const assessment = await assessmentService.getById(id)
+    if (!assessment) {
+      return response.error(res, 'Valoración no encontrada.', 404)
+    }
+    
+    await assessmentService.deleteAssessment(id)
+    
+    return response.success(res, { message: 'Valoración eliminada correctamente.' })
+  } catch (error) {
+    next(error)
+  }
+}
 
-export { createAssessment, getAssessment, getByUser, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, updateAssessment }
+
+export { createAssessment, getAssessment, getByUser, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, updateAssessment, deleteAssessment }

@@ -95,6 +95,7 @@ model Assessment {
   nivelActividadFisica String   
   observacion          String?  
   objetivoUsuario      String   
+  proximaFechaValoracion DateTime? // Fecha programada para la próxima valoración
 
   // Análisis IA
   analisisIA           String?  

@@ -31,4 +31,7 @@ router.post('/:id/lesion', authenticate, uploadLesion.single('evidencia'), asses
 // GET /api/assessments/:id/lesion → Descargar evidencia de lesión
 router.get('/:id/lesion', authenticate, assessmentController.getLesion)
 
+// DELETE /api/assessments/:id → Eliminar valoración
+router.delete('/:id', authenticate, assessmentController.deleteAssessment)
+
 export default router

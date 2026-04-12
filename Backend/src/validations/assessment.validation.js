@@ -32,6 +32,7 @@ const baseSchema = {
   nivelActividadFisica: z.string().optional(),
   observacion: z.string().optional().nullable(),
   objetivoUsuario: z.string().min(1).optional(),
+  proximaFechaValoracion: z.string().datetime().optional().nullable(),
 }
 
 const createAssessmentSchema = z.object({

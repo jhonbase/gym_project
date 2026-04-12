@@ -37,6 +37,8 @@ export default function StudentProfilePage() {
   const [student, setStudent] = useState(null)
   const [loading, setLoading] = useState(true)
   const [alert, setAlert] = useState(null)
+  const [uploadingCert, setUploadingCert] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
 
   useEffect(() => {
     apiClient.get(`/users/${id}`)
@@ -44,6 +46,56 @@ export default function StudentProfilePage() {
       .catch(() => setAlert({ type: 'error', message: 'No se pudo cargar el estudiante.' }))
       .finally(() => setLoading(false))
   }, [id])
+
+  async function handleCertificadoUpload(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    
+    if (file.type !== 'application/pdf') {
+      setAlert({ type: 'error', message: 'Solo se permiten archivos PDF' })
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setAlert({ type: 'error', message: 'El archivo no puede exceder 5MB' })
+      return
+    }
+    
+    setUploadingCert(true)
+    const formData = new FormData()
+    formData.append('certificado', file)
+    
+    try {
+      const res = await apiClient.post(`/users/${id}/certificado`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      setStudent(prev => ({ ...prev, certificadoEps: res.data.data.certificadoUrl }))
+      setAlert({ type: 'success', message: 'Certificado subido exitosamente' })
+    } catch (err) {
+      setAlert({ type: 'error', message: 'Error al subir el certificado' })
+    } finally {
+      setUploadingCert(false)
+    }
+  }
+
+  async function handleDeleteAssessment(assessmentId, assessmentDate) {
+    if (!confirm(`¿Estás seguro de eliminar la valoración del ${assessmentDate}? Esta acción no se puede deshacer.`)) {
+      return
+    }
+    
+    setDeletingId(assessmentId)
+    try {
+      await apiClient.delete(`/assessments/${assessmentId}`)
+      setStudent(prev => ({
+        ...prev,
+        assessments: prev.assessments.filter(a => a.id !== assessmentId)
+      }))
+      setAlert({ type: 'success', message: 'Valoración eliminada correctamente.' })
+    } catch (err) {
+      setAlert({ type: 'error', message: 'Error al eliminar la valoración.' })
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   if (loading) return <LoadingSpinner />
   if (!student) return (
@@ -59,7 +111,7 @@ export default function StudentProfilePage() {
     { key: 'Email',           val: student.email },
     { key: 'Teléfono',        val: student.telefono },
     { key: 'EPS',             val: student.eps },
-    { key: 'Certificado EPS', val: student.certificadoEps ? 'Subido' : 'Pendiente', isCertificado: true },
+    { key: 'Certificado EPS', val: student.certificadoEps ? 'Subido' : 'Pendiente', isCertificado: true, canUpload: true },
     { key: 'Grupo sanguíneo', val: student.grupoSanguineo },
     { key: 'Programa',        val: student.programa },
     { key: 'Modalidad',       val: student.modalidad },
@@ -85,7 +137,7 @@ export default function StudentProfilePage() {
       {/* Información del estudiante */}
       <SectionCard icon={<IconUser />} title={`${student.nombre}`}>
         <div className="dashboard-user-grid">
-          {userFields.map(({ key, val, isCertificado }) => (
+          {userFields.map(({ key, val, isCertificado, canUpload }) => (
             <div key={key} className="dashboard-user-item">
               <span className="dashboard-user-key">{key}</span>
               {isCertificado ? (
@@ -98,6 +150,20 @@ export default function StudentProfilePage() {
                   >
                     📄 Ver certificado
                   </a>
+                ) : canUpload ? (
+                  <div className="dashboard-certificado-pending">
+                    <span className="dashboard-user-val-pending">Pendiente</span>
+                    <label className="dashboard-certificado-btn">
+                      {uploadingCert ? 'Subiendo...' : 'Subir PDF'}
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={handleCertificadoUpload}
+                        disabled={uploadingCert}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                  </div>
                 ) : (
                   <span className="dashboard-user-val-pending">Pendiente</span>
                 )
@@ -108,19 +174,6 @@ export default function StudentProfilePage() {
           ))}
         </div>
       </SectionCard>
-
-      {/* Huellas registradas */}
-      {student.fingerprints && student.fingerprints.length > 0 && (
-        <SectionCard icon={<span>👆</span>} title="Huellas registradas">
-          <div className="fingerprints-list">
-            {student.fingerprints.map((fp, idx) => (
-              <span key={fp.id} className="fingerprint-tag">
-                Dedo {idx + 1} ✓
-              </span>
-            ))}
-          </div>
-        </SectionCard>
-      )}
 
       {/* Valoraciones */}
       <SectionCard icon={<IconClipboard />} title="Valoraciones">
@@ -133,13 +186,33 @@ export default function StudentProfilePage() {
         {student.assessments?.length > 0 ? (
           <div className="assessments-list">
             {student.assessments.map(a => (
-              <Link to={`/assessment/${a.id}`} key={a.id} className="assessment-row">
-                <span className="assessment-row-date">
-                  {new Date(a.createdAt).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' })}
-                </span>
-                <span className="assessment-row-data">IMC: {a.imc} · Peso: {a.peso} kg</span>
-                <span className={badgeClass(a.estadoValoracion)}>{a.estadoValoracion}</span>
-              </Link>
+              <div key={a.id} className="assessment-row-wrapper">
+                <Link to={`/assessment/${a.id}`} className="assessment-row">
+                  <div className="assessment-row-left">
+                    <span className="assessment-row-date">
+                      {new Date(a.createdAt).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </span>
+                    <span className="assessment-row-state">{a.estadoValoracion}</span>
+                  </div>
+                  {a.proximaFechaValoracion && (
+                    <span className={`assessment-row-proxima ${new Date(a.proximaFechaValoracion) < new Date() ? 'assessment-row-proxima-overdue' : ''}`}>
+                      📅 Próxima: {new Date(a.proximaFechaValoracion).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })}
+                    </span>
+                  )}
+                </Link>
+                <button 
+                  className="assessment-delete-btn"
+                  onClick={() => handleDeleteAssessment(a.id, new Date(a.createdAt).toLocaleDateString('es-CO'))}
+                  disabled={deletingId === a.id}
+                  title="Eliminar valoración"
+                >
+                  {deletingId === a.id ? '...' : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
             ))}
           </div>
         ) : (

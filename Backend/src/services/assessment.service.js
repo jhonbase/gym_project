@@ -61,4 +61,13 @@ async function update(id, data) {
   })
 }
 
-export { create, getById, getByUserId, updateAnalysis, updateLesion, update }
+/**
+ * Elimina una valoración.
+ */
+async function deleteAssessment(id) {
+  return prisma.assessment.delete({
+    where: { id },
+  })
+}
+
+export { create, getById, getByUserId, updateAnalysis, updateLesion, update, deleteAssessment }

@@ -227,7 +227,23 @@ export default function StudentsPage() {
     s.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.documento?.includes(searchTerm) ||
     s.numeroCarnet?.includes(searchTerm)
-  )
+  ).sort((a, b) => {
+    const proxA = getProximaValoracion(a)
+    const proxB = getProximaValoracion(b)
+    if (!proxA && !proxB) return 0
+    if (!proxA) return 1
+    if (!proxB) return -1
+    return new Date(proxA.proximaFechaValoracion) - new Date(proxB.proximaFechaValoracion)
+  })
+
+  function getProximaValoracion(student) {
+    if (!student.assessments?.length) return null
+    const now = new Date()
+    const upcoming = student.assessments
+      .filter(a => a.proximaFechaValoracion && new Date(a.proximaFechaValoracion) >= now)
+      .sort((a, b) => new Date(a.proximaFechaValoracion) - new Date(b.proximaFechaValoracion))
+    return upcoming[0] || null
+  }
 
   if (loading && students.length === 0) return <LoadingSpinner />
 
@@ -266,25 +282,30 @@ export default function StudentsPage() {
                   </div>
                   <div className="student-info">
                     <span className="student-name">{student.nombre}</span>
-                    <span className="student-meta">{student.programa} · {student.jornada}</span>
-                    <span className="student-meta">{student.numeroCarnet} · {student.documento}</span>
+                    <span className="student-meta">{student.programa} · {student.documento}</span>
+                    {getProximaValoracion(student) && (
+                      <span className="student-proxima">
+                        📅 Próxima valoración: {new Date(getProximaValoracion(student).proximaFechaValoracion).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="student-stats">
                   <span className="stat-value">{student.assessments?.length || 0}</span>
                   <span className="stat-label">valoraciones</span>
                 </div>
-                <svg className="student-row-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
               </Link>
               <button 
                 className="student-delete-btn"
                 onClick={() => handleDeleteStudent(student.id, student.nombre)}
-                disabled={deletingId === student.id}
-                title="Eliminar estudiante"
-              >
-                {deletingId === student.id ? '...' : '×'}
+                  disabled={deletingId === student.id}
+                  title="Eliminar estudiante"
+                >
+                  {deletingId === student.id ? '...' : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  )}
               </button>
             </div>
           ))}

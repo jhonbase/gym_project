@@ -93,6 +93,7 @@ export default function AssessmentFormPage() {
     presionArterial: '', edadMetabolica: '',
     resistenciaMuscular: '',
     nivelActividadFisica: 'sedentario', observacion: '', objetivoUsuario: '',
+    proximaFechaValoracion: '',
     tieneLesion: false, lesionDescripcion: '',
     anteOsteomuscular: false, anteOsteomuscularDesc: '',
     anteCardiovascular: false, anteCardiovascularDesc: '',
@@ -169,6 +170,7 @@ export default function AssessmentFormPage() {
         nivelActividadFisica: form.nivelActividadFisica,
         observacion: form.observacion || undefined,
         objetivoUsuario: form.objetivoUsuario,
+        proximaFechaValoracion: form.proximaFechaValoracion ? new Date(form.proximaFechaValoracion).toISOString() : undefined,
         lesionDescripcion: form.tieneLesion ? (form.lesionDescripcion || undefined) : undefined,
         anteOsteomuscular: form.anteOsteomuscular,
         anteOsteomuscularDesc: form.anteOsteomuscular ? form.anteOsteomuscularDesc || undefined : undefined,
@@ -405,6 +407,23 @@ export default function AssessmentFormPage() {
             <FormField label="Observaciones (opcional)" error={fe.observacion}>
               <textarea className="ui-input" name="observacion" value={form.observacion} onChange={handleChange} rows="3" style={{ resize: 'vertical', minHeight: '80px' }} />
             </FormField>
+          </div>
+        </SectionCard>
+
+        {/* Programación de próxima valoración */}
+        <SectionCard icon={<span>📅</span>} title="Próxima valoración">
+          <div className="proxima-fecha-wrapper" style={{ width: '100%' }}>
+            <label className="proxima-fecha-label">Fecha programada</label>
+            <input 
+              type="date" 
+              className="ui-input proxima-fecha-input"
+              name="proximaFechaValoracion"
+              value={form.proximaFechaValoracion}
+              onChange={handleChange}
+              min={new Date().toISOString().split('T')[0]}
+              style={{ width: '100%' }}
+            />
+            <span className="proxima-fecha-hint">Programar recordatorio para próxima valoración</span>
           </div>
         </SectionCard>
 

@@ -840,6 +840,11 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   box-shadow: 0 0 10px rgba(245, 158, 11, 0.3) !important;
 }
 
+/* ─── Objetivo en resultado (estilo trofeo) ─── */
+.objetivo-section {
+  border-left-color: #F59E0B !important;
+}
+
 /* ─── Resultado de antecedentes ───────────────── */
 .antecedentes-result {
   display: flex;

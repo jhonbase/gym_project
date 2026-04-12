@@ -150,14 +150,14 @@ export default function AssessmentFormPage() {
         userId: user.id,
         peso: Number(form.peso),
         estatura: Number(form.estatura),
-        grasaCorporal: Number(form.grasaCorporal),
-        masaMuscular: Number(form.masaMuscular),
-        imc: Number(form.imc),
-        masaMagra: Number(form.masaMagra),
-        aguaCorporal: Number(form.aguaCorporal),
-        grasaVisceral: Number(form.grasaVisceral),
+        grasaCorporal: form.grasaCorporal ? Number(form.grasaCorporal) : undefined,
+        masaMuscular: form.masaMuscular ? Number(form.masaMuscular) : undefined,
+        imc: form.imc ? Number(form.imc) : undefined,
+        masaMagra: form.masaMagra ? Number(form.masaMagra) : undefined,
+        aguaCorporal: form.aguaCorporal ? Number(form.aguaCorporal) : undefined,
+        grasaVisceral: form.grasaVisceral ? Number(form.grasaVisceral) : undefined,
         presionArterial: form.presionArterial,
-        edadMetabolica: Number(form.edadMetabolica),
+        edadMetabolica: form.edadMetabolica ? Number(form.edadMetabolica) : undefined,
         fuerzaAgarre: 1,
         resistenciaMuscular: form.resistenciaMuscular,
         rmEstimado: 1,
@@ -256,7 +256,7 @@ export default function AssessmentFormPage() {
               <input className="ui-input" name="imc" type="number" step="0.1" value={form.imc} onChange={handleChange} required />
             </FormField>
             <FormField label="Masa magra (kg)" error={fe.masaMagra}>
-              <input className="ui-input" name="masaMagra" type="number" step="0.1" value={form.masaMagra} onChange={handleChange} required />
+              <input className="ui-input" name="masaMagra" type="number" step="0.1" value={form.masaMagra} onChange={handleChange} />
             </FormField>
             <FormField label="Grasa visceral (nivel)" error={fe.grasaVisceral}>
               <input className="ui-input" name="grasaVisceral" type="number" min="1" max="59" value={form.grasaVisceral} onChange={handleChange} required />
@@ -274,7 +274,7 @@ export default function AssessmentFormPage() {
               <input className="ui-input" name="edadMetabolica" type="number" value={form.edadMetabolica} onChange={handleChange} required />
             </FormField>
             <FormField label="Agua corporal (%)" error={fe.aguaCorporal}>
-              <input className="ui-input" name="aguaCorporal" type="number" step="0.1" value={form.aguaCorporal} onChange={handleChange} required />
+              <input className="ui-input" name="aguaCorporal" type="number" step="0.1" value={form.aguaCorporal} onChange={handleChange} />
             </FormField>
             <FormField label="Resistencia muscular" error={fe.resistenciaMuscular}>
               <input className="ui-input" name="resistenciaMuscular" value={form.resistenciaMuscular} onChange={handleChange} required />

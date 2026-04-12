@@ -60,8 +60,8 @@ model Assessment {
   grasaCorporal        Float    
   masaMuscular         Float    
   imc                  Float    
-  masaMagra            Float    
-  aguaCorporal         Float    
+  masaMagra            Float?    
+  aguaCorporal         Float?    
   grasaVisceral        Int      
 
   // Datos clínicos

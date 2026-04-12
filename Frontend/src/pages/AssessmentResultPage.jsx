@@ -16,6 +16,11 @@ const IconClinical = () => (
     <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
   </svg>
 )
+const IconContext = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h8"/>
+  </svg>
+)
 const IconAI = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
@@ -165,14 +170,12 @@ export default function AssessmentResultPage() {
           <ResultItem label="Presión arterial"    value={a.presionArterial} />
           <ResultItem label="Edad metabólica"     value={a.edadMetabolica} />
           <ResultItem label="Resistencia musc."   value={a.resistenciaMuscular} />
-          <ResultItem label="Actividad física"    value={a.nivelActividadFisica} />
-          <ResultItem label="Objetivo"            value={a.objetivoUsuario} />
         </div>
-        {a.observacion && (
-          <p className="result-obs">
-            <strong style={{ color: 'var(--color-muted)' }}>Observaciones: </strong>{a.observacion}
-          </p>
-        )}
+      </SectionCard>
+
+      {/* Contexto del usuario */}
+      <SectionCard icon={<IconContext />} title="Contexto del usuario">
+        <ResultItem label="Nivel de actividad" value={a.nivelActividadFisica} />
       </SectionCard>
 
       {/* Evidencia de lesión */}
@@ -212,6 +215,24 @@ export default function AssessmentResultPage() {
             {a.antePsiquiatrico && <ResultItem label="Psiquiátrico" value={a.antePsiquiatricoDesc || 'Sí'} />}
             {a.antePsicologico && <ResultItem label="Psicológico" value={a.antePsicologicoDesc || 'Sí'} />}
           </div>
+        </SectionCard>
+      )}
+
+      {/* Objetivo del usuario */}
+      {a.objetivoUsuario && (
+        <SectionCard 
+          icon={<span style={{ fontSize: '1.2rem' }}>🏆</span>} 
+          title="Objetivo del usuario"
+          className="objetivo-section"
+        >
+          <div className="result-objetivo">
+            <div className="result-objetivo-value">{a.objetivoUsuario}</div>
+          </div>
+          {a.observacion && (
+            <p className="result-obs">
+              <strong style={{ color: 'var(--color-muted)' }}>Observaciones: </strong>{a.observacion}
+            </p>
+          )}
         </SectionCard>
       )}
 

@@ -4,169 +4,193 @@ import { useAuth } from '../hooks/useAuth.js'
 import apiClient from '../api/client.js'
 import LoadingSpinner from '../components/LoadingSpinner.jsx'
 import AlertMessage from '../components/AlertMessage.jsx'
-import SectionCard from '../components/SectionCard.jsx'
 
-const IconUser = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-  </svg>
-)
-
-const IconClipboard = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-  </svg>
-)
-
-function badgeClass(estado) {
-  if (estado === 'pendiente') return 'ui-badge ui-badge-pending'
-  if (estado === 'analizada')  return 'ui-badge ui-badge-analyzed'
-  return 'ui-badge ui-badge-done'
+function StatCard({ icon, label, value, subtext, color }) {
+  return (
+    <div className="dashboard-stat-card" style={{ '--stat-color': color }}>
+      <div className="dashboard-stat-icon">{icon}</div>
+      <div className="dashboard-stat-content">
+        <span className="dashboard-stat-value">{value}</span>
+        <span className="dashboard-stat-label">{label}</span>
+        {subtext && <span className="dashboard-stat-subtext">{subtext}</span>}
+      </div>
+    </div>
+  )
 }
 
 export default function DashboardPage() {
   const { user } = useAuth()
-  const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [alert, setAlert]   = useState(null)
-  const [uploadingCert, setUploadingCert] = useState(false)
+  const [alert, setAlert] = useState(null)
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    thisMonth: 0,
+    pendingPlans: 0,
+    upcomingDates: 0
+  })
+  const [recentStudents, setRecentStudents] = useState([])
+  const [pendingActions, setPendingActions] = useState([])
 
   useEffect(() => {
-    apiClient.get(`/users/${user.id}`)
-      .then(res => setUserData(res.data.data.user))
-      .catch(() => setAlert({ type: 'error', message: 'No se pudieron cargar tus datos. Revisa tu conexión.' }))
-      .finally(() => setLoading(false))
-  }, [user.id])
-
-  async function handleCertificadoUpload(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    
-    if (file.type !== 'application/pdf') {
-      setAlert({ type: 'error', message: 'Solo se permiten archivos PDF' })
-      return
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setAlert({ type: 'error', message: 'El archivo no puede exceder 5MB' })
-      return
-    }
-    
-    setUploadingCert(true)
-    const formData = new FormData()
-    formData.append('certificado', file)
-    
-    try {
-      const res = await apiClient.post(`/users/${user.id}/certificado`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+    Promise.all([
+      apiClient.get('/users?rol=usuario'),
+    ])
+    .then(([usersRes]) => {
+      const students = usersRes.data.data.users || []
+      
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      
+      // Calcular stats de estudiantes
+      setStats({
+        totalStudents: students.length,
+        thisMonth: 0, // Sin endpoint de valoraciones globales
+        pendingPlans: 0,
+        upcomingDates: 0
       })
-      setUserData(prev => ({ ...prev, certificadoEps: res.data.data.certificadoUrl }))
-      setAlert({ type: 'success', message: 'Certificado subido exitosamente' })
-    } catch (err) {
-      setAlert({ type: 'error', message: 'Error al subir el certificado' })
-    } finally {
-      setUploadingCert(false)
-    }
-  }
+      
+      // Estudiantes recientes
+      const recent = students.slice(0, 6).map(s => ({
+        ...s,
+        lastAssessment: null
+      }))
+      setRecentStudents(recent)
+      setPendingActions([])
+    })
+    .catch(() => {
+      setAlert({ type: 'error', message: 'Error al cargar datos del dashboard' })
+    })
+    .finally(() => setLoading(false))
+  }, [])
 
   if (loading) return <LoadingSpinner />
 
-  const u = userData || user
-
-  const userFields = [
-    { key: 'Documento',       val: u.documento },
-    { key: 'Número de carnet', val: u.numeroCarnet },
-    { key: 'Email',           val: u.email },
-    { key: 'Teléfono',        val: u.telefono },
-    { key: 'EPS',             val: u.eps },
-    { key: 'Certificado EPS', val: u.certificadoEps ? 'Subido' : 'Pendiente', isCertificado: true },
-    { key: 'Grupo sanguíneo', val: u.grupoSanguineo },
-    { key: 'Programa',        val: u.programa },
-    { key: 'Modalidad',       val: u.modalidad },
-    { key: 'Jornada',         val: u.jornada },
-    { key: 'Semestre',        val: u.semestre },
-    { key: 'Egresado',        val: u.esEgresado ? 'Sí' : 'No' },
-  ]
-
   return (
     <div className="dashboard-page">
-      <div className="dashboard-page-header">
-        <span className="dashboard-page-title">Mi perfil</span>
+      <AlertMessage {...alert} onClose={() => setAlert(null)} />
+
+      {/* Header */}
+      <div className="dashboard-header">
+        <div>
+          <h1 className="dashboard-greeting">Hola, {user.nombre.split(' ')[0]} 👋</h1>
+          <p className="dashboard-subtitle">Bienvenido al panel de entrenador</p>
+        </div>
         <Link to="/assessment/new" className="ui-btn-primary">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
           Nueva Valoración
         </Link>
       </div>
 
-      <AlertMessage {...alert} onClose={() => setAlert(null)} />
+      {/* Stats Grid */}
+      <div className="dashboard-stats-grid">
+        <StatCard 
+          icon={<span>👥</span>} 
+          label="Estudiantes" 
+          value={stats.totalStudents} 
+          color="#3b82f6"
+        />
+        <StatCard 
+          icon={<span>📊</span>} 
+          label="Este mes" 
+          value={stats.thisMonth} 
+          subtext="valoraciones"
+          color="#8b5cf6"
+        />
+        <StatCard 
+          icon={<span>⚠️</span>} 
+          label="Pendientes" 
+          value={stats.pendingPlans} 
+          subtext="sin plan"
+          color="#f59e0b"
+        />
+        <StatCard 
+          icon={<span>📅</span>} 
+          label="Próximas" 
+          value={stats.upcomingDates} 
+          subtext="valoraciones"
+          color="#10b981"
+        />
+      </div>
 
-      {/* Información del usuario */}
-      <SectionCard icon={<IconUser />} title="Información personal">
-        <p className="dashboard-user-name">{u.nombre}</p>
-        <div className="dashboard-user-grid">
-          {userFields.map(({ key, val, isCertificado }) => (
-            <div key={key} className="dashboard-user-item">
-              <span className="dashboard-user-key">{key}</span>
-              {isCertificado ? (
-                u.certificadoEps ? (
-                  <a 
-                    href={`http://localhost:3000${u.certificadoEps}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="dashboard-user-val-link"
-                  >
-                    📄 Ver certificado
-                  </a>
-                ) : (
-                  <div className="dashboard-certificado-pending">
-                    <span className="dashboard-user-val-pending">Pendiente</span>
-                    <label className="dashboard-certificado-btn">
-                      {uploadingCert ? 'Subiendo...' : 'Subir PDF'}
-                      <input
-                        type="file"
-                        accept=".pdf"
-                        onChange={handleCertificadoUpload}
-                        disabled={uploadingCert}
-                        style={{ display: 'none' }}
-                      />
-                    </label>
+      {/* Content Grid */}
+      <div className="dashboard-content-grid">
+        {/* Estudiantes Recientes */}
+        <div className="dashboard-section">
+          <div className="dashboard-section-header">
+            <h2 className="dashboard-section-title">Estudiantes Recientes</h2>
+            <Link to="/students" className="dashboard-section-link">Ver todos →</Link>
+          </div>
+          <div className="dashboard-students-list">
+            {recentStudents.length > 0 ? (
+              recentStudents.map(s => (
+                <Link 
+                  key={s.id} 
+                  to={`/student/${s.id}`} 
+                  className="dashboard-student-card"
+                >
+                  <div className="dashboard-student-avatar">
+                    {s.nombre?.charAt(0).toUpperCase() || '?'}
                   </div>
-                )
-              ) : (
-                <span className="dashboard-user-val">{val}</span>
-              )}
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-
-      {/* Valoraciones */}
-      <SectionCard icon={<IconClipboard />} title="Mis valoraciones">
-        <div className="assessments-section-header">
-          <span className="assessments-section-title">
-            {userData?.assessments?.length ?? 0} valoración(es) registrada(s)
-          </span>
-        </div>
-
-        {userData?.assessments?.length > 0 ? (
-          <div className="assessments-list">
-            {userData.assessments.map(a => (
-              <Link to={`/assessment/${a.id}`} key={a.id} className="assessment-row">
-                <span className="assessment-row-date">
-                  {new Date(a.createdAt).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' })}
-                </span>
-                <span className="assessment-row-data">IMC: {a.imc} · Peso: {a.peso} kg</span>
-                <span className={badgeClass(a.estadoValoracion)}>{a.estadoValoracion}</span>
-              </Link>
-            ))}
+                  <div className="dashboard-student-info">
+                    <span className="dashboard-student-name">{s.nombre}</span>
+                    <span className="dashboard-student-meta">
+                      {s.lastAssessment 
+                        ? `Última: ${new Date(s.lastAssessment.createdAt).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })}`
+                        : 'Sin valoraciones'}
+                    </span>
+                  </div>
+                  <span className="dashboard-student-arrow">→</span>
+                </Link>
+              ))
+            ) : (
+              <p className="dashboard-empty">No hay estudiantes registrados</p>
+            )}
           </div>
-        ) : (
-          <div className="empty-state">
-            <p>No hay valoraciones aún.</p>
-            <p style={{ marginTop: '0.35rem', color: 'var(--color-dim)' }}>Crea tu primera valoración física.</p>
+        </div>
+
+        {/* Acciones Pendientes */}
+        <div className="dashboard-section">
+          <div className="dashboard-section-header">
+            <h2 className="dashboard-section-title">Acciones Pendientes</h2>
           </div>
-        )}
-      </SectionCard>
+          <div className="dashboard-actions-list">
+            {pendingActions.length > 0 ? (
+              pendingActions.map((action, i) => (
+                <Link 
+                  key={i} 
+                  to={`/assessment/${action.id}`}
+                  className={`dashboard-action-card dashboard-action-${action.type}`}
+                >
+                  <div className="dashboard-action-icon">
+                    {action.type === 'plan' ? '⚠️' : '📅'}
+                  </div>
+                  <div className="dashboard-action-content">
+                    <span className="dashboard-action-student">{action.student}</span>
+                    <span className="dashboard-action-message">{action.message}</span>
+                  </div>
+                  <span className="dashboard-action-arrow">→</span>
+                </Link>
+              ))
+            ) : (
+              <p className="dashboard-empty">No hay acciones pendientes ✅</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="dashboard-quick-actions">
+        <Link to="/students" className="dashboard-quick-action">
+          <span className="dashboard-quick-icon">📋</span>
+          <span>Ver Estudiantes</span>
+        </Link>
+        <Link to="/assessment/new" className="dashboard-quick-action">
+          <span className="dashboard-quick-icon">📝</span>
+          <span>Nueva Valoración</span>
+        </Link>
+      </div>
     </div>
   )
 }

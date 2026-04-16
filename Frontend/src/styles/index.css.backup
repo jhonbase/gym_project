@@ -1,24 +1,27 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
 
-:root {
-  --color-bg: #0B0B0B;
-  --color-surface: #161616;
-  --color-surface2: #1C1C1C;
-  --color-border: #2A2A2A;
-  --color-accent: #E10600;
-  --color-accent-h: #C40500;
-  --color-text: #FFFFFF;
-  --color-muted: #BFBFBF;
-  --color-dim: #555555;
-  --color-success: #22c55e;
-  --color-warning: #f97316;
-  --color-error: #ef4444;
+@theme {
+  /* Paleta dark fitness premium */
+  --color-bg:        #0B0B0B;
+  --color-surface:   #161616;
+  --color-surface2:  #1C1C1C;
+  --color-border:    #2A2A2A;
+  --color-accent:    #E10600;
+  --color-accent-h:  #C40500;
+  --color-text:      #FFFFFF;
+  --color-muted:     #BFBFBF;
+  --color-dim:       #555555;
+  --color-success:   #22c55e;
+  --color-warning:   #f97316;
+  --color-error:     #ef4444;
+
+  /* Tipografía */
   --font-sans: 'Segoe UI', system-ui, sans-serif;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+
+  /* Radios */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  16px;
 }
 
 /* Reset base */
@@ -725,14 +728,402 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   resize: vertical;
 }
 .plan-edit-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
-.plan-done-box { display: flex; flex-direction: column; gap: 1rem; }
-.plan-content {
-  white-space: pre-wrap;
-  font-family: inherit;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--color-text);
+
+/* ─── Plan de Entrenamiento Visual ───────────────────── */
+.plan-done-box { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* Tabla del plan */
+.plan-table-container {
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.plan-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.plan-table th {
+  background: var(--color-accent);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.plan-table th:first-child { border-top-left-radius: var(--radius-sm); }
+.plan-table th:last-child { border-top-right-radius: var(--radius-sm); }
+
+.plan-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.plan-table tr:last-child td { border-bottom: none; }
+.plan-table tr:hover { background: var(--color-surface2); }
+
+.plan-day { 
+  font-weight: 700; 
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+.plan-exercise { font-weight: 600; color: var(--color-text); }
+.plan-sets, .plan-reps, .plan-rest { 
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+/* Notas del plan */
+.plan-notes {
   background: var(--color-surface2);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  border-left: 3px solid var(--color-accent);
+}
+
+.plan-notes-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.plan-notes-content {
+  font-size: 0.85rem;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+.plan-notes-content p { margin-bottom: 0.5rem; }
+.plan-notes-content p:last-child { margin-bottom: 0; }
+
+/* Contenedor principal */
+.plan-visual { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* Botones en línea */
+.plan-preview-box {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Custom Modal Overlay */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.custom-modal-content {
+  background: var(--color-surface);
+  border-radius: 16px;
+  max-width: 1000px;
+  width: 95%;
+  max-height: 92vh;
+  overflow: hidden;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.custom-modal-content .plan-modal-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.custom-modal-content .plan-modal-close {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.custom-modal-content .plan-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.custom-modal-content .plan-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: calc(92vh - 80px);
+}
+
+/* Tabla premium */
+.plan-modal-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.plan-modal-table th {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.9rem 1rem;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.plan-modal-table th:first-child { border-top-left-radius: 12px; }
+.plan-modal-table th:last-child { border-top-right-radius: 12px; }
+
+.plan-modal-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.plan-modal-table tr:hover td {
+  background: linear-gradient(90deg, rgba(225, 6, 0, 0.06) 0%, rgba(225, 6, 0, 0.02) 100%);
+}
+
+.td-day { font-weight: 800; color: var(--color-accent); background: var(--color-surface2) !important; }
+.td-group { color: var(--color-muted); font-size: 0.8rem; }
+.td-exercise { font-weight: 600; }
+.td-sets, .td-reps, .td-rest { font-family: monospace; color: var(--color-muted); }
+
+/* Notas */
+.custom-modal-content .plan-modal-notes {
+  margin-top: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.25rem;
+  border-left: 4px solid var(--color-accent);
+}
+
+.custom-modal-content .plan-modal-notes-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.custom-modal-content .plan-modal-notes-content p {
+  font-size: 0.85rem;
+  color: var(--color-text);
+  line-height: 1.5;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--color-border);
+  margin-bottom: 0.5rem;
+}
+
+/* Modal del Plan - ESTILO MEJORADO */
+.plan-modal {
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  max-width: 1000px;
+  width: 95%;
+  max-height: 92vh;
+  overflow: hidden;
+  background: var(--color-surface);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+}
+
+.plan-modal::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.plan-modal-content {
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+  overflow: hidden;
+}
+
+/* Header del modal */
+.plan-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.75rem;
+  background: linear-gradient(135deg, var(--color-accent) 0%, #c00500 100%);
+  color: #fff;
+}
+
+.plan-modal-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.plan-modal-close {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.plan-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+/* Body del modal */
+.plan-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  background: var(--color-surface);
+}
+
+/* Tabla mejorada */
+.plan-modal-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.plan-modal-table th {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.9rem 1rem;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.plan-modal-table th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.plan-modal-table th:last-child {
+  border-top-right-radius: 12px;
+}
+
+.plan-modal-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  transition: background 0.2s;
+}
+
+.plan-modal-table tr:last-child td {
+  border-bottom: none;
+}
+
+.plan-modal-table tr:hover td {
+  background: linear-gradient(90deg, rgba(225, 6, 0, 0.05) 0%, rgba(225, 6, 0, 0.02) 100%);
+}
+
+.plan-modal-table .td-day {
+  font-weight: 800;
+  color: var(--color-accent);
+  background: var(--color-surface2);
+}
+
+.plan-modal-table .td-group {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+.plan-modal-table .td-exercise {
+  font-weight: 600;
+}
+
+.plan-modal-table .td-sets,
+.plan-modal-table .td-reps,
+.plan-modal-table .td-rest {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+/* Sección de Notas en modal */
+.plan-modal-notes {
+  margin-top: 1.5rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  padding: 1.25rem;
+  border-left: 4px solid var(--color-accent);
+}
+
+.plan-modal-notes-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+}
+
+.plan-modal-notes-content {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.plan-modal-notes-content p {
+  font-size: 0.85rem;
+  color: var(--color-text);
+  line-height: 1.5;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--color-border);
+}
+
+/* Estado pendiente */
+.plan-pending {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-muted);
+}
   padding: 1rem;
   border-radius: var(--radius-sm);
   overflow-x: auto;
@@ -1012,9 +1403,18 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
 
 .lesion-edit-active { display: flex; flex-direction: column; gap: 0.5rem; }
 .lesion-edit-header {
-  display: flex;
+display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1.25rem 1.75rem;
+  background: linear-gradient(135deg, var(--color-accent) 0%, #b80500 100%);
+  color: #fff;
+}
+
+.custom-modal-content .plan-modal-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
 }
 .lesion-edit-badge {
   display: inline-flex;
@@ -1609,173 +2009,4 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   color: #EF4444;
   font-size: 0.8rem;
   font-weight: 500;
-}
-
-/* ─── Plan Modal Styles ───────────────────────── */
-.plan-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.plan-modal-content {
-  background: var(--color-surface);
-  border-radius: 16px;
-  max-width: 1000px;
-  width: 95%;
-  max-height: 90vh;
-  overflow: hidden;
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.3s ease;
-}
-
-.plan-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.75rem;
-  background: linear-gradient(135deg, var(--color-accent) 0%, #b80500 100%);
-  color: #fff;
-}
-
-.plan-modal-header h2 {
-  margin: 0;
-  font-size: 1.35rem;
-  font-weight: 700;
-}
-
-.plan-modal-close {
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  padding: 0.5rem;
-  display: flex;
-  border-radius: 50%;
-  transition: all 0.2s;
-}
-
-.plan-modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: rotate(90deg);
-}
-
-.plan-modal-body {
-  padding: 1.5rem;
-  overflow-y: auto;
-  max-height: calc(90vh - 80px);
-}
-
-/* Table Premium */
-.plan-modal-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 0.9rem;
-  overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.plan-modal-table th {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  color: #fff;
-  font-weight: 700;
-  padding: 0.9rem 1rem;
-  text-align: left;
-  text-transform: uppercase;
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-}
-
-.plan-modal-table th:first-child { border-top-left-radius: 12px; }
-.plan-modal-table th:last-child { border-top-right-radius: 12px; }
-
-.plan-modal-table td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
-}
-
-.plan-modal-table tr:hover td {
-  background: linear-gradient(90deg, rgba(225, 6, 0, 0.06) 0%, rgba(225, 6, 0, 0.02) 100%);
-}
-
-.plan-modal-table .td-day {
-  font-weight: 800;
-  color: var(--color-accent);
-  background: var(--color-surface2) !important;
-}
-
-.plan-modal-table .td-group {
-  color: var(--color-muted);
-  font-size: 0.8rem;
-}
-
-.plan-modal-table .td-exercise {
-  font-weight: 600;
-}
-
-.plan-modal-table .td-sets,
-.plan-modal-table .td-reps,
-.plan-modal-table .td-rest {
-  font-family: monospace;
-  font-size: 0.85rem;
-  color: var(--color-muted);
-}
-
-/* Notes */
-.plan-modal-notes {
-  margin-top: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 1.25rem;
-  border-left: 4px solid var(--color-accent);
-}
-
-.plan-modal-notes-title {
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--color-accent);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.75rem;
-}
-
-.plan-modal-notes-content p {
-  font-size: 0.85rem;
-  color: var(--color-text);
-  line-height: 1.5;
-  padding-left: 0.75rem;
-  border-left: 2px solid var(--color-border);
-  margin-bottom: 0.5rem;
-}
-
-/* Plan buttons */
-.plan-preview-box {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.plan-pending {
-  text-align: center;
-  padding: 2rem;
-  color: var(--color-muted);
 }

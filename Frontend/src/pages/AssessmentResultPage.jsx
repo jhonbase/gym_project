@@ -52,6 +52,102 @@ function ResultItem({ label, value }) {
   )
 }
 
+/* ─── Visualización del Plan de Entrenamiento ─── */
+function PlanVisualization({ plan }) {
+  if (!plan) return null
+  
+  const parsed = parseTrainingPlan(plan)
+  
+  if (parsed.table.length === 0) {
+    return <pre style={{ whiteSpace: 'pre-wrap', padding: '1rem', background: 'var(--color-surface2)', borderRadius: '12px', fontSize: '0.85rem', lineHeight: 1.6 }}>{plan}</pre>
+  }
+  
+  return (
+    <div>
+      <table className="plan-modal-table">
+        <thead>
+          <tr>
+            <th>Día</th>
+            <th>Grupo Muscular</th>
+            <th>Ejercicio</th>
+            <th>Series</th>
+            <th>Reps</th>
+            <th>Descanso</th>
+          </tr>
+        </thead>
+        <tbody>
+          {parsed.table.map((row, i) => (
+            <tr key={i}>
+              <td className="td-day">{row.dia}</td>
+              <td className="td-group">{row.grupo}</td>
+              <td className="td-exercise">{row.ejercicio}</td>
+              <td className="td-sets">{row.series}</td>
+              <td className="td-reps">{row.reps}</td>
+              <td className="td-rest">{row.descanso}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      
+      {parsed.notes.length > 0 && (
+        <div className="plan-modal-notes">
+          <div className="plan-modal-notes-title">Notas y Recomendaciones</div>
+          <div className="plan-modal-notes-content">
+            {parsed.notes.map((note, i) => (
+              <p key={i}>{note}</p>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Parser del Plan de Entrenamiento ─── */
+function parseTrainingPlan(planText) {
+  const table = []
+  const notes = []
+  const lines = planText.split('\n')
+  
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (!trimmed) continue
+    
+    // Notas
+    if (trimmed.toLowerCase().includes('nota') && trimmed.length < 40) {
+      const notesText = trimmed.replace(/\*\*/g, '').trim()
+      if (notesText) notes.push(notesText)
+      continue
+    }
+    
+    // Tabla
+    if (trimmed.includes('|')) {
+      const cells = trimmed.split('|').map(c => c.trim()).filter(c => c.length > 0)
+      
+      if (cells.length >= 5) {
+        const first = cells[0].toLowerCase()
+        if (!first.includes('dia') && !first.includes('group')) {
+          table.push({
+            dia: cells[0],
+            grupo: cells[1] || '-',
+            ejercicio: cells[2],
+            series: cells[3],
+            reps: cells[4],
+            descanso: cells[5] || '-'
+          })
+        }
+      }
+    } else if (trimmed.length > 20 && !trimmed.includes('|')) {
+      const clean = trimmed.replace(/\*\*/g, '').trim()
+      if (clean && !clean.toLowerCase().includes('dia')) {
+        notes.push(clean)
+      }
+    }
+  }
+  
+  return { table, notes }
+}
+
 export default function AssessmentResultPage() {
   const { id } = useParams()
   const [assessment, setAssessment] = useState(null)
@@ -61,6 +157,7 @@ export default function AssessmentResultPage() {
   const [editingPlan, setEditingPlan] = useState(false)
   const [planDraft, setPlanDraft] = useState('')
   const [savingPlan, setSavingPlan] = useState(false)
+  const [showPlanModal, setShowPlanModal] = useState(false)
 
   const pdfEndpoint = `/assessments/${id}/pdf`
 
@@ -340,22 +437,45 @@ export default function AssessmentResultPage() {
             </div>
           </div>
         ) : a.planEntrenamiento ? (
-          <div className="plan-done-box">
-            <pre className="plan-content">{a.planEntrenamiento}</pre>
-            <button className="ui-btn-secondary" onClick={handleEditPlan}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          <div className="plan-preview-box">
+            <button className="ui-btn-primary" onClick={() => setShowPlanModal(true)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
               </svg>
-              Editar Plan
+              Ver Plan de Entrenamiento
+            </button>
+            <button className="ui-btn-secondary" onClick={handleEditPlan}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Editar
             </button>
           </div>
         ) : (
-          <div className="ai-pending-box">
-            <p className="ai-pending-text">Plan de entrenamiento pendiente.</p>
+          <div className="plan-pending">
+            <p>Plan de entrenamiento pendiente.</p>
           </div>
         )}
       </SectionCard>
+
+      {/* Plan Modal */}
+      {showPlanModal && a.planEntrenamiento && (
+        <div className="plan-modal-overlay" onClick={() => setShowPlanModal(false)}>
+          <div className="plan-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="plan-modal-header">
+              <h2>Plan de Entrenamiento Semanal</h2>
+              <button className="plan-modal-close" onClick={() => setShowPlanModal(false)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <div className="plan-modal-body">
+              <PlanVisualization plan={a.planEntrenamiento} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Próxima fecha de valoración */}
       {a.proximaFechaValoracion && (

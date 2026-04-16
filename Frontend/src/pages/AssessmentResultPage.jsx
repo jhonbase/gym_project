@@ -58,7 +58,7 @@ function PlanVisualization({ plan, onSave, readOnly = true, onAlert }) {
 
   const [parsed, setParsed] = useState(() => parseTrainingPlan(plan))
   const [editingRow, setEditingRow] = useState(null)
-  const [addingToRow, setAddingToRow] = useState(null)
+  const [addingAfterRow, setAddingAfterRow] = useState(null)
   const [newExercise, setNewExercise] = useState({ grupo: '', ejercicio: '', series: '3', reps: '12', descanso: '60s' })
   const [saving, setSaving] = useState(false)
 
@@ -120,7 +120,7 @@ function PlanVisualization({ plan, onSave, readOnly = true, onAlert }) {
   }
 
   function handleStartAdd(rowIndex) {
-    setAddingToRow(rowIndex)
+    setAddingAfterRow(rowIndex)
     const targetDay = parsed.table[rowIndex].dia
     setNewExercise({ grupo: '', ejercicio: '', series: '3', reps: '12', descanso: '60s' })
   }
@@ -130,11 +130,12 @@ function PlanVisualization({ plan, onSave, readOnly = true, onAlert }) {
       onAlert?.({ type: 'error', message: 'Completa todos los campos' })
       return
     }
-    const targetDay = parsed.table[addingToRow].dia
+    const targetDay = parsed.table[addingAfterRow].dia
     const newRow = { dia: targetDay, ...newExercise }
-    const newTable = [...parsed.table, newRow]
+    const newTable = [...parsed.table]
+    newTable.splice(addingAfterRow + 1, 0, newRow)
     setParsed({ ...parsed, table: newTable })
-    setAddingToRow(null)
+    setAddingAfterRow(null)
   }
 
   let lastDia = ''
@@ -150,7 +151,7 @@ function PlanVisualization({ plan, onSave, readOnly = true, onAlert }) {
             <th>Series</th>
             <th>Reps</th>
             <th>Descanso</th>
-            {!readOnly && <th style={{ width: '50px' }}></th>}
+            {!readOnly && <th style={{ width: '80px' }}></th>}
           </tr>
         </thead>
         <tbody>
@@ -158,88 +159,135 @@ function PlanVisualization({ plan, onSave, readOnly = true, onAlert }) {
             const isNewDay = lastDia && lastDia !== row.dia
             lastDia = row.dia
             const isEditing = editingRow === i
-            const isAdding = addingToRow === i
+            const showAddRowBelow = addingAfterRow === i
 
             return (
-              <tr
-                key={i}
-                className={isNewDay ? 'day-separator' : ''}
-                onDoubleClick={() => handleDoubleClick(i)}
-              >
-                <td className="td-day">{row.dia}</td>
-                <td className="td-group">
-                  {isEditing || isAdding ? (
-                    <input
-                      className="plan-cell-input"
-                      value={isAdding ? newExercise.grupo : row.grupo}
-                      onChange={(e) => isAdding ? setNewExercise({ ...newExercise, grupo: e.target.value }) : handleCellChange(i, 'grupo', e.target.value)}
-                    />
-                  ) : row.grupo}
-                </td>
-                <td className="td-exercise">
-                  {isEditing || isAdding ? (
-                    <input
-                      className="plan-cell-input"
-                      value={isAdding ? newExercise.ejercicio : row.ejercicio}
-                      onChange={(e) => isAdding ? setNewExercise({ ...newExercise, ejercicio: e.target.value }) : handleCellChange(i, 'ejercicio', e.target.value)}
-                    />
-                  ) : row.ejercicio}
-                </td>
-                <td className="td-sets">
-                  {isEditing || isAdding ? (
-                    <input
-                      className="plan-cell-input small"
-                      value={isAdding ? newExercise.series : row.series}
-                      onChange={(e) => isAdding ? setNewExercise({ ...newExercise, series: e.target.value }) : handleCellChange(i, 'series', e.target.value)}
-                    />
-                  ) : row.series}
-                </td>
-                <td className="td-reps">
-                  {isEditing || isAdding ? (
-                    <input
-                      className="plan-cell-input small"
-                      value={isAdding ? newExercise.reps : row.reps}
-                      onChange={(e) => isAdding ? setNewExercise({ ...newExercise, reps: e.target.value }) : handleCellChange(i, 'reps', e.target.value)}
-                    />
-                  ) : row.reps}
-                </td>
-                <td className="td-rest">
-                  {isEditing || isAdding ? (
-                    <input
-                      className="plan-cell-input small"
-                      value={isAdding ? newExercise.descanso : row.descanso}
-                      onChange={(e) => isAdding ? setNewExercise({ ...newExercise, descanso: e.target.value }) : handleCellChange(i, 'descanso', e.target.value)}
-                    />
-                  ) : row.descanso}
-                </td>
-                {!readOnly && (
-                  <td className="td-actions">
+              <>
+                <tr
+                  key={i}
+                  className={isNewDay ? 'day-separator' : ''}
+                  onDoubleClick={() => handleDoubleClick(i)}
+                >
+                  <td className="td-day">{row.dia}</td>
+                  <td className="td-group">
                     {isEditing ? (
-                      <button className="plan-save-btn" onClick={handleSaveRow} title="Guardar">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
-                      </button>
-                    ) : isAdding ? (
-                      <>
-                        <button className="plan-save-btn" onClick={handleAddExercise} title="Agregar">
+                      <input
+                        className="plan-cell-input"
+                        value={row.grupo}
+                        onChange={(e) => handleCellChange(i, 'grupo', e.target.value)}
+                      />
+                    ) : row.grupo}
+                  </td>
+                  <td className="td-exercise">
+                    {isEditing ? (
+                      <input
+                        className="plan-cell-input"
+                        value={row.ejercicio}
+                        onChange={(e) => handleCellChange(i, 'ejercicio', e.target.value)}
+                      />
+                    ) : row.ejercicio}
+                  </td>
+                  <td className="td-sets">
+                    {isEditing ? (
+                      <input
+                        className="plan-cell-input small"
+                        value={row.series}
+                        onChange={(e) => handleCellChange(i, 'series', e.target.value)}
+                      />
+                    ) : row.series}
+                  </td>
+                  <td className="td-reps">
+                    {isEditing ? (
+                      <input
+                        className="plan-cell-input small"
+                        value={row.reps}
+                        onChange={(e) => handleCellChange(i, 'reps', e.target.value)}
+                      />
+                    ) : row.reps}
+                  </td>
+                  <td className="td-rest">
+                    {isEditing ? (
+                      <input
+                        className="plan-cell-input small"
+                        value={row.descanso}
+                        onChange={(e) => handleCellChange(i, 'descanso', e.target.value)}
+                      />
+                    ) : row.descanso}
+                  </td>
+                  {!readOnly && (
+                    <td className="td-actions">
+                      {isEditing ? (
+                        <button className="plan-save-btn" onClick={handleSaveRow} title="Guardar">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
                         </button>
-                        <button className="plan-delete-btn" onClick={() => setAddingToRow(null)} title="Cancelar">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button className="plan-add-row-btn" onClick={() => handleStartAdd(i)} title="Agregar ejercicio">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        </button>
-                        <button className="plan-delete-btn" onClick={() => handleDeleteRow(i)} title="Eliminar">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                        </button>
-                      </>
-                    )}
-                  </td>
+                      ) : (
+                        <>
+                          <button className="plan-add-row-btn" onClick={() => handleStartAdd(i)} title="Agregar ejercicio">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                          </button>
+                          <button className="plan-delete-btn" onClick={() => handleDeleteRow(i)} title="Eliminar">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  )}
+                </tr>
+                {showAddRowBelow && (
+                  <tr key={`add-${i}`} className="plan-new-row">
+                    <td className="td-day"></td>
+                    <td className="td-group">
+                      <input
+                        className="plan-cell-input"
+                        placeholder="Grupo muscular"
+                        value={newExercise.grupo}
+                        onChange={(e) => setNewExercise({ ...newExercise, grupo: e.target.value })}
+                        autoFocus
+                      />
+                    </td>
+                    <td className="td-exercise">
+                      <input
+                        className="plan-cell-input"
+                        placeholder="Ejercicio"
+                        value={newExercise.ejercicio}
+                        onChange={(e) => setNewExercise({ ...newExercise, ejercicio: e.target.value })}
+                      />
+                    </td>
+                    <td className="td-sets">
+                      <input
+                        className="plan-cell-input small"
+                        placeholder="Series"
+                        value={newExercise.series}
+                        onChange={(e) => setNewExercise({ ...newExercise, series: e.target.value })}
+                      />
+                    </td>
+                    <td className="td-reps">
+                      <input
+                        className="plan-cell-input small"
+                        placeholder="Reps"
+                        value={newExercise.reps}
+                        onChange={(e) => setNewExercise({ ...newExercise, reps: e.target.value })}
+                      />
+                    </td>
+                    <td className="td-rest">
+                      <input
+                        className="plan-cell-input small"
+                        placeholder="Descanso"
+                        value={newExercise.descanso}
+                        onChange={(e) => setNewExercise({ ...newExercise, descanso: e.target.value })}
+                      />
+                    </td>
+                    <td className="td-actions">
+                      <button className="plan-save-btn" onClick={handleAddExercise} title="Confirmar">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
+                      </button>
+                      <button className="plan-delete-btn" onClick={() => setAddingAfterRow(null)} title="Cancelar">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      </button>
+                    </td>
+                  </tr>
                 )}
-              </tr>
+              </>
             )
           })}
         </tbody>

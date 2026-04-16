@@ -63,43 +63,30 @@ function PlanVisualization({ plan }) {
   }
   
   return (
-    <div>
-      <table className="plan-modal-table">
-        <thead>
-          <tr>
-            <th>Día</th>
-            <th>Grupo Muscular</th>
-            <th>Ejercicio</th>
-            <th>Series</th>
-            <th>Reps</th>
-            <th>Descanso</th>
+    <table className="plan-modal-table">
+      <thead>
+        <tr>
+          <th>Día</th>
+          <th>Grupo Muscular</th>
+          <th>Ejercicio</th>
+          <th>Series</th>
+          <th>Reps</th>
+          <th>Descanso</th>
+        </tr>
+      </thead>
+      <tbody>
+        {parsed.table.map((row, i) => (
+          <tr key={i}>
+            <td className="td-day">{row.dia}</td>
+            <td className="td-group">{row.grupo}</td>
+            <td className="td-exercise">{row.ejercicio}</td>
+            <td className="td-sets">{row.series}</td>
+            <td className="td-reps">{row.reps}</td>
+            <td className="td-rest">{row.descanso}</td>
           </tr>
-        </thead>
-        <tbody>
-          {parsed.table.map((row, i) => (
-            <tr key={i}>
-              <td className="td-day">{row.dia}</td>
-              <td className="td-group">{row.grupo}</td>
-              <td className="td-exercise">{row.ejercicio}</td>
-              <td className="td-sets">{row.series}</td>
-              <td className="td-reps">{row.reps}</td>
-              <td className="td-rest">{row.descanso}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      
-      {parsed.notes.length > 0 && (
-        <div className="plan-modal-notes">
-          <div className="plan-modal-notes-title">Notas y Recomendaciones</div>
-          <div className="plan-modal-notes-content">
-            {parsed.notes.map((note, i) => (
-              <p key={i}>{note}</p>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+        ))}
+      </tbody>
+    </table>
   )
 }
 

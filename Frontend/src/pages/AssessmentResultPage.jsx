@@ -82,6 +82,7 @@ function PlanVisualization({ plan, onSave, readOnly = true, onAlert }) {
 
     Object.entries(days).forEach(([dia, rows]) => {
       rows.forEach((row, idx) => {
+        // Solo mostrar el día en el primer ejercicio de cada día
         text += `| ${idx === 0 ? dia : ''} | ${row.grupo} | ${row.ejercicio} | ${row.series} | ${row.reps} | ${row.descanso} |\n`
       })
     })
@@ -311,6 +312,9 @@ function parseTrainingPlan(planText) {
   const lines = planText.split('\n')
   
   const headerKeywords = ['día', 'grupo muscular', 'ejercicio', 'series', 'reps', 'descanso', 'dia', 'group']
+  const dayKeywords = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo', 'lun', 'mar', 'mie', 'jue', 'vie', 'sáb', 'dom', 'semana']
+  
+  let lastDia = ''
   
   for (const line of lines) {
     const trimmed = line.trim()
@@ -327,23 +331,40 @@ function parseTrainingPlan(planText) {
     if (trimmed.includes('|')) {
       const cells = trimmed.split('|').map(c => c.trim()).filter(c => c.length > 0)
       
-      if (cells.length >= 5) {
-        const first = cells[0].toLowerCase().trim()
-        
-        // Ignorar si es header o separador
-        const isHeader = headerKeywords.some(kw => first.includes(kw))
-        const isSeparator = trimmed.includes('---') || trimmed.match(/^[\s|-]+$/)
-        
-        if (!isHeader && !isSeparator) {
-          table.push({
-            dia: cells[0],
-            grupo: cells[1] || '-',
-            ejercicio: cells[2],
-            series: cells[3],
-            reps: cells[4],
-            descanso: cells[5] || '-'
-          })
-        }
+      if (cells.length < 5) continue
+      
+      // Saltar header y separadores
+      const isSeparator = trimmed.includes('---') || trimmed.match(/^[\s|-]+$/)
+      if (isSeparator) continue
+      
+      const firstLower = cells[0].toLowerCase()
+      if (headerKeywords.some(kw => firstLower.includes(kw))) continue
+      
+      // Determinar si la primera celda es un día o no
+      const isDay = dayKeywords.some(d => firstLower.includes(d))
+      
+      if (isDay) {
+        // La primera celda es el día
+        lastDia = cells[0]
+        table.push({
+          dia: lastDia,
+          grupo: cells[1] || '-',
+          ejercicio: cells[2] || '',
+          series: cells[3] || '-',
+          reps: cells[4] || '-',
+          descanso: cells[5] || '-'
+        })
+      } else {
+        // No hay día en esta fila - usar el último día conocido
+        // Los valores están corridos 1 posición
+        table.push({
+          dia: lastDia,
+          grupo: cells[0] || '-',
+          ejercicio: cells[1] || '',
+          series: cells[2] || '-',
+          reps: cells[3] || '-',
+          descanso: cells[4] || '-'
+        })
       }
     }
   }

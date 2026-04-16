@@ -34,4 +34,7 @@ router.get('/:id/lesion', authenticate, assessmentController.getLesion)
 // DELETE /api/assessments/:id → Eliminar valoración
 router.delete('/:id', authenticate, assessmentController.deleteAssessment)
 
+// PUT /api/assessments/:id/training-plan → Actualizar plan de entrenamiento (edición manual)
+router.put('/:id/training-plan', authenticate, assessmentController.updateTrainingPlan)
+
 export default router

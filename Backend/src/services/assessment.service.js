@@ -42,6 +42,33 @@ async function updateAnalysis(id, analysis) {
 }
 
 /**
+ * Actualiza el plan de entrenamiento de una valoración.
+ */
+async function updatePlanEntrenamiento(id, plan) {
+  return prisma.assessment.update({
+    where: { id },
+    data: {
+      planEntrenamiento: plan,
+    },
+  })
+}
+
+/**
+ * Actualiza análisis y plan de entrenamiento simultáneamente.
+ * Cambia el estado de "completada" a "analizada".
+ */
+async function updateAnalysisAndPlan(id, analysis, trainingPlan) {
+  return prisma.assessment.update({
+    where: { id },
+    data: {
+      analisisIA: analysis,
+      planEntrenamiento: trainingPlan,
+      estadoValoracion: 'analizada',
+    },
+  })
+}
+
+/**
  * Actualiza la evidencia de lesión de una valoración.
  */
 async function updateLesion(id, data) {
@@ -70,4 +97,4 @@ async function deleteAssessment(id) {
   })
 }
 
-export { create, getById, getByUserId, updateAnalysis, updateLesion, update, deleteAssessment }
+export { create, getById, getByUserId, updateAnalysis, updatePlanEntrenamiento, updateAnalysisAndPlan, updateLesion, update, deleteAssessment }

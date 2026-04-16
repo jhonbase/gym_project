@@ -12,27 +12,28 @@ const __dirname = path.dirname(__filename)
 
 /**
  * POST /api/assessments
- * Crea una nueva valoración física e intenta generar análisis IA.
+ * Crea una nueva valoración física e intenta generar análisis IA y plan de entrenamiento.
  */
 async function createAssessment(req, res, next) {
   try {
-    // Guardar en BD con estado "completada"
     const assessment = await assessmentService.create({
       ...req.body,
       estadoValoracion: 'completada',
     })
 
-    // Intentar generar análisis con IA (devuelve null si no hay internet/key)
     const analysis = await aiService.generateAssessmentAnalysis(assessment)
+    const trainingPlan = await aiService.generateTrainingPlan(assessment)
 
-    if (analysis) {
-      // Si la IA respondió → actualizar con el análisis
-      const updated = await assessmentService.updateAnalysis(assessment.id, analysis)
-      logger.info(`Valoración ${updated.id} creada con análisis IA.`)
+    if (analysis || trainingPlan) {
+      const updated = await assessmentService.updateAnalysisAndPlan(
+        assessment.id,
+        analysis,
+        trainingPlan
+      )
+      logger.info(`Valoración ${updated.id} creada con análisis IA y plan de entrenamiento.`)
       return response.success(res, { assessment: updated }, 201)
     }
 
-    // Si la IA no está disponible → devolver sin análisis
     logger.info(`Valoración ${assessment.id} creada sin análisis IA (IA no disponible).`)
     return response.success(res, { assessment, aiStatus: 'pending' }, 201)
   } catch (error) {
@@ -73,8 +74,7 @@ async function getByUser(req, res, next) {
 
 /**
  * POST /api/assessments/:id/analyze
- * Reintenta generar el análisis IA para una valoración
- * que se guardó sin análisis (porque no había internet).
+ * Reintenta generar el análisis IA y plan de entrenamiento para una valoración.
  */
 async function retryAnalysis(req, res, next) {
   try {
@@ -84,18 +84,13 @@ async function retryAnalysis(req, res, next) {
       return response.error(res, 'Valoración no encontrada.', 404)
     }
 
-    // Si ya tiene análisis, no lo regeneramos
-    if (assessment.analisisIA) {
-      return response.success(res, {
-        assessment,
-        message: 'Esta valoración ya tiene análisis generado.',
-      })
-    }
+    // Siempre regeneramos (el usuario puede elegir regenerar aunque ya tenga)
+    logger.info(`Regenerando análisis y plan para valoración ${assessment.id}`)
 
-    // Intentar generar análisis
     const analysis = await aiService.generateAssessmentAnalysis(assessment)
+    const trainingPlan = await aiService.generateTrainingPlan(assessment)
 
-    if (!analysis) {
+    if (!analysis && !trainingPlan) {
       return response.error(
         res,
         'Servicio de IA no disponible. Intenta de nuevo cuando tengas conexión a internet.',
@@ -103,8 +98,12 @@ async function retryAnalysis(req, res, next) {
       )
     }
 
-    const updated = await assessmentService.updateAnalysis(assessment.id, analysis)
-    logger.info(`Análisis IA generado para valoración ${updated.id}.`)
+    const updated = await assessmentService.updateAnalysisAndPlan(
+      assessment.id,
+      analysis,
+      trainingPlan
+    )
+    logger.info(`Análisis y plan regenerados para valoración ${updated.id}.`)
     return response.success(res, { assessment: updated })
   } catch (error) {
     next(error)
@@ -251,5 +250,29 @@ async function deleteAssessment(req, res, next) {
   }
 }
 
+/**
+ * PUT /api/assessments/:id/training-plan
+ * Actualiza el plan de entrenamiento de una valoración (edición manual).
+ */
+async function updateTrainingPlan(req, res, next) {
+  try {
+    const { planEntrenamiento } = req.body
 
-export { createAssessment, getAssessment, getByUser, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, updateAssessment, deleteAssessment }
+    if (!planEntrenamiento) {
+      return response.error(res, 'El plan de entrenamiento es requerido.', 400)
+    }
+
+    const assessment = await assessmentService.updatePlanEntrenamiento(req.params.id, planEntrenamiento)
+
+    if (!assessment) {
+      return response.error(res, 'Valoración no encontrada.', 404)
+    }
+
+    return response.success(res, { assessment })
+  } catch (error) {
+    next(error)
+  }
+}
+
+
+export { createAssessment, getAssessment, getByUser, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, updateAssessment, deleteAssessment, updateTrainingPlan }

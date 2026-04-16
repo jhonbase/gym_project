@@ -13,7 +13,7 @@ import axios from 'axios'
 
 const apiClient = axios.create({
   baseURL: '/api',
-  timeout: 10000,
+  timeout: 60000, // 60 segundos para dar tiempo a la IA
   headers: { 'Content-Type': 'application/json' },
 })
 

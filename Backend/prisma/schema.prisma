@@ -99,6 +99,7 @@ model Assessment {
 
   // Análisis IA
   analisisIA           String?  
+  planEntrenamiento   String?  // Plan de entrenamiento generado por IA
   estadoValoracion     String   @default("pendiente") // "pendiente" | "completada" | "analizada"
 
   createdAt            DateTime @default(now())

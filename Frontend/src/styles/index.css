@@ -143,6 +143,23 @@ select.ui-input {
 .ui-btn-secondary:hover { border-color: var(--color-muted); color: var(--color-text); }
 .ui-btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* Botón de icono (regenerar) */
+.ui-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ui-btn-icon:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.ui-btn-icon:disabled { opacity: 0.4; cursor: not-allowed; }
+
 /* Botón ghost (solo texto) */
 .ui-btn-ghost {
   background: transparent;
@@ -670,9 +687,17 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   color: var(--color-muted);
   font-size: 0.85rem;
   font-weight: 500;
-  transition: color 0.2s;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
 }
-.result-back-link:hover { color: var(--color-text); }
+.result-back-link:hover { 
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
 .result-date { font-size: 0.8rem; color: var(--color-dim); margin-bottom: 0.25rem; }
 .result-grid {
   display: grid;
@@ -688,6 +713,33 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
 .ai-done-box { display: flex; flex-direction: column; gap: 0.75rem; }
 .ai-done-text { color: var(--color-muted); font-size: 0.875rem; }
 .ai-done-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+.plan-edit-box { display: flex; flex-direction: column; gap: 1rem; }
+.plan-textarea {
+  width: 100%;
+  min-height: 300px;
+  padding: 0.75rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface2);
+  color: var(--color-text);
+  resize: vertical;
+}
+.plan-edit-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
+.plan-done-box { display: flex; flex-direction: column; gap: 1rem; }
+.plan-content {
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-surface2);
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+}
 
 /* ─── Responsive ──────────────────────────────── */
 @media (max-width: 640px) {

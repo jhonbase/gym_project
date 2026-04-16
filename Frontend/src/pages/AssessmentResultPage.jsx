@@ -26,6 +26,11 @@ const IconAI = () => (
     <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
   </svg>
 )
+const IconTraining = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6.5 6.5h11v11h-11z"/><path d="M6.5 6.5L17.5 17.5"/><path d="M17.5 6.5L6.5 17.5"/>
+  </svg>
+)
 const IconLesion = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/>
@@ -53,6 +58,9 @@ export default function AssessmentResultPage() {
   const [loading, setLoading] = useState(true)
   const [analyzing, setAnalyzing] = useState(false)
   const [alert, setAlert] = useState(null)
+  const [editingPlan, setEditingPlan] = useState(false)
+  const [planDraft, setPlanDraft] = useState('')
+  const [savingPlan, setSavingPlan] = useState(false)
 
   const pdfEndpoint = `/assessments/${id}/pdf`
 
@@ -67,14 +75,44 @@ export default function AssessmentResultPage() {
     setAnalyzing(true)
     setAlert(null)
     try {
+      console.log('Regenerando análisis para:', id)
       const res = await apiClient.post(`/assessments/${id}/analyze`)
+      console.log('Respuesta:', res.data)
       setAssessment(res.data.data.assessment)
+      setAlert({ type: 'success', message: 'Análisis y plan regenerados correctamente.' })
       await openPdfPreview()
     } catch (err) {
-      const msg = err.response?.data?.error || 'No se pudo generar el análisis.'
+      console.error('Error al regenerar:', err)
+      const msg = err.response?.data?.error || 'No se pudo regenerar el análisis.'
       setAlert({ type: 'error', message: msg })
     } finally {
       setAnalyzing(false)
+    }
+  }
+
+  function handleEditPlan() {
+    setPlanDraft(assessment.planEntrenamiento || '')
+    setEditingPlan(true)
+  }
+
+  function handleCancelEdit() {
+    setEditingPlan(false)
+    setPlanDraft('')
+  }
+
+  async function handleSavePlan() {
+    setSavingPlan(true)
+    try {
+      const res = await apiClient.put(`/assessments/${id}/training-plan`, {
+        planEntrenamiento: planDraft,
+      })
+      setAssessment(res.data.data.assessment)
+      setEditingPlan(false)
+      setAlert({ type: 'success', message: 'Plan de entrenamiento actualizado.' })
+    } catch (err) {
+      setAlert({ type: 'error', message: 'Error al guardar el plan.' })
+    } finally {
+      setSavingPlan(false)
     }
   }
 
@@ -123,14 +161,22 @@ export default function AssessmentResultPage() {
 
   const a = assessment
 
+  function goBack() {
+    if (window.history.length > 1) {
+      window.history.back()
+    } else {
+      window.location.href = '/dashboard'
+    }
+  }
+
   return (
     <div className="result-page">
       {/* Back */}
       <div className="result-header-actions">
-        <Link to="/dashboard" className="result-back-link">
+        <button onClick={goBack} className="result-back-link">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          Volver al dashboard
-        </Link>
+          Volver
+        </button>
         <Link to={`/assessment/${id}/edit`} className="result-edit-link">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Editar valoración
@@ -250,6 +296,12 @@ export default function AssessmentResultPage() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Descargar PDF
               </button>
+              <button className="ui-btn-icon" onClick={handleAnalyze} disabled={analyzing} title="Regenerar análisis">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                {analyzing ? '...' : 'Regenerar'}
+              </button>
             </div>
           </div>
         ) : (
@@ -263,6 +315,44 @@ export default function AssessmentResultPage() {
             <button className="ui-btn-primary" onClick={handleAnalyze} disabled={analyzing}>
               {analyzing ? 'Generando análisis...' : 'Generar Análisis con IA →'}
             </button>
+          </div>
+        )}
+      </SectionCard>
+
+      {/* Plan de Entrenamiento */}
+      <SectionCard icon={<IconTraining />} title="Plan de Entrenamiento">
+        {editingPlan ? (
+          <div className="plan-edit-box">
+            <textarea
+              className="plan-textarea"
+              value={planDraft}
+              onChange={(e) => setPlanDraft(e.target.value)}
+              rows={15}
+              placeholder="Escribe el plan de entrenamiento..."
+            />
+            <div className="plan-edit-actions">
+              <button className="ui-btn-secondary" onClick={handleCancelEdit} disabled={savingPlan}>
+                Cancelar
+              </button>
+              <button className="ui-btn-primary" onClick={handleSavePlan} disabled={savingPlan}>
+                {savingPlan ? 'Guardando...' : 'Guardar Plan'}
+              </button>
+            </div>
+          </div>
+        ) : a.planEntrenamiento ? (
+          <div className="plan-done-box">
+            <pre className="plan-content">{a.planEntrenamiento}</pre>
+            <button className="ui-btn-secondary" onClick={handleEditPlan}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Editar Plan
+            </button>
+          </div>
+        ) : (
+          <div className="ai-pending-box">
+            <p className="ai-pending-text">Plan de entrenamiento pendiente.</p>
           </div>
         )}
       </SectionCard>

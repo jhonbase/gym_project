@@ -221,21 +221,41 @@ select.ui-input {
 .ui-badge-done     { background: rgba(225,6,0,0.12);    color: #E10600; border: 1px solid rgba(225,6,0,0.3); }
 .ui-badge-analyzed { background: rgba(34,197,94,0.12);  color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
 
-/* Alertas */
+/* Alertas - Toast flotante */
 .ui-alert {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.75rem;
-  padding: 0.8rem 1rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  min-width: 280px;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: ui-alert-slide-in 0.3s ease-out;
 }
-.ui-alert-success { background: rgba(34,197,94,0.08);  border: 1px solid rgba(34,197,94,0.3);  color: #22c55e; }
-.ui-alert-error   { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.3);  color: #ef4444; }
-.ui-alert-warning { background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.3); color: #f97316; }
-.ui-alert-close   { background: none; border: none; color: inherit; cursor: pointer; font-size: 1rem; flex-shrink: 0; line-height: 1; padding: 0; }
+
+@keyframes ui-alert-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.ui-alert-success { background: #166534; border: 1px solid #22c55e; color: #dcfce7; }
+.ui-alert-error   { background: #991b1b; border: 1px solid #ef4444; color: #fee2e2; }
+.ui-alert-warning { background: #9a3412; border: 1px solid #f97316; color: #ffedd5; }
+.ui-alert-close   { background: none; border: none; color: inherit; cursor: pointer; font-size: 1.1rem; flex-shrink: 0; padding: 0.25rem; opacity: 0.8; }
+.ui-alert-close:hover { opacity: 1; }
 
 /* Spinner */
 .ui-spinner {
@@ -1946,4 +1966,131 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   justify-content: flex-end;
   padding-top: 1rem;
   border-top: 1px solid var(--color-border);
+}
+
+/* ─── Document Cards ──────────────────────────────── */
+.documents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.document-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  transition: all 0.2s;
+}
+
+.document-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 8px rgba(225, 6, 0, 0.08);
+}
+
+.document-card-ready {
+  border-left: 4px solid var(--color-success);
+}
+
+.document-card-pending {
+  border-left: 4px solid var(--color-muted);
+  opacity: 0.8;
+}
+
+.document-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: var(--color-surface1);
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.document-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.document-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 0.25rem 0;
+}
+
+.document-card-status {
+  font-size: 0.8rem;
+  color: var(--color-success);
+  margin: 0;
+}
+
+.document-card-status-pending {
+  color: var(--color-muted);
+}
+
+.document-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.document-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.document-btn-primary {
+  background: var(--color-accent);
+  color: white;
+}
+
+.document-btn-primary:hover {
+  background: #c90500;
+}
+
+.document-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.document-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.document-btn-icon:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.document-btn-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.document-card-empty {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  font-style: italic;
 }

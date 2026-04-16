@@ -602,55 +602,76 @@ export default function AssessmentResultPage() {
         </SectionCard>
       )}
 
-      {/* Análisis IA */}
-      <SectionCard icon={<IconAI />} title="Análisis con IA">
-        {a.analisisIA ? (
-          <div className="ai-done-box">
-            <p className="ai-done-text">Análisis generado correctamente.</p>
-            <div className="ai-done-actions">
-              <button className="ui-btn-primary" onClick={openPdfPreview}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                Ver PDF
-              </button>
-              <button className="ui-btn-icon" onClick={handleAnalyze} disabled={analyzing} title="Regenerar análisis">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-                </svg>
-                {analyzing ? '...' : 'Regenerar'}
-              </button>
+      {/* Resultados por IA */}
+      <SectionCard icon={<IconAI />} title="Resultados por IA">
+        <div className="documents-grid">
+          {/* Análisis IA */}
+          <div className={`document-card ${a.analisisIA ? 'document-card-ready' : 'document-card-pending'}`}>
+            <div className="document-card-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
+            <div className="document-card-content">
+              <h3 className="document-card-title">Análisis con IA</h3>
+              {a.analisisIA ? (
+                <p className="document-card-status">Generado</p>
+              ) : (
+                <p className="document-card-status document-card-status-pending">Pendiente</p>
+              )}
+            </div>
+            <div className="document-card-actions">
+              {a.analisisIA ? (
+                <>
+                  <button className="document-btn document-btn-primary" onClick={openPdfPreview}>
+                    Ver
+                  </button>
+                  <button className="document-btn-icon" onClick={handleAnalyze} disabled={analyzing} title="Regenerar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                  </button>
+                </>
+              ) : (
+                <button className="document-btn document-btn-primary" onClick={handleAnalyze} disabled={analyzing}>
+                  {analyzing ? 'Generando...' : 'Generar'}
+                </button>
+              )}
             </div>
           </div>
-        ) : (
-          <div className="ai-pending-box">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-dim)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
-            </svg>
-            <p className="ai-pending-text">
-              Análisis pendiente. Necesitas conexión a internet para generarlo con IA.
-            </p>
-            <button className="ui-btn-primary" onClick={handleAnalyze} disabled={analyzing}>
-              {analyzing ? 'Generando análisis...' : 'Generar Análisis con IA →'}
-            </button>
-          </div>
-        )}
-      </SectionCard>
 
-      {/* Plan de Entrenamiento */}
-      <SectionCard icon={<IconTraining />} title="Plan de Entrenamiento">
-        {a.planEntrenamiento ? (
-          <div className="plan-preview-box">
-            <button className="ui-btn-primary" onClick={() => setShowPlanModal(true)}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+          {/* Plan de Entrenamiento */}
+          <div className={`document-card ${a.planEntrenamiento ? 'document-card-ready' : 'document-card-pending'}`}>
+            <div className="document-card-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18"/>
+                <path d="M9 21V9"/>
               </svg>
-              Ver Plan de Entrenamiento
-            </button>
+            </div>
+            <div className="document-card-content">
+              <h3 className="document-card-title">Plan de Entrenamiento</h3>
+              {a.planEntrenamiento ? (
+                <p className="document-card-status">Generado</p>
+              ) : (
+                <p className="document-card-status document-card-status-pending">Pendiente</p>
+              )}
+            </div>
+            <div className="document-card-actions">
+              {a.planEntrenamiento ? (
+                <button className="document-btn document-btn-primary" onClick={() => setShowPlanModal(true)}>
+                  Ver
+                </button>
+              ) : (
+                <span className="document-card-empty">Sin plan</span>
+              )}
+            </div>
           </div>
-        ) : (
-          <div className="plan-pending">
-            <p>Plan de entrenamiento pendiente.</p>
-          </div>
-        )}
+        </div>
       </SectionCard>
 
       {/* Plan Modal */}

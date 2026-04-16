@@ -157,8 +157,7 @@ function PlanVisualization({ plan, onSave, readOnly = true, onAlert }) {
         </thead>
         <tbody>
           {parsed.table.map((row, i) => {
-            const isNewDay = lastDia && lastDia !== row.dia
-            lastDia = row.dia
+            const showDay = i === 0 ? true : parsed.table[i-1].dia !== row.dia
             const isEditing = editingRow === i
             const showAddRowBelow = addingAfterRow === i
 
@@ -166,10 +165,10 @@ function PlanVisualization({ plan, onSave, readOnly = true, onAlert }) {
               <>
                 <tr
                   key={i}
-                  className={isNewDay ? 'day-separator' : ''}
+                  className={showDay && i !== 0 ? 'day-separator' : ''}
                   onDoubleClick={() => handleDoubleClick(i)}
                 >
-                  <td className="td-day">{row.dia}</td>
+                  <td className="td-day">{showDay ? row.dia : ''}</td>
                   <td className="td-group">
                     {isEditing ? (
                       <input

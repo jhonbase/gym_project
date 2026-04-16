@@ -1717,6 +1717,11 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   background: linear-gradient(90deg, rgba(225, 6, 0, 0.06) 0%, rgba(225, 6, 0, 0.02) 100%);
 }
 
+.plan-modal-table tr.day-separator td {
+  border-top: 2px solid var(--color-accent);
+  background: rgba(225, 6, 0, 0.05);
+}
+
 .plan-modal-table .td-day {
   font-weight: 800;
   color: var(--color-accent);
@@ -1778,4 +1783,162 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   text-align: center;
   padding: 2rem;
   color: var(--color-muted);
+}
+
+/* ─── PlanEditable Styles ──────────────────────────── */
+.plan-editable-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.plan-cell-input {
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+  color: var(--color-text);
+  font-size: 0.85rem;
+  width: 100%;
+  min-width: 60px;
+}
+
+.plan-cell-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(225, 6, 0, 0.15);
+}
+
+.plan-cell-input.small {
+  width: 60px;
+  min-width: 50px;
+  text-align: center;
+}
+
+.plan-modal-table tr[onDoubleClick] {
+  cursor: pointer;
+}
+
+.plan-modal-table tr:hover td:not(.td-day) {
+  background: rgba(225, 6, 0, 0.08);
+}
+
+.td-actions {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.plan-save-btn,
+.plan-delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.plan-save-btn {
+  color: var(--color-success);
+}
+
+.plan-save-btn:hover {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.plan-delete-btn {
+  color: var(--color-dim);
+}
+
+.plan-delete-btn:hover {
+  color: var(--color-error);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.plan-add-row-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-success);
+  transition: all 0.2s;
+}
+
+.plan-add-row-btn:hover {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.plan-add-row td {
+  padding: 0.75rem 1rem;
+  background: var(--color-surface2);
+}
+
+.plan-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 1px dashed var(--color-border);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.plan-add-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.plan-add-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.plan-add-confirm,
+.plan-add-cancel {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.plan-add-confirm {
+  color: var(--color-success);
+}
+
+.plan-add-confirm:hover {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.plan-add-cancel {
+  color: var(--color-dim);
+}
+
+.plan-add-cancel:hover {
+  color: var(--color-error);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.plan-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
 }

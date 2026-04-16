@@ -52,41 +52,207 @@ function ResultItem({ label, value }) {
   )
 }
 
-/* ─── Visualización del Plan de Entrenamiento ─── */
-function PlanVisualization({ plan }) {
+/* ─── Visualización del Plan de Entrenamiento (Editable) ─── */
+function PlanVisualization({ plan, onSave, readOnly = true, onAlert }) {
   if (!plan) return null
-  
-  const parsed = parseTrainingPlan(plan)
-  
-  if (parsed.table.length === 0) {
+
+  const [parsed, setParsed] = useState(() => parseTrainingPlan(plan))
+  const [editingRow, setEditingRow] = useState(null)
+  const [addingToRow, setAddingToRow] = useState(null)
+  const [newExercise, setNewExercise] = useState({ grupo: '', ejercicio: '', series: '3', reps: '12', descanso: '60s' })
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    setParsed(parseTrainingPlan(plan))
+  }, [plan])
+
+  if (parsed.table.length === 0 && readOnly) {
     return <pre style={{ whiteSpace: 'pre-wrap', padding: '1rem', background: 'var(--color-surface2)', borderRadius: '12px', fontSize: '0.85rem', lineHeight: 1.6 }}>{plan}</pre>
   }
-  
+
+  function generatePlanText() {
+    const days = {}
+    parsed.table.forEach(row => {
+      if (!days[row.dia]) days[row.dia] = []
+      days[row.dia].push(row)
+    })
+
+    let text = '| Día | Grupo Muscular | Ejercicio | Series | Reps | Descanso |\n'
+    text += '|---|---|---|---|---|---|\n'
+
+    Object.entries(days).forEach(([dia, rows]) => {
+      rows.forEach((row, idx) => {
+        text += `| ${idx === 0 ? dia : ''} | ${row.grupo} | ${row.ejercicio} | ${row.series} | ${row.reps} | ${row.descanso} |\n`
+      })
+    })
+
+    return text
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    try {
+      await onSave(generatePlanText())
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function handleDoubleClick(index) {
+    if (readOnly) return
+    setEditingRow(index)
+  }
+
+  function handleCellChange(index, field, value) {
+    const newTable = [...parsed.table]
+    newTable[index] = { ...newTable[index], [field]: value }
+    setParsed({ ...parsed, table: newTable })
+  }
+
+  function handleSaveRow() {
+    setEditingRow(null)
+  }
+
+  function handleDeleteRow(index) {
+    if (!confirm('¿Eliminar este ejercicio?')) return
+    const newTable = parsed.table.filter((_, i) => i !== index)
+    setParsed({ ...parsed, table: newTable })
+  }
+
+  function handleStartAdd(rowIndex) {
+    setAddingToRow(rowIndex)
+    const targetDay = parsed.table[rowIndex].dia
+    setNewExercise({ grupo: '', ejercicio: '', series: '3', reps: '12', descanso: '60s' })
+  }
+
+  function handleAddExercise() {
+    if (!newExercise.ejercicio.trim() || !newExercise.grupo.trim()) {
+      onAlert?.({ type: 'error', message: 'Completa todos los campos' })
+      return
+    }
+    const targetDay = parsed.table[addingToRow].dia
+    const newRow = { dia: targetDay, ...newExercise }
+    const newTable = [...parsed.table, newRow]
+    setParsed({ ...parsed, table: newTable })
+    setAddingToRow(null)
+  }
+
+  let lastDia = ''
+
   return (
-    <table className="plan-modal-table">
-      <thead>
-        <tr>
-          <th>Día</th>
-          <th>Grupo Muscular</th>
-          <th>Ejercicio</th>
-          <th>Series</th>
-          <th>Reps</th>
-          <th>Descanso</th>
-        </tr>
-      </thead>
-      <tbody>
-        {parsed.table.map((row, i) => (
-          <tr key={i}>
-            <td className="td-day">{row.dia}</td>
-            <td className="td-group">{row.grupo}</td>
-            <td className="td-exercise">{row.ejercicio}</td>
-            <td className="td-sets">{row.series}</td>
-            <td className="td-reps">{row.reps}</td>
-            <td className="td-rest">{row.descanso}</td>
+    <div className="plan-editable-container">
+      <table className="plan-modal-table">
+        <thead>
+          <tr>
+            <th>Día</th>
+            <th>Grupo Muscular</th>
+            <th>Ejercicio</th>
+            <th>Series</th>
+            <th>Reps</th>
+            <th>Descanso</th>
+            {!readOnly && <th style={{ width: '50px' }}></th>}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {parsed.table.map((row, i) => {
+            const isNewDay = lastDia && lastDia !== row.dia
+            lastDia = row.dia
+            const isEditing = editingRow === i
+            const isAdding = addingToRow === i
+
+            return (
+              <tr
+                key={i}
+                className={isNewDay ? 'day-separator' : ''}
+                onDoubleClick={() => handleDoubleClick(i)}
+              >
+                <td className="td-day">{row.dia}</td>
+                <td className="td-group">
+                  {isEditing || isAdding ? (
+                    <input
+                      className="plan-cell-input"
+                      value={isAdding ? newExercise.grupo : row.grupo}
+                      onChange={(e) => isAdding ? setNewExercise({ ...newExercise, grupo: e.target.value }) : handleCellChange(i, 'grupo', e.target.value)}
+                    />
+                  ) : row.grupo}
+                </td>
+                <td className="td-exercise">
+                  {isEditing || isAdding ? (
+                    <input
+                      className="plan-cell-input"
+                      value={isAdding ? newExercise.ejercicio : row.ejercicio}
+                      onChange={(e) => isAdding ? setNewExercise({ ...newExercise, ejercicio: e.target.value }) : handleCellChange(i, 'ejercicio', e.target.value)}
+                    />
+                  ) : row.ejercicio}
+                </td>
+                <td className="td-sets">
+                  {isEditing || isAdding ? (
+                    <input
+                      className="plan-cell-input small"
+                      value={isAdding ? newExercise.series : row.series}
+                      onChange={(e) => isAdding ? setNewExercise({ ...newExercise, series: e.target.value }) : handleCellChange(i, 'series', e.target.value)}
+                    />
+                  ) : row.series}
+                </td>
+                <td className="td-reps">
+                  {isEditing || isAdding ? (
+                    <input
+                      className="plan-cell-input small"
+                      value={isAdding ? newExercise.reps : row.reps}
+                      onChange={(e) => isAdding ? setNewExercise({ ...newExercise, reps: e.target.value }) : handleCellChange(i, 'reps', e.target.value)}
+                    />
+                  ) : row.reps}
+                </td>
+                <td className="td-rest">
+                  {isEditing || isAdding ? (
+                    <input
+                      className="plan-cell-input small"
+                      value={isAdding ? newExercise.descanso : row.descanso}
+                      onChange={(e) => isAdding ? setNewExercise({ ...newExercise, descanso: e.target.value }) : handleCellChange(i, 'descanso', e.target.value)}
+                    />
+                  ) : row.descanso}
+                </td>
+                {!readOnly && (
+                  <td className="td-actions">
+                    {isEditing ? (
+                      <button className="plan-save-btn" onClick={handleSaveRow} title="Guardar">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
+                      </button>
+                    ) : isAdding ? (
+                      <>
+                        <button className="plan-save-btn" onClick={handleAddExercise} title="Agregar">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
+                        </button>
+                        <button className="plan-delete-btn" onClick={() => setAddingToRow(null)} title="Cancelar">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button className="plan-add-row-btn" onClick={() => handleStartAdd(i)} title="Agregar ejercicio">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                        <button className="plan-delete-btn" onClick={() => handleDeleteRow(i)} title="Eliminar">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                        </button>
+                      </>
+                    )}
+                  </td>
+                )}
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+
+      {!readOnly && (
+        <div className="plan-modal-actions">
+          <button className="ui-btn-primary" onClick={handleSave} disabled={saving}>
+            {saving ? 'Guardando...' : 'Guardar Cambios'}
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -95,6 +261,8 @@ function parseTrainingPlan(planText) {
   const table = []
   const notes = []
   const lines = planText.split('\n')
+  
+  const headerKeywords = ['día', 'grupo muscular', 'ejercicio', 'series', 'reps', 'descanso', 'dia', 'group']
   
   for (const line of lines) {
     const trimmed = line.trim()
@@ -112,8 +280,13 @@ function parseTrainingPlan(planText) {
       const cells = trimmed.split('|').map(c => c.trim()).filter(c => c.length > 0)
       
       if (cells.length >= 5) {
-        const first = cells[0].toLowerCase()
-        if (!first.includes('dia') && !first.includes('group')) {
+        const first = cells[0].toLowerCase().trim()
+        
+        // Ignorar si es header o separador
+        const isHeader = headerKeywords.some(kw => first.includes(kw))
+        const isSeparator = trimmed.includes('---') || trimmed.match(/^[\s|-]+$/)
+        
+        if (!isHeader && !isSeparator) {
           table.push({
             dia: cells[0],
             grupo: cells[1] || '-',
@@ -123,11 +296,6 @@ function parseTrainingPlan(planText) {
             descanso: cells[5] || '-'
           })
         }
-      }
-    } else if (trimmed.length > 20 && !trimmed.includes('|')) {
-      const clean = trimmed.replace(/\*\*/g, '').trim()
-      if (clean && !clean.toLowerCase().includes('dia')) {
-        notes.push(clean)
       }
     }
   }
@@ -458,7 +626,26 @@ export default function AssessmentResultPage() {
               </button>
             </div>
             <div className="plan-modal-body">
-              <PlanVisualization plan={a.planEntrenamiento} />
+              <PlanVisualization
+                plan={a.planEntrenamiento}
+                onSave={async (newPlan) => {
+                  setSavingPlan(true)
+                  try {
+                    const res = await apiClient.put(`/assessments/${id}/training-plan`, {
+                      planEntrenamiento: newPlan,
+                    })
+                    setAssessment(res.data.data.assessment)
+                    setShowPlanModal(false)
+                    setAlert({ type: 'success', message: 'Plan de entrenamiento actualizado.' })
+                  } catch (err) {
+                    setAlert({ type: 'error', message: 'Error al guardar el plan.' })
+                  } finally {
+                    setSavingPlan(false)
+                  }
+                }}
+                readOnly={false}
+                onAlert={setAlert}
+              />
             </div>
           </div>
         </div>

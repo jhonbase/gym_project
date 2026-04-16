@@ -93,6 +93,7 @@ model Assessment {
 
   // Contexto
   nivelActividadFisica String   
+  diasDisponibles      String[] // Días disponibles para entrenar: ["lunes", "miercoles", "viernes"]
   observacion          String?  
   objetivoUsuario      String   
   proximaFechaValoracion DateTime? // Fecha programada para la próxima valoración

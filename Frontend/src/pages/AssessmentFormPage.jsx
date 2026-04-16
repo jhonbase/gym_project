@@ -92,7 +92,9 @@ export default function AssessmentFormPage() {
     imc: '', masaMagra: '', aguaCorporal: '', grasaVisceral: '',
     presionArterial: '', edadMetabolica: '',
     resistenciaMuscular: '',
-    nivelActividadFisica: 'sedentario', observacion: '', objetivoUsuario: '',
+    nivelActividadFisica: 'sedentario', 
+    diasDisponibles: ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'],
+    observacion: '', objetivoUsuario: '',
     proximaFechaValoracion: '',
     tieneLesion: false, lesionDescripcion: '',
     anteOsteomuscular: false, anteOsteomuscularDesc: '',
@@ -168,6 +170,7 @@ export default function AssessmentFormPage() {
         rmEstimado: 1,
         ppm: 30,
         nivelActividadFisica: form.nivelActividadFisica,
+        diasDisponibles: form.diasDisponibles,
         observacion: form.observacion || undefined,
         objetivoUsuario: form.objetivoUsuario,
         proximaFechaValoracion: form.proximaFechaValoracion ? new Date(form.proximaFechaValoracion).toISOString() : undefined,
@@ -388,25 +391,30 @@ export default function AssessmentFormPage() {
                 <option value="muy_activo">Muy activo</option>
               </select>
             </FormField>
-            <div className="objetivo-wrapper">
-              <label className="objetivo-label">
-                <span className="objetivo-icon">🏆</span>
-                Objetivo del usuario
-              </label>
-              <textarea 
-                className="ui-input objetivo-input" 
-                name="objetivoUsuario" 
-                value={form.objetivoUsuario} 
-                onChange={handleChange} 
-                rows="3" 
-                required 
-                style={{ resize: 'vertical', minHeight: '80px' }}
-                placeholder="¿Qué objetivos tiene el usuario?"
-              />
-            </div>
             <FormField label="Observaciones (opcional)" error={fe.observacion}>
               <textarea className="ui-input" name="observacion" value={form.observacion} onChange={handleChange} rows="3" style={{ resize: 'vertical', minHeight: '80px' }} />
             </FormField>
+            <div>
+              <label className="ui-label">Días disponibles para entrenar</label>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
+                {['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].map(dia => (
+                  <button
+                    key={dia}
+                    type="button"
+                    className={`antecedente-chip ${form.diasDisponibles.includes(dia) ? 'antecedente-chip-active' : ''}`}
+                    onClick={() => {
+                      const nuevosDias = form.diasDisponibles.includes(dia)
+                        ? form.diasDisponibles.filter(d => d !== dia)
+                        : [...form.diasDisponibles, dia]
+                      setForm(prev => ({ ...prev, diasDisponibles: nuevosDias }))
+                    }}
+                  >
+                    <span className="antecedente-chip-icon">{form.diasDisponibles.includes(dia) ? '✓' : '+'}</span>
+                    <span style={{ textTransform: 'capitalize' }}>{dia}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </SectionCard>
 

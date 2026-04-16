@@ -127,6 +127,7 @@ function buildTrainingPlanPrompt(data) {
   const imc = data.imc || 0
   const grasa = data.grasaCorporal || 0
   const masaMuscular = data.masaMuscular || 0
+  const diasDisponibles = data.diasDisponibles || []
   
   let adaptaciones = ''
   if (data.lesionDescripcion) adaptaciones += `- Lesión actual: ${data.lesionDescripcion}\n`
@@ -147,6 +148,10 @@ function buildTrainingPlanPrompt(data) {
     objetivoTexto = 'Mantenimiento y mejora general'
   }
 
+  const diasTexto = diasDisponibles.length > 0 
+    ? `Días disponibles para entrenar: ${diasDisponibles.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')}`
+    : 'Días disponibles para entrenar: Lunes a Viernes (todos los días)'
+
   return `
 Eres un Entrenador Personal Certificado con más de 10 años de experiencia. 
 Genera un plan de entrenamiento semanal completo y detallado en ESPAÑOL.
@@ -158,17 +163,19 @@ DATOS DEL CLIENTE:
 - Grasa corporal: ${grasa}%
 - Masa muscular: ${masaMuscular} kg
 - Nivel de actividad actual: ${nivel}
+- ${diasTexto}
 ${adaptaciones ? '\nCONSIDERACIONES ESPECIALES:\n' + adaptaciones : ''}
 
 INSTRUCCIONES:
-1. Genera un plan de 4-5 días de entrenamiento por semana
+1. Genera un plan de entrenamiento para los días ${diasDisponibles.length > 0 ? 'específicos' : '4-5'} que el cliente tiene disponibles
 2. Incluye: día de entrenamiento, grupo muscular principal, ejercicios específicos, series, repeticiones, tiempo de descanso
 3. Considera el objetivo del usuario para definir intensidad y tipo de ejercicios
 4. Incluye recomendaciones de calentamiento y enfriamiento
 5. Adapta los ejercicios según las lesiones/antecedentes del usuario
 6. El plan debe ser realista y progresivo
+7. USA SOLO LOS DÍAS QUE EL CLIENTE TIENE DISPONIBLES - NO inventes días adicionales
 
-FORMATO DE RESPUESTA (usa este formato de tabla):
+FORMAT DE RESPUESTA (usa este formato de tabla):
 | Día | Grupo Muscular | Ejercicio | Series | Reps | Descanso |
 |-----|----------------|-----------|--------|------|----------|
 | Lunes | Pierna | Sentadilla | 4 | 10-12 | 90s |

@@ -90,7 +90,9 @@ export default function AssessmentEditPage() {
     imc: '', masaMagra: '', aguaCorporal: '', grasaVisceral: '',
     presionArterial: '', edadMetabolica: '',
     resistenciaMuscular: '',
-    nivelActividadFisica: 'sedentario', observacion: '', objetivoUsuario: '',
+    nivelActividadFisica: 'sedentario', 
+    diasDisponibles: ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'],
+    observacion: '', objetivoUsuario: '',
     proximaFechaValoracion: '',
     tieneLesion: false, lesionDescripcion: '',
     anteOsteomuscular: false, anteOsteomuscularDesc: '',
@@ -126,6 +128,9 @@ export default function AssessmentEditPage() {
           edadMetabolica: a.edadMetabolica || '',
           resistenciaMuscular: a.resistenciaMuscular || '',
           nivelActividadFisica: a.nivelActividadFisica || 'sedentario',
+          diasDisponibles: a.diasDisponibles && a.diasDisponibles.length > 0 
+            ? a.diasDisponibles 
+            : ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'],
           observacion: a.observacion || '',
           objetivoUsuario: a.objetivoUsuario || '',
           proximaFechaValoracion: a.proximaFechaValoracion ? new Date(a.proximaFechaValoracion).toISOString().split('T')[0] : '',
@@ -210,6 +215,7 @@ export default function AssessmentEditPage() {
         rmEstimado: 1,
         ppm: 30,
         nivelActividadFisica: form.nivelActividadFisica,
+        diasDisponibles: form.diasDisponibles,
         observacion: form.observacion || null,
         objetivoUsuario: form.objetivoUsuario,
         proximaFechaValoracion: form.proximaFechaValoracion ? new Date(form.proximaFechaValoracion).toISOString() : null,
@@ -415,7 +421,7 @@ export default function AssessmentEditPage() {
           </div>
         </SectionCard>
 
-        <SectionCard icon={<IconContext />} title="Contexto del usuario">
+<SectionCard icon={<IconContext />} title="Contexto del usuario">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             <FormField label="Nivel de actividad física" error={fe.nivelActividadFisica}>
               <select className="ui-input" name="nivelActividadFisica" value={form.nivelActividadFisica} onChange={handleChange}>
@@ -459,6 +465,27 @@ export default function AssessmentEditPage() {
             <FormField label="Observaciones (opcional)" error={fe.observacion}>
               <textarea className="ui-input" name="observacion" value={form.observacion} onChange={handleChange} rows="3" style={{ resize: 'vertical', minHeight: '80px' }} />
             </FormField>
+            <div>
+              <label className="ui-label">Días disponibles para entrenar</label>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
+                {['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].map(dia => (
+                  <button
+                    key={dia}
+                    type="button"
+                    className={`antecedente-chip ${form.diasDisponibles.includes(dia) ? 'antecedente-chip-active' : ''}`}
+                    onClick={() => {
+                      const nuevosDias = form.diasDisponibles.includes(dia)
+                        ? form.diasDisponibles.filter(d => d !== dia)
+                        : [...form.diasDisponibles, dia]
+                      setForm(prev => ({ ...prev, diasDisponibles: nuevosDias }))
+                    }}
+                  >
+                    <span className="antecedente-chip-icon">{form.diasDisponibles.includes(dia) ? '✓' : '+'}</span>
+                    <span style={{ textTransform: 'capitalize' }}>{dia}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </SectionCard>
 

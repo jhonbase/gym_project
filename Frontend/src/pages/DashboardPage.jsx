@@ -310,6 +310,11 @@ export default function DashboardPage() {
             {allActions.length === 0 && (
               <p className="dashboard-empty">No hay acciones pendientes</p>
             )}
+            {allActions.length > 3 && (
+              <button className="dashboard-view-all-btn" onClick={() => openModal('all')}>
+                Ver todas las acciones ({allActions.length}) →
+              </button>
+            )}
           </div>
         </div>
       </div>

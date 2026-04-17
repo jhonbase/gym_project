@@ -747,7 +747,7 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--color-accent), #8b5cf6);
+  background: linear-gradient(90deg, var(--color-accent), #991b1b);
   opacity: 0.8;
 }
 
@@ -903,6 +903,27 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   background: #1a1a1a;
   transform: translateX(6px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-view-all-btn {
+  display: block;
+  width: 100%;
+  padding: 0.875rem;
+  background: linear-gradient(135deg, var(--color-accent), #991b1b);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.dashboard-view-all-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(225, 6, 0, 0.3);
 }
 
 .dashboard-action-icon {

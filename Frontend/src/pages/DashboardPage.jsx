@@ -43,7 +43,7 @@ function Modal({ isOpen, onClose, title, children }) {
   )
 }
 
-function Calendar({ assessments }) {
+function Calendar({ assessments, onBack }) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(null)
   
@@ -144,21 +144,36 @@ function Calendar({ assessments }) {
         <div className="calendar-selected-day">
           <h4>{selectedDate} de {months[currentDate.getMonth()]}</h4>
           {getAssessmentsForDate(selectedDate).length > 0 ? (
-            <ul className="calendar-events">
+            <div className="calendar-events-grid">
               {getAssessmentsForDate(selectedDate).map(a => (
-                <li key={a.id}>
-                  <span className="event-time">
-                    {new Date(a.proximaFechaValoracion).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                  <span className="event-name">{a.user?.nombre || 'Estudiante'}</span>
-                </li>
+                <Link 
+                  key={a.id} 
+                  to={`/student/${a.userId}`}
+                  className="calendar-event-card"
+                >
+                  <div className="event-avatar">
+                    {a.user?.nombre?.charAt(0).toUpperCase() || '?'}
+                  </div>
+                  <div className="event-info">
+                    <span className="event-name">{a.user?.nombre || 'Estudiante'}</span>
+                    <span className="event-time">
+                      {new Date(a.proximaFechaValoracion).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <span className="event-arrow">→</span>
+                </Link>
               ))}
-            </ul>
+            </div>
           ) : (
             <p className="no-events">No hay valoraciones</p>
           )}
         </div>
       )}
+      <div className="calendar-footer">
+        <button className="calendar-back-btn" onClick={onBack}>
+          ← Volver a Valoraciones
+        </button>
+      </div>
     </div>
   )
 }
@@ -449,17 +464,7 @@ export default function DashboardPage() {
         title={getModalTitle()}
       >
         {showCalendar ? (
-          <>
-            <Calendar assessments={assessments} />
-            <div className="modal-calendar-toggle">
-              <button 
-                className="calendar-toggle-btn active"
-                onClick={() => setShowCalendar(false)}
-              >
-                ← Volver a Valoraciones
-              </button>
-            </div>
-          </>
+          <Calendar assessments={assessments} onBack={() => setShowCalendar(false)} />
         ) : (
           <div className="dashboard-modal-list">
             {getFilteredActions().length > 0 ? (

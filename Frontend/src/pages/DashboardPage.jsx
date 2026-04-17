@@ -43,6 +43,126 @@ function Modal({ isOpen, onClose, title, children }) {
   )
 }
 
+function Calendar({ assessments }) {
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState(null)
+  
+  const months = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ]
+  
+  const daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+  
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDay = firstDay.getDay()
+    
+    const days = []
+    
+    // Días vacíos del mes anterior
+    for (let i = 0; i < startingDay; i++) {
+      days.push(null)
+    }
+    
+    // Días del mes actual
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(i)
+    }
+    
+    return days
+  }
+  
+  const prevMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
+  }
+  
+  const nextMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
+  }
+  
+  const hasAssessment = (day) => {
+    if (!day) return false
+    const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    return assessments.some(a => {
+      if (!a.proximaFechaValoracion) return false
+      const fecha = new Date(a.proximaFechaValoracion).toISOString().split('T')[0]
+      return fecha === dateStr
+    })
+  }
+  
+  const getAssessmentsForDate = (day) => {
+    if (!day) return []
+    const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    return assessments.filter(a => {
+      if (!a.proximaFechaValoracion) return false
+      const fecha = new Date(a.proximaFechaValoracion).toISOString().split('T')[0]
+      return fecha === dateStr
+    })
+  }
+  
+  const today = new Date()
+  const isToday = (day) => {
+    return day === today.getDate() && 
+           currentDate.getMonth() === today.getMonth() && 
+           currentDate.getFullYear() === today.getFullYear()
+  }
+  
+  const days = getDaysInMonth(currentDate)
+  
+  return (
+    <div className="dashboard-calendar">
+      <div className="dashboard-calendar-header">
+        <button onClick={prevMonth} className="calendar-nav-btn">←</button>
+        <span className="calendar-month">
+          {months[currentDate.getMonth()]} {currentDate.getFullYear()}
+        </span>
+        <button onClick={nextMonth} className="calendar-nav-btn">→</button>
+      </div>
+      <div className="calendar-weekdays">
+        {daysOfWeek.map(day => (
+          <div key={day} className="calendar-weekday">{day}</div>
+        ))}
+      </div>
+      <div className="calendar-days">
+        {days.map((day, i) => (
+          <div 
+            key={i} 
+            className={`calendar-day ${!day ? 'empty' : ''} ${isToday(day) ? 'today' : ''} ${hasAssessment(day) ? 'has-assessment' : ''} ${selectedDate === day ? 'selected' : ''}`}
+            onClick={() => day && setSelectedDate(selectedDate === day ? null : day)}
+          >
+            {day}
+            {hasAssessment(day) && <span className="assessment-dot"></span>}
+          </div>
+        ))}
+      </div>
+      {selectedDate && (
+        <div className="calendar-selected-day">
+          <h4>{selectedDate} de {months[currentDate.getMonth()]}</h4>
+          {getAssessmentsForDate(selectedDate).length > 0 ? (
+            <ul className="calendar-events">
+              {getAssessmentsForDate(selectedDate).map(a => (
+                <li key={a.id}>
+                  <span className="event-time">
+                    {new Date(a.proximaFechaValoracion).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  <span className="event-name">{a.user?.nombre || 'Estudiante'}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="no-events">No hay valoraciones</p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function DashboardPage() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
@@ -55,8 +175,10 @@ export default function DashboardPage() {
   })
   const [students, setStudents] = useState([])
   const [allActions, setAllActions] = useState([])
+  const [assessments, setAssessments] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
   const [modalCategory, setModalCategory] = useState('all')
+  const [showCalendar, setShowCalendar] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -167,6 +289,7 @@ export default function DashboardPage() {
         sinEps: withoutEps.length
       })
       
+      setAssessments(assessments)
       setStudents(studentsWithAssessments.slice(0, 3))
       setAllActions(actions)
     })
@@ -322,31 +445,55 @@ export default function DashboardPage() {
       {/* Modal */}
       <Modal 
         isOpen={modalOpen} 
-        onClose={() => setModalOpen(false)} 
+        onClose={() => { setModalOpen(false); setShowCalendar(false) }} 
         title={getModalTitle()}
       >
-        <div className="dashboard-modal-list">
-          {getFilteredActions().length > 0 ? (
-            getFilteredActions().map((action, i) => (
-              <Link 
-                key={i} 
-                to={action.type === 'plan' ? `/assessment/${action.id}` : `/student/${action.userId || action.id}`}
-                className={`dashboard-action-card dashboard-action-${action.type}`}
+        {showCalendar ? (
+          <>
+            <Calendar assessments={assessments} />
+            <div className="modal-calendar-toggle">
+              <button 
+                className="calendar-toggle-btn active"
+                onClick={() => setShowCalendar(false)}
               >
-                <div className="dashboard-action-icon">
-                  {action.type === 'new' ? '🚨' : action.type === 'plan' ? '⚠️' : action.type === 'eps' ? '📄' : '📅'}
-                </div>
-                <div className="dashboard-action-content">
-                  <span className="dashboard-action-student">{action.student}</span>
-                  <span className="dashboard-action-message">{action.message}</span>
-                </div>
-                <span className="dashboard-action-arrow">→</span>
-              </Link>
-            ))
-          ) : (
-            <p className="dashboard-empty">No hay acciones en esta categoría</p>
-          )}
-        </div>
+                ← Volver a Valoraciones
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="dashboard-modal-list">
+            {getFilteredActions().length > 0 ? (
+              getFilteredActions().map((action, i) => (
+                <Link 
+                  key={i} 
+                  to={action.type === 'plan' ? `/assessment/${action.id}` : `/student/${action.userId || action.id}`}
+                  className={`dashboard-action-card dashboard-action-${action.type}`}
+                >
+                  <div className="dashboard-action-icon">
+                    {action.type === 'new' ? '🚨' : action.type === 'plan' ? '⚠️' : action.type === 'eps' ? '📄' : '📅'}
+                  </div>
+                  <div className="dashboard-action-content">
+                    <span className="dashboard-action-student">{action.student}</span>
+                    <span className="dashboard-action-message">{action.message}</span>
+                  </div>
+                  <span className="dashboard-action-arrow">→</span>
+                </Link>
+              ))
+            ) : (
+              <p className="dashboard-empty">No hay acciones en esta categoría</p>
+            )}
+            {modalCategory === 'date' && (
+              <div className="modal-calendar-toggle">
+                <button 
+                  className="calendar-toggle-btn"
+                  onClick={() => setShowCalendar(true)}
+                >
+                  📅 Ver Calendario
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </Modal>
     </div>
   )

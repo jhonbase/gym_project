@@ -50,9 +50,11 @@ export default function DashboardPage() {
       })
       
       // Estudiantes recientes
-      const recent = students.slice(0, 6).map(s => ({
+      const recent = students.slice(0, 3).map(s => ({
         ...s,
-        lastAssessment: null
+        lastAssessment: s.assessments && s.assessments.length > 0 
+          ? s.assessments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]
+          : null
       }))
       setRecentStudents(recent)
       setPendingActions([])
@@ -75,12 +77,6 @@ export default function DashboardPage() {
           <h1 className="dashboard-greeting">Hola, {user.nombre.split(' ')[0]} 👋</h1>
           <p className="dashboard-subtitle">Bienvenido al panel de entrenador</p>
         </div>
-        <Link to="/assessment/new" className="ui-btn-primary">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Nueva Valoración
-        </Link>
       </div>
 
       {/* Stats Grid */}
@@ -120,7 +116,6 @@ export default function DashboardPage() {
         <div className="dashboard-section">
           <div className="dashboard-section-header">
             <h2 className="dashboard-section-title">Estudiantes Recientes</h2>
-            <Link to="/students" className="dashboard-section-link">Ver todos →</Link>
           </div>
           <div className="dashboard-students-list">
             {recentStudents.length > 0 ? (
@@ -136,9 +131,11 @@ export default function DashboardPage() {
                   <div className="dashboard-student-info">
                     <span className="dashboard-student-name">{s.nombre}</span>
                     <span className="dashboard-student-meta">
+                      {s.programa && s.semestre && `${s.programa} · Semestre ${s.semestre}`}
+                      {s.programa && s.semestre && s.lastAssessment && ' · '}
                       {s.lastAssessment 
                         ? `Última: ${new Date(s.lastAssessment.createdAt).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })}`
-                        : 'Sin valoraciones'}
+                        : (!s.programa && !s.lastAssessment && 'Sin valoraciones')}
                     </span>
                   </div>
                   <span className="dashboard-student-arrow">→</span>
@@ -178,18 +175,6 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="dashboard-quick-actions">
-        <Link to="/students" className="dashboard-quick-action">
-          <span className="dashboard-quick-icon">📋</span>
-          <span>Ver Estudiantes</span>
-        </Link>
-        <Link to="/assessment/new" className="dashboard-quick-action">
-          <span className="dashboard-quick-icon">📝</span>
-          <span>Nueva Valoración</span>
-        </Link>
       </div>
     </div>
   )

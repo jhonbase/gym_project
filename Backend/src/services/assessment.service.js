@@ -28,6 +28,16 @@ async function getByUserId(userId) {
 }
 
 /**
+ * Obtiene todas las valoraciones con datos del usuario.
+ */
+async function getAll() {
+  return prisma.assessment.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: { user: true },
+  })
+}
+
+/**
  * Actualiza una valoración con el análisis generado por la IA.
  * Cambia el estado de "completada" a "analizada".
  */
@@ -97,4 +107,4 @@ async function deleteAssessment(id) {
   })
 }
 
-export { create, getById, getByUserId, updateAnalysis, updatePlanEntrenamiento, updateAnalysisAndPlan, updateLesion, update, deleteAssessment }
+export { create, getById, getByUserId, getAll, updateAnalysis, updatePlanEntrenamiento, updateAnalysisAndPlan, updateLesion, update, deleteAssessment }

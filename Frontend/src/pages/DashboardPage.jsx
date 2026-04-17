@@ -24,40 +24,90 @@ export default function DashboardPage() {
   const [alert, setAlert] = useState(null)
   const [stats, setStats] = useState({
     totalStudents: 0,
-    thisMonth: 0,
     pendingPlans: 0,
-    upcomingDates: 0
+    upcomingDates: 0,
+    thisMonth: 0
   })
-  const [recentStudents, setRecentStudents] = useState([])
-  const [pendingActions, setPendingActions] = useState([])
+  const [students, setStudents] = useState([])
+  const [urgentActions, setUrgentActions] = useState([])
 
   useEffect(() => {
     Promise.all([
       apiClient.get('/users?rol=usuario'),
+      apiClient.get('/assessments')
     ])
-    .then(([usersRes]) => {
-      const students = usersRes.data.data.users || []
+    .then(([usersRes, assessmentsRes]) => {
+      const studentsData = usersRes.data.data.users || []
+      const assessments = assessmentsRes.data.data.assessments || []
       
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
       
-      // Calcular stats de estudiantes
-      setStats({
-        totalStudents: students.length,
-        thisMonth: 0, // Sin endpoint de valoraciones globales
-        pendingPlans: 0,
-        upcomingDates: 0
+      // Agregar última valoración a cada estudiante
+      const studentsWithAssessments = studentsData.map(s => {
+        const studentAssessments = assessments.filter(a => a.userId === s.id)
+        const lastAssessment = studentAssessments.length > 0 
+          ? studentAssessments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]
+          : null
+        return { ...s, lastAssessment }
       })
       
-      // Estudiantes recientes
-      const recent = students.slice(0, 3).map(s => ({
-        ...s,
-        lastAssessment: s.assessments && s.assessments.length > 0 
-          ? s.assessments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]
-          : null
-      }))
-      setRecentStudents(recent)
-      setPendingActions([])
+      // Calcular estudiantes sin plan de entrenamiento
+      const withoutPlan = assessments.filter(a => 
+        !a.planEntrenamiento || a.planEntrenamiento.trim() === ''
+      )
+      
+      // Próximas fechas de valoración (próximos 7 días)
+      const upcoming = assessments.filter(a => 
+        a.proximaFechaValoracion && 
+        new Date(a.proximaFechaValoracion) >= now &&
+        new Date(a.proximaFechaValoracion) <= sevenDaysFromNow
+      )
+      
+      // Este mes
+      const thisMonthAssessments = assessments.filter(a => 
+        new Date(a.createdAt) >= startOfMonth
+      )
+      
+      // Crear lista de acciones urgentes
+      const actions = []
+      
+      // Agregar estudiantes sin plan
+      withoutPlan.forEach(a => {
+        actions.push({
+          type: 'plan',
+          student: a.user?.nombre || 'Estudiante',
+          id: a.id,
+          userId: a.userId,
+          message: 'Sin plan de entrenamiento',
+          date: a.createdAt
+        })
+      })
+      
+      // Agregar próximas fechas
+      upcoming.forEach(a => {
+        actions.push({
+          type: 'date',
+          student: a.user?.nombre || 'Estudiante',
+          id: a.userId,
+          message: `Valoración: ${new Date(a.proximaFechaValoracion).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })}`,
+          date: a.proximaFechaValoracion
+        })
+      })
+      
+      // Ordenar por fecha
+      actions.sort((a, b) => new Date(a.date) - new Date(b.date))
+      
+      setStats({
+        totalStudents: studentsData.length,
+        pendingPlans: withoutPlan.length,
+        upcomingDates: upcoming.length,
+        thisMonth: thisMonthAssessments.length
+      })
+      
+      setStudents(studentsWithAssessments.slice(0, 3))
+      setUrgentActions(actions.slice(0, 6))
     })
     .catch(() => {
       setAlert({ type: 'error', message: 'Error al cargar datos del dashboard' })
@@ -82,23 +132,10 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <div className="dashboard-stats-grid">
         <StatCard 
-          icon={<span>👥</span>} 
-          label="Estudiantes" 
-          value={stats.totalStudents} 
-          color="#3b82f6"
-        />
-        <StatCard 
-          icon={<span>📊</span>} 
-          label="Este mes" 
-          value={stats.thisMonth} 
-          subtext="valoraciones"
-          color="#8b5cf6"
-        />
-        <StatCard 
           icon={<span>⚠️</span>} 
-          label="Pendientes" 
+          label="Sin Plan" 
           value={stats.pendingPlans} 
-          subtext="sin plan"
+          subtext="estudiantes"
           color="#f59e0b"
         />
         <StatCard 
@@ -108,6 +145,20 @@ export default function DashboardPage() {
           subtext="valoraciones"
           color="#10b981"
         />
+        <StatCard 
+          icon={<span>📊</span>} 
+          label="Total" 
+          value={stats.thisMonth} 
+          subtext="valoraciones"
+          color="#8b5cf6"
+        />
+        <StatCard 
+          icon={<span>👥</span>} 
+          label="Total" 
+          value={stats.totalStudents} 
+          subtext="estudiantes"
+          color="#3b82f6"
+        />
       </div>
 
       {/* Content Grid */}
@@ -115,11 +166,11 @@ export default function DashboardPage() {
         {/* Estudiantes Recientes */}
         <div className="dashboard-section">
           <div className="dashboard-section-header">
-            <h2 className="dashboard-section-title">Estudiantes Recientes</h2>
+            <h2 className="dashboard-section-title">Estudiantes</h2>
           </div>
           <div className="dashboard-students-list">
-            {recentStudents.length > 0 ? (
-              recentStudents.map(s => (
+            {students.length > 0 ? (
+              students.map(s => (
                 <Link 
                   key={s.id} 
                   to={`/student/${s.id}`} 
@@ -153,11 +204,11 @@ export default function DashboardPage() {
             <h2 className="dashboard-section-title">Acciones Pendientes</h2>
           </div>
           <div className="dashboard-actions-list">
-            {pendingActions.length > 0 ? (
-              pendingActions.map((action, i) => (
+            {urgentActions.length > 0 ? (
+              urgentActions.map((action, i) => (
                 <Link 
                   key={i} 
-                  to={`/assessment/${action.id}`}
+                  to={action.type === 'plan' ? `/assessment/${action.id}` : `/student/${action.userId || action.id}`}
                   className={`dashboard-action-card dashboard-action-${action.type}`}
                 >
                   <div className="dashboard-action-icon">

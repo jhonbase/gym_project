@@ -7,6 +7,9 @@ import uploadLesion from '../config/multer.lesion.js'
 
 const router = Router()
 
+// GET /api/assessments → Todas las valoraciones
+router.get('/', authenticate, assessmentController.getAllAssessments)
+
 // POST /api/assessments → Crear valoración + intentar análisis IA
 router.post('/', authenticate, validateRequest(createAssessmentSchema), assessmentController.createAssessment)
 

@@ -73,6 +73,19 @@ async function getByUser(req, res, next) {
 }
 
 /**
+ * GET /api/assessments
+ * Obtiene todas las valoraciones con datos del usuario.
+ */
+async function getAllAssessments(req, res, next) {
+  try {
+    const assessments = await assessmentService.getAll()
+    return response.success(res, { assessments })
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
  * POST /api/assessments/:id/analyze
  * Reintenta generar el análisis IA y plan de entrenamiento para una valoración.
  */
@@ -275,4 +288,4 @@ async function updateTrainingPlan(req, res, next) {
 }
 
 
-export { createAssessment, getAssessment, getByUser, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, updateAssessment, deleteAssessment, updateTrainingPlan }
+export { createAssessment, getAssessment, getByUser, getAllAssessments, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, updateAssessment, deleteAssessment, updateTrainingPlan }

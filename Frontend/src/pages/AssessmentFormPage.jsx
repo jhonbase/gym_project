@@ -379,7 +379,7 @@ export default function AssessmentFormPage() {
           </div>
         </SectionCard>
 
-        {/* Contexto */}
+        {/* Contexto del usuario */}
         <SectionCard icon={<IconContext />} title="Contexto del usuario">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             <FormField label="Nivel de actividad física" error={fe.nivelActividadFisica}>
@@ -391,6 +391,35 @@ export default function AssessmentFormPage() {
                 <option value="muy_activo">Muy activo</option>
               </select>
             </FormField>
+            <div className="objetivo-wrapper">
+              <label className="objetivo-label">
+                <span className="objetivo-icon">🏆</span>
+                Objetivo del usuario
+              </label>
+              <textarea 
+                className="ui-input objetivo-input" 
+                name="objetivoUsuario" 
+                value={form.objetivoUsuario} 
+                onChange={handleChange} 
+                rows="3" 
+                style={{ resize: 'vertical', minHeight: '80px' }}
+                placeholder="¿Qué objetivos tiene el usuario?"
+              />
+            </div>
+            <div className="proxima-fecha-wrapper">
+              <label className="proxima-fecha-label">
+                <span className="proxima-fecha-icon">📅</span>
+                Próxima fecha de valoración
+              </label>
+              <input 
+                type="date" 
+                className="ui-input proxima-fecha-input"
+                name="proximaFechaValoracion"
+                value={form.proximaFechaValoracion}
+                onChange={handleChange}
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
             <FormField label="Observaciones (opcional)" error={fe.observacion}>
               <textarea className="ui-input" name="observacion" value={form.observacion} onChange={handleChange} rows="3" style={{ resize: 'vertical', minHeight: '80px' }} />
             </FormField>
@@ -415,23 +444,6 @@ export default function AssessmentFormPage() {
                 ))}
               </div>
             </div>
-          </div>
-        </SectionCard>
-
-        {/* Programación de próxima valoración */}
-        <SectionCard icon={<span>📅</span>} title="Próxima valoración">
-          <div className="proxima-fecha-wrapper" style={{ width: '100%' }}>
-            <label className="proxima-fecha-label">Fecha programada</label>
-            <input 
-              type="date" 
-              className="ui-input proxima-fecha-input"
-              name="proximaFechaValoracion"
-              value={form.proximaFechaValoracion}
-              onChange={handleChange}
-              min={new Date().toISOString().split('T')[0]}
-              style={{ width: '100%' }}
-            />
-            <span className="proxima-fecha-hint">Programar recordatorio para próxima valoración</span>
           </div>
         </SectionCard>
 

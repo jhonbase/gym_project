@@ -152,7 +152,7 @@ async function getAssessmentPdf(req, res, next) {
 
 /**
  * POST /api/assessments/:id/lesion
- * Sube evidencia de lesión (imagen o PDF)
+ * Sube evidencia de lesión (imagen o PDF) y la AGREGA al array existente
  */
 async function uploadLesion(req, res, next) {
   try {
@@ -163,18 +163,24 @@ async function uploadLesion(req, res, next) {
     const filePath = `/uploads/lesiones/${req.file.filename}`
     const descripcion = req.body.descripcion || null
 
-    const assessment = await assessmentService.updateLesion(req.params.id, {
-      lesionEvidencia: filePath,
-      lesionDescripcion: descripcion,
-    })
+    const assessment = await assessmentService.getById(req.params.id)
 
     if (!assessment) {
       return response.error(res, 'Valoración no encontrada.', 404)
     }
 
+    const lesionesActuales = assessment.lesionesEvidencia || []
+    const nuevasLesiones = [...lesionesActuales, filePath]
+
+    const updated = await assessmentService.updateLesion(req.params.id, {
+      lesionesEvidencia: nuevasLesiones,
+      lesionDescripcion: descripcion || assessment.lesionDescripcion,
+    })
+
     return response.success(res, { 
-      assessment,
-      lesionUrl: filePath 
+      assessment: updated,
+      lesionUrl: filePath,
+      totalLesiones: nuevasLesiones.length
     })
   } catch (error) {
     next(error)
@@ -183,7 +189,7 @@ async function uploadLesion(req, res, next) {
 
 /**
  * GET /api/assessments/:id/lesion
- * Descarga la evidencia de lesión
+ * Lista todas las evidencias de lesión
  */
 async function getLesion(req, res, next) {
   try {
@@ -193,11 +199,96 @@ async function getLesion(req, res, next) {
       return response.error(res, 'Valoración no encontrada.', 404)
     }
 
-    if (!assessment.lesionEvidencia) {
-      return response.error(res, 'No hay evidencia de lesión.', 404)
+    if (!assessment.lesionesEvidencia || assessment.lesionesEvidencia.length === 0) {
+      return response.error(res, 'No hay evidencias de lesión.', 404)
     }
 
-    const absolutePath = path.join(process.cwd(), assessment.lesionEvidencia)
+    return response.success(res, { 
+      lesiones: assessment.lesionesEvidencia,
+      descripcion: assessment.lesionDescripcion
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
+ * DELETE /api/assessments/:id/lesion/:filename
+ * Elimina un archivo específico del array de lesiones
+ */
+async function deleteLesionFile(req, res, next) {
+  try {
+    const { id, filename } = req.params
+    
+    const assessment = await assessmentService.getById(id)
+
+    if (!assessment) {
+      return response.error(res, 'Valoración no encontrada.', 404)
+    }
+
+    const lesionesActuales = assessment.lesionesEvidencia || []
+    const filePath = `/uploads/lesiones/${filename}`
+    const nuevasLesiones = lesionesActuales.filter(l => l !== filePath)
+
+    const updated = await assessmentService.updateLesion(id, {
+      lesionesEvidencia: nuevasLesiones,
+    })
+
+    return response.success(res, { 
+      assessment: updated,
+      deletedFile: filePath
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
+ * POST /api/assessments/:id/historial
+ * Sube el historial clínico (único archivo)
+ */
+async function uploadHistorial(req, res, next) {
+  try {
+    if (!req.file) {
+      return response.error(res, 'No se ha proporcionado ningún archivo.', 400)
+    }
+
+    const filePath = `/uploads/historial/${req.file.filename}`
+
+    const assessment = await assessmentService.updateHistorial(req.params.id, {
+      historialClinico: filePath,
+    })
+
+    if (!assessment) {
+      return response.error(res, 'Valoración no encontrada.', 404)
+    }
+
+    return response.success(res, { 
+      assessment,
+      historialUrl: filePath
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
+ * GET /api/assessments/:id/historial
+ * Descarga el historial clínico
+ */
+async function getHistorial(req, res, next) {
+  try {
+    const assessment = await assessmentService.getById(req.params.id)
+
+    if (!assessment) {
+      return response.error(res, 'Valoración no encontrada.', 404)
+    }
+
+    if (!assessment.historialClinico) {
+      return response.error(res, 'No hay historial clínico.', 404)
+    }
+
+    const absolutePath = path.join(process.cwd(), assessment.historialClinico)
 
     if (!fs.existsSync(absolutePath)) {
       return response.error(res, 'El archivo no existe.', 404)
@@ -288,4 +379,4 @@ async function updateTrainingPlan(req, res, next) {
 }
 
 
-export { createAssessment, getAssessment, getByUser, getAllAssessments, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, updateAssessment, deleteAssessment, updateTrainingPlan }
+export { createAssessment, getAssessment, getByUser, getAllAssessments, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, deleteLesionFile, uploadHistorial, getHistorial, updateAssessment, deleteAssessment, updateTrainingPlan }

@@ -42,6 +42,46 @@ const IconHistory = () => (
   </svg>
 )
 
+function getFileType(url) {
+  const ext = url.split('.').pop()?.toLowerCase().split('?')[0]
+  if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) return 'image'
+  if (ext === 'pdf') return 'pdf'
+  if (['doc', 'docx'].includes(ext)) return 'word'
+  return 'other'
+}
+
+function FileLink({ url, label }) {
+  const fileType = getFileType(url)
+  const fullUrl = `http://localhost:3000${url}`
+  const encodedUrl = encodeURIComponent(fullUrl)
+
+  if (fileType === 'word') {
+    return (
+      <a
+        href={`https://view.officeapps.live.com/op/embed.aspx?Src=${encodedUrl}&amp;wdStartOn=1`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="lesion-result-link"
+        style={{ marginRight: '1rem', marginBottom: '0.5rem', display: 'inline-block' }}
+      >
+        📄 {label}
+      </a>
+    )
+  }
+
+  return (
+    <a
+      href={fullUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="lesion-result-link"
+      style={{ marginRight: '1rem', marginBottom: '0.5rem', display: 'inline-block' }}
+    >
+      📄 {label}
+    </a>
+  )
+}
+
 /* ─── Item de resultado ───────────────────────── */
 function ResultItem({ label, value }) {
   return (
@@ -544,27 +584,28 @@ export default function AssessmentResultPage() {
         <ResultItem label="Nivel de actividad" value={a.nivelActividadFisica} />
       </SectionCard>
 
-      {/* Evidencia de lesión */}
-      {(a.lesionEvidencia || a.lesionDescripcion) && (
-        <SectionCard icon={<IconLesion />} title="Evidencia de lesión">
+      {/* Antecedentes Clínicos */}
+      {(a.lesionesEvidencia?.length > 0 || a.lesionDescripcion || a.historialClinico) && (
+        <SectionCard icon={<IconLesion />} title="Antecedentes Clínicos">
           <div className="lesion-result">
             {a.lesionDescripcion && (
               <p className="result-obs">
-                <strong style={{ color: 'var(--color-muted)' }}>Descripción: </strong>{a.lesionDescripcion}
+                <strong style={{ color: 'var(--color-muted)' }}>Lesión: </strong>{a.lesionDescripcion}
               </p>
             )}
-            {a.lesionEvidencia && (
-              <a 
-                href={`http://localhost:3000${a.lesionEvidencia}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="lesion-result-link"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-                </svg>
-                Ver evidencia adjunta
-              </a>
+            {a.lesionesEvidencia?.length > 0 && (
+              <div style={{ marginTop: '0.5rem' }}>
+                <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Archivos de lesión:</p>
+                {a.lesionesEvidencia.map((ev, idx) => (
+                  <FileLink key={idx} url={ev} label={`Documento ${idx + 1}`} />
+                ))}
+              </div>
+            )}
+            {a.historialClinico && (
+              <div style={{ marginTop: '1rem' }}>
+                <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Historial clínico:</p>
+                <FileLink url={a.historialClinico} label="Ver historial clínico" />
+              </div>
             )}
           </div>
         </SectionCard>

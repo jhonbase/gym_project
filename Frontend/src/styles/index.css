@@ -1722,6 +1722,21 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   font-size: 0.8rem;
   font-weight: 500;
 }
+.lesion-files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.lesion-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.7rem;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+}
 
 /* ─── Antecedentes de salud ────────────────────── */
 .antecedentes-grid {

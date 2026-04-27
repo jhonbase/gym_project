@@ -73,9 +73,10 @@ model Assessment {
   rmEstimado           Float    
   ppm                   Int      
 
-  // Evidencia de lesión
-  lesionEvidencia      String?  // Ruta del archivo de evidencia (imagen/PDF)
-  lesionDescripcion    String?  // Descripción de la lesión
+  // Antecedentes Clínicos
+  lesionesEvidencia   String[] // Array de rutas de archivos de lesiones
+  lesionDescripcion String?       // Descripción de la lesión
+  historialClinico String?     // Ruta del archivo de historial clínico (único)
 
   // Antecedentes de salud
   anteOsteomuscular    Boolean  @default(false)

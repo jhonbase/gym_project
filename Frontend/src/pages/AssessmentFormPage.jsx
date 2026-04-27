@@ -105,7 +105,8 @@ export default function AssessmentFormPage() {
     antePsicologico: false, antePsicologicoDesc: '',
   })
 
-  const [lesionFile, setLesionFile] = useState(null)
+  const [lesionFiles, setLesionFiles] = useState([])
+  const [historialFile, setHistorialFile] = useState(null)
   const [fieldErrors, setFieldErrors] = useState({})
 
   function handleChange(e) {
@@ -131,6 +132,23 @@ export default function AssessmentFormPage() {
   }
 
   function handleLesionFileChange(e) {
+    const files = Array.from(e.target.files)
+    files.forEach(file => {
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/webp']
+      if (!allowedTypes.includes(file.type)) {
+        setAlert({ type: 'error', message: 'Solo se permiten archivos PDF o imágenes (JPEG, PNG, WebP)' })
+        return
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setAlert({ type: 'error', message: 'El archivo no puede exceder 10MB' })
+        return
+      }
+      setLesionFiles(prev => [...prev, file])
+    })
+    e.target.value = ''
+  }
+
+  function handleHistorialFileChange(e) {
     const file = e.target.files[0]
     if (file) {
       const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/webp']
@@ -142,8 +160,12 @@ export default function AssessmentFormPage() {
         setAlert({ type: 'error', message: 'El archivo no puede exceder 10MB' })
         return
       }
-      setLesionFile(file)
+      setHistorialFile(file)
     }
+  }
+
+  function removeLesionFile(index) {
+    setLesionFiles(prev => prev.filter((_, i) => i !== index))
   }
 
   async function handleSubmit(e) {
@@ -192,13 +214,21 @@ export default function AssessmentFormPage() {
       const res = await apiClient.post('/assessments', data)
       const assessment = res.data.data.assessment
 
-      if (lesionFile) {
+      for (const file of lesionFiles) {
         const formData = new FormData()
-        formData.append('evidencia', lesionFile)
+        formData.append('evidencia', file)
         if (form.tieneLesion && form.lesionDescripcion) {
           formData.append('descripcion', form.lesionDescripcion)
         }
         await apiClient.post(`/assessments/${assessment.id}/lesion`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+      }
+
+      if (historialFile) {
+        const formData = new FormData()
+        formData.append('archivo', historialFile)
+        await apiClient.post(`/assessments/${assessment.id}/historial`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
       }
@@ -295,8 +325,8 @@ export default function AssessmentFormPage() {
           </div>
         </SectionCard>
 
-        {/* Lesión */}
-        <SectionCard icon={<IconLesion />} title="Lesión">
+        {/* Antecedentes Clínicos */}
+        <SectionCard icon={<IconLesion />} title="Antecedentes Clínicos">
           <div className="lesion-edit-section">
             {form.tieneLesion ? (
               <div className="lesion-edit-active">
@@ -328,27 +358,32 @@ export default function AssessmentFormPage() {
                     accept=".pdf,image/jpeg,image/png,image/jpg,image/webp"
                     onChange={handleLesionFileChange}
                     className="lesion-input"
+                    multiple
                   />
-                  {lesionFile ? (
-                    <div className="lesion-file-selected">
-                      <span>✓ {lesionFile.name}</span>
-                      <button 
-                        type="button"
-                        onClick={() => setLesionFile(null)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E10600', fontSize: '1rem' }}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ) : (
-                    <label htmlFor="lesionFile" className="lesion-label">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                      </svg>
-                      Adjuntar evidencia
-                    </label>
-                  )}
+                  <label htmlFor="lesionFile" className="lesion-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    Agregar archivos
+                  </label>
                 </div>
+                
+                {lesionFiles.length > 0 && (
+                  <div className="lesion-files-list" style={{ marginTop: '0.5rem' }}>
+                    {lesionFiles.map((file, index) => (
+                      <div key={index} className="lesion-file-item">
+                        <span>📄 {file.name}</span>
+                        <button 
+                          type="button"
+                          onClick={() => removeLesionFile(index)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E10600', fontSize: '1rem' }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <button 
@@ -360,6 +395,38 @@ export default function AssessmentFormPage() {
                 <span>Agregar información de lesión</span>
               </button>
             )}
+          </div>
+
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--color-border)' }}>
+            <label className="ui-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Historial clínico</label>
+            <div className="lesion-upload">
+              <input
+                type="file"
+                id="historialFile"
+                accept=".pdf,image/jpeg,image/png,image/jpg,image/webp"
+                onChange={handleHistorialFileChange}
+                className="lesion-input"
+              />
+              {historialFile ? (
+                <div className="lesion-file-selected">
+                  <span>📄 {historialFile.name}</span>
+                  <button 
+                    type="button"
+                    onClick={() => setHistorialFile(null)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E10600', fontSize: '1rem' }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <label htmlFor="historialFile" className="lesion-label">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  Adjuntar historial clínico (único)
+                </label>
+              )}
+            </div>
           </div>
         </SectionCard>
 

@@ -57,7 +57,7 @@ export default function LoginPage() {
               className="ui-input"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="entrenador@unifit.edu"
+              placeholder="agregarCorreo@ejemplo.com"
               disabled={loading}
             />
           </div>

@@ -103,13 +103,11 @@ export default function AssessmentEditPage() {
     antePsicologico: false, antePsicologicoDesc: '',
   })
 
-  const [lesionFile, setLesionFile] = useState(null)
-  const [lesionExisting, setLesionExisting] = useState(null)
-  const [lesionRemove, setLesionRemove] = useState(false)
+  const [lesionFiles, setLesionFiles] = useState([])
+  const [lesionExisting, setLesionExisting] = useState([])
+  const [historialFile, setHistorialFile] = useState(null)
+  const [historialExisting, setHistorialExisting] = useState(null)
   const [fieldErrors, setFieldErrors] = useState({})
-
-  const hasLesionFile = lesionFile || (lesionExisting && !lesionRemove)
-  const showLesionGreen = lesionFile || (lesionExisting && !lesionRemove)
 
   useEffect(() => {
     apiClient.get(`/assessments/${id}`)
@@ -134,8 +132,10 @@ export default function AssessmentEditPage() {
           observacion: a.observacion || '',
           objetivoUsuario: a.objetivoUsuario || '',
           proximaFechaValoracion: a.proximaFechaValoracion ? new Date(a.proximaFechaValoracion).toISOString().split('T')[0] : '',
-          tieneLesion: !!a.lesionDescripcion || !!a.lesionEvidencia,
+          tieneLesion: !!a.lesionDescripcion || (a.lesionesEvidencia?.length > 0),
           lesionDescripcion: a.lesionDescripcion || '',
+          lesionesExisting: a.lesionesEvidencia || [],
+          historialExisting: a.historialClinico || null,
           anteOsteomuscular: a.anteOsteomuscular || false,
           anteOsteomuscularDesc: a.anteOsteomuscularDesc || '',
           anteCardiovascular: a.anteCardiovascular || false,
@@ -146,9 +146,11 @@ export default function AssessmentEditPage() {
           anteMetabolicoDesc: a.anteMetabolicoDesc || '',
           antePsiquiatrico: a.antePsiquiatrico || false,
           antePsiquiatricoDesc: a.antePsiquiatricoDesc || '',
-          antePsicologico: a.antePsicologico || false,
+antePsicologico: a.antePsicologico || false,
           antePsicologicoDesc: a.antePsicologicoDesc || '',
         })
+        setLesionExisting(a.lesionesEvidencia || [])
+        setHistorialExisting(a.historialClinico || null)
       })
       .catch(() => setAlert({ type: 'error', message: 'Error al cargar la valoración' }))
       .finally(() => setLoading(false))
@@ -177,6 +179,23 @@ export default function AssessmentEditPage() {
   }
 
   function handleLesionFileChange(e) {
+    const files = Array.from(e.target.files)
+    files.forEach(file => {
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/webp']
+      if (!allowedTypes.includes(file.type)) {
+        setAlert({ type: 'error', message: 'Solo se permiten archivos PDF o imágenes (JPEG, PNG, WebP)' })
+        return
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setAlert({ type: 'error', message: 'El archivo no puede exceder 10MB' })
+        return
+      }
+      setLesionFiles(prev => [...prev, file])
+    })
+    e.target.value = ''
+  }
+
+  function handleHistorialFileChange(e) {
     const file = e.target.files[0]
     if (file) {
       const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/webp']
@@ -188,7 +207,22 @@ export default function AssessmentEditPage() {
         setAlert({ type: 'error', message: 'El archivo no puede exceder 10MB' })
         return
       }
-      setLesionFile(file)
+      setHistorialFile(file)
+    }
+  }
+
+  function removeLesionFile(index) {
+    setLesionFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  async function deleteExistingLesion(filename) {
+    if (!confirm('¿Eliminar este archivo?')) return
+    try {
+      await apiClient.delete(`/assessments/${id}/lesion/${filename}`)
+      setLesionExisting(prev => prev.filter(f => !f.includes(filename)))
+      setAlert({ type: 'success', message: 'Archivo eliminado' })
+    } catch {
+      setAlert({ type: 'error', message: 'Error al eliminar' })
     }
   }
 
@@ -236,15 +270,21 @@ export default function AssessmentEditPage() {
 
       await apiClient.put(`/assessments/${id}`, data)
 
-      if (lesionRemove) {
-        await apiClient.put(`/assessments/${id}`, { lesionDescripcion: null, lesionEvidencia: null })
-      } else if (lesionFile) {
+      for (const file of lesionFiles) {
         const formData = new FormData()
-        formData.append('evidencia', lesionFile)
+        formData.append('evidencia', file)
         if (form.tieneLesion && form.lesionDescripcion) {
           formData.append('descripcion', form.lesionDescripcion)
         }
         await apiClient.post(`/assessments/${id}/lesion`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+      }
+
+      if (historialFile) {
+        const formData = new FormData()
+        formData.append('archivo', historialFile)
+        await apiClient.post(`/assessments/${id}/historial`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
       }
@@ -338,8 +378,8 @@ export default function AssessmentEditPage() {
           </div>
         </SectionCard>
 
-        {/* Lesión */}
-        <SectionCard icon={<IconLesion />} title="Lesión">
+        {/* Antecedentes Clínicos */}
+        <SectionCard icon={<IconLesion />} title="Antecedentes Clínicos">
           <div className="lesion-edit-section">
             {form.tieneLesion ? (
               <div className="lesion-edit-active">
@@ -348,7 +388,7 @@ export default function AssessmentEditPage() {
                   <button 
                     type="button" 
                     className="lesion-edit-remove"
-                    onClick={() => { setForm(prev => ({ ...prev, tieneLesion: false })); setLesionRemove(true); }}
+                    onClick={() => setForm(prev => ({ ...prev, tieneLesion: false, lesionDescripcion: '' }))}
                   >
                     Quitar
                   </button>
@@ -371,27 +411,47 @@ export default function AssessmentEditPage() {
                     accept=".pdf,image/jpeg,image/png,image/jpg,image/webp"
                     onChange={handleLesionFileChange}
                     className="lesion-input"
+                    multiple
                   />
-                  {lesionFile || (lesionExisting && !lesionRemove) ? (
-                    <div className="lesion-file-selected">
-                      <span>✓ {lesionFile ? lesionFile.name : 'Archivo existente'}</span>
-                      <button 
-                        type="button"
-                        onClick={() => { setLesionFile(null); setLesionRemove(true); }}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E10600', fontSize: '1rem' }}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ) : (
-                    <label htmlFor="lesionFileEdit" className="lesion-label">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                      </svg>
-                      Adjuntar evidencia
-                    </label>
-                  )}
+                  <label htmlFor="lesionFileEdit" className="lesion-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    Agregar archivos
+                  </label>
                 </div>
+                
+                {(lesionFiles.length > 0 || lesionExisting.length > 0) && (
+                  <div className="lesion-files-list" style={{ marginTop: '0.5rem' }}>
+                    {lesionExisting.map((ev, idx) => {
+                      const filename = ev.split('/').pop()
+                      return (
+                        <div key={`existing-${idx}`} className="lesion-file-item">
+                          <span>📄 {filename}</span>
+                          <button 
+                            type="button"
+                            onClick={() => deleteExistingLesion(filename)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E10600', fontSize: '1rem' }}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )
+                    })}
+                    {lesionFiles.map((file, idx) => (
+                      <div key={`new-${idx}`} className="lesion-file-item">
+                        <span>📄 {file.name}</span>
+                        <button 
+                          type="button"
+                          onClick={() => removeLesionFile(idx)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E10600', fontSize: '1rem' }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <button 
@@ -403,6 +463,38 @@ export default function AssessmentEditPage() {
                 <span>Agregar información de lesión</span>
               </button>
             )}
+          </div>
+
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--color-border)' }}>
+            <label className="ui-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Historial clínico</label>
+            <div className="lesion-upload">
+              <input
+                type="file"
+                id="historialFileEdit"
+                accept=".pdf,image/jpeg,image/png,image/jpg,image/webp"
+                onChange={handleHistorialFileChange}
+                className="lesion-input"
+              />
+              {historialFile || historialExisting ? (
+                <div className="lesion-file-selected">
+                  <span>📄 {historialFile ? historialFile.name : 'Archivo existente'}</span>
+                  <button 
+                    type="button"
+                    onClick={() => setHistorialFile(null)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E10600', fontSize: '1rem' }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <label htmlFor="historialFileEdit" className="lesion-label">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  Adjuntar historial clínico (único)
+                </label>
+              )}
+            </div>
           </div>
         </SectionCard>
 

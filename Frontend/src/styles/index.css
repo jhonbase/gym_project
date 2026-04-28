@@ -222,11 +222,26 @@ select.ui-input {
 .ui-badge-analyzed { background: rgba(34,197,94,0.12);  color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
 
 /* Alertas - Toast flotante */
+.alerts-stack {
+  position: fixed !important;
+  bottom: 1.5rem !important;
+  right: 1.5rem !important;
+  left: auto !important;
+  top: auto !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  flex-direction: column-reverse !important;
+  gap: 0.5rem !important;
+  pointer-events: none !important;
+  width: auto !important;
+  max-width: 400px !important;
+}
+.alerts-stack > * {
+  pointer-events: auto !important;
+  position: relative !important;
+}
+
 .ui-alert {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  z-index: 9999;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -271,6 +286,13 @@ select.ui-input {
 .ui-alert-warning { background: #9a3412; border: 1px solid #f97316; color: #ffedd5; }
 .ui-alert-close   { background: none; border: none; color: inherit; cursor: pointer; font-size: 1.1rem; flex-shrink: 0; padding: 0.25rem; opacity: 0.8; }
 .ui-alert-close:hover { opacity: 1; }
+
+/* Stack de alertas - dentro del flujo normal */
+.alerts-stack {
+  position: relative;
+  z-index: 100;
+  width: 100%;
+}
 
 /* Spinner */
 .ui-spinner {
@@ -2086,6 +2108,23 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
 .student-delete-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+.student-edit-btn {
+  width: 40px;
+  height: 100%;
+  min-height: 70px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.student-edit-btn:hover {
+  color: var(--color-accent);
 }
 
 /* ─── Assessment row with delete ───────────────── */

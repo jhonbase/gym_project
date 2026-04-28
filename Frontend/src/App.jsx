@@ -2,6 +2,7 @@
 // Configura las rutas y envuelve todo con el AuthProvider
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { AlertProvider } from './context/AlertContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import Layout from './components/Layout.jsx'
 import LoginPage from './pages/LoginPage.jsx'
@@ -14,29 +15,31 @@ import AssessmentEditPage from './pages/AssessmentEditPage.jsx'
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Rutas públicas (sin login) */}
-          <Route path="/login" element={<LoginPage />} />
+    <AlertProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Rutas públicas (sin login) */}
+            <Route path="/login" element={<LoginPage />} />
 
-          {/* Rutas protegidas (requieren login) */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<Layout />}>
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/students" element={<StudentsPage />} />
-              <Route path="/student/:id" element={<StudentProfilePage />} />
-              <Route path="/student/:userId/assessment/new" element={<AssessmentFormPage />} />
-              <Route path="/assessment/new" element={<AssessmentFormPage />} />
-              <Route path="/assessment/:id" element={<AssessmentResultPage />} />
-              <Route path="/assessment/:id/edit" element={<AssessmentEditPage />} />
+            {/* Rutas protegidas (requieren login) */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<Layout />}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/students" element={<StudentsPage />} />
+                <Route path="/student/:id" element={<StudentProfilePage />} />
+                <Route path="/student/:userId/assessment/new" element={<AssessmentFormPage />} />
+                <Route path="/assessment/new" element={<AssessmentFormPage />} />
+                <Route path="/assessment/:id" element={<AssessmentResultPage />} />
+                <Route path="/assessment/:id/edit" element={<AssessmentEditPage />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Cualquier otra ruta → redirige al login */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+            {/* Cualquier otra ruta → redirige al login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </AlertProvider>
   )
 }

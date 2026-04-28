@@ -5,7 +5,6 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import Layout from './components/Layout.jsx'
 import LoginPage from './pages/LoginPage.jsx'
-import RegisterPage from './pages/RegisterPage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import StudentsPage from './pages/StudentsPage.jsx'
 import StudentProfilePage from './pages/StudentProfilePage.jsx'
@@ -20,7 +19,6 @@ export default function App() {
         <Routes>
           {/* Rutas públicas (sin login) */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
 
           {/* Rutas protegidas (requieren login) */}
           <Route element={<ProtectedRoute />}>

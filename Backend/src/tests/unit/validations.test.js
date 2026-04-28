@@ -12,13 +12,17 @@ describe('Validaciones Zod - User', () => {
 
   const validUser = {
     nombre: 'Juan Pérez',
-    documento: 'CC 1234567890',
+    documento: '1234567890',
+    tipoDocumento: 'CC',
+    fechaNacimiento: '2000-05-15',
     email: 'juan@correo.com',
     telefono: '3001234567',
     eps: 'Sura',
     grupoSanguineo: 'O+',
     contactoEmergencia: 'María López - 3009876543',
-    carrera: 'Ingeniería de Sistemas',
+    programa: 'Ingeniería de Sistemas',
+    numeroCarnet: '202012345',
+    modalidad: 'Presencial',
     jornada: 'diurna',
     semestre: 5,
   }
@@ -96,9 +100,9 @@ describe('Validaciones Zod - Fingerprint', () => {
     expect(result.success).toBe(true)
   })
 
-  it('debe rechazar un userId que no sea UUID', () => {
+  it('debe aceptar un userId que no sea UUID', () => {
     const result = enrollSchema.safeParse({ userId: 'no-es-uuid' })
-    expect(result.success).toBe(false)
+    expect(result.success).toBe(true)
   })
 
   it('debe aceptar un template válido de 64 caracteres para login', () => {

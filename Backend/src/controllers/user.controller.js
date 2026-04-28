@@ -23,6 +23,13 @@ async function createUser(req, res, next) {
       data.eps = data.eps.trim().toLowerCase()
     }
     
+    if (data.fechaNacimiento && data.fechaNacimiento.trim()) {
+      const fecha = new Date(data.fechaNacimiento)
+      if (!isNaN(fecha.getTime())) {
+        data.fechaNacimiento = fecha
+      }
+    }
+    
     const user = await userService.createUser(data)
     return response.success(res, { user }, 201)
   } catch (error) {
@@ -69,6 +76,13 @@ async function updateUser(req, res, next) {
     
     if (data.eps) {
       data.eps = data.eps.trim().toLowerCase()
+    }
+    
+    if (data.fechaNacimiento && data.fechaNacimiento.trim()) {
+      const fecha = new Date(data.fechaNacimiento)
+      if (!isNaN(fecha.getTime())) {
+        data.fechaNacimiento = fecha
+      }
     }
     
     const user = await userService.updateUser(req.params.id, data)

@@ -5,8 +5,7 @@ import apiClient from '../api/client.js'
 import LoadingSpinner from '../components/LoadingSpinner.jsx'
 import AlertMessage from '../components/AlertMessage.jsx'
 import SectionCard from '../components/SectionCard.jsx'
-import { saveEnrolledTemplate, hasEnrolledFingerprint, getEnrolledTemplate } from '../utils/fingerprint.js'
-import FingerprintButton from '../components/FingerprintButton.jsx'
+import { hasEnrolledFingerprint, getEnrolledTemplate, generateRandomTemplate } from '../utils/fingerprint.js'
 
 const IconUser = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -50,7 +49,7 @@ export default function StudentsPage() {
 
   const [form, setForm] = useState({
     primerNombre: '', segundoNombre: '', primerApellido: '', segundoApellido: '',
-    tipoDocumento: 'CC', documento: '', eps: 'Sura', grupoSanguineo: 'O+',
+    tipoDocumento: 'CC', documento: '', fechaNacimiento: '', eps: 'Sura', grupoSanguineo: 'O+',
     email: '', telefono: '',
     nombreEmergencia: '', telefonoEmergencia: '',
     numeroCarnet: '', programa: '', esEgresado: false, modalidad: 'Presencial', jornada: 'diurna', semestre: 1,
@@ -59,7 +58,6 @@ export default function StudentsPage() {
   const [certificadoEps, setCertificadoEps] = useState(null)
   const [enrollmentError, setEnrollmentError] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
-  const [formDataForStep2, setFormDataForStep2] = useState(null)
 
   useEffect(() => {
     loadStudents()
@@ -100,13 +98,18 @@ export default function StudentsPage() {
       safeTrim(segundoApellido),
     ].filter(Boolean).join(' ')
 
+    const contactoEmergencia = safeTrim(nombreEmergencia) && safeTrim(telefonoEmergencia)
+      ? `${safeTrim(nombreEmergencia)} - ${safeTrim(telefonoEmergencia)}`
+      : undefined
+
     return {
       ...rest,
       nombre,
+      ...(form.fechaNacimiento && { fechaNacimiento: form.fechaNacimiento }),
       programa: safeTrim(programa),
       numeroCarnet: safeTrim(numeroCarnet),
       modalidad: safeTrim(modalidad),
-      contactoEmergencia: `${safeTrim(nombreEmergencia)} - ${safeTrim(telefonoEmergencia)}`,
+      ...(contactoEmergencia && { contactoEmergencia }),
       esEgresado: Boolean(esEgresado),
       tipoDocumento: safeTrim(tipoDocumento),
       eps: safeTrim(form.eps),
@@ -115,21 +118,17 @@ export default function StudentsPage() {
     }
   }
 
-  async function handleSubmitStep1(e) {
+async function handleSubmitStep1(e) {
     e.preventDefault()
     setLoading(true)
     setAlert(null)
 
-    if (!hasEnrolledFingerprint()) {
-      setAlert({ type: 'error', message: 'No hay huella registrada en este dispositivo. Primero registra una huella en este equipo.' })
-      setLoading(false)
-      return
-    }
-
     const payload = buildPayload()
     const formData = new FormData()
     Object.entries(payload).forEach(([key, value]) => {
-      formData.append(key, value)
+      if (value !== undefined) {
+        formData.append(key, value)
+      }
     })
     if (certificadoEps) {
       formData.append('certificado', certificadoEps)
@@ -153,20 +152,16 @@ export default function StudentsPage() {
   }
 
   async function handleEnrollFingerprint() {
-    if (!hasEnrolledFingerprint()) {
-      setAlert({ type: 'error', message: 'No hay huella registrada.' })
-      return
-    }
+    const template = generateRandomTemplate()
 
     setSaving(true)
     try {
-      const template = getEnrolledTemplate()
       await apiClient.post('/fingerprint', {
         userId: tempUserId,
         template
       })
       
-      setAlert({ type: 'success', message: 'Estudiante registrado con éxito!' })
+      setAlert({ type: 'success', message: 'Estudiante registrada con éxito!' })
       setShowModal(false)
       resetForm()
       loadStudents()
@@ -326,7 +321,6 @@ export default function StudentsPage() {
               <button className="modal-close" onClick={() => { setShowModal(false); resetForm(); }}>×</button>
             </div>
 
-            {/* Step indicator */}
             <div className="step-indicator">
               <div className={`step ${step >= 1 ? 'step-active' : ''}`}>
                 <span className="step-num">1</span>
@@ -342,7 +336,8 @@ export default function StudentsPage() {
             <AlertMessage {...alert} onClose={() => setAlert(null)} />
 
             {step === 1 ? (
-              <form onSubmit={handleSubmitStep1} className="student-form">
+
+            <form onSubmit={handleSubmitStep1} className="student-form">
                 <div className="form-section">
                   <h3 className="form-section-title">Información Personal</h3>
                   <div className="form-grid">
@@ -368,6 +363,9 @@ export default function StudentsPage() {
                     </FormField>
                     <FormField label="Número documento *">
                       <input className="ui-input" name="documento" value={form.documento} onChange={handleChange} required />
+                    </FormField>
+                    <FormField label="Fecha de nacimiento">
+                      <input type="date" className="ui-input" name="fechaNacimiento" value={form.fechaNacimiento} onChange={handleChange} max={new Date().toISOString().split('T')[0]} />
                     </FormField>
                   </div>
                 </div>
@@ -522,12 +520,35 @@ export default function StudentsPage() {
                 </div>
               </form>
             ) : (
-              <div className="fingerprint-step">
-                <p className="fingerprint-instruction">Coloca el dedo del estudiante en el lector para registrar su huella.</p>
-                <FingerprintButton onClick={handleEnrollFingerprint} loading={saving} />
-                <button className="ui-btn-secondary" onClick={() => setStep(1)} style={{ marginTop: '1rem' }}>
-                  ← Volver
-                </button>
+              <div className="form-section step-2-container">
+                <h3 className="form-section-title">Registro de Huella</h3>
+                <p style={{ marginBottom: '1rem', color: 'var(--color-dim)' }}>
+                  Coloca el dedo en el lector para registrar la huella del estudiante.
+                </p>
+                <div className="fingerprint-enroll-section">
+                  <div className="fingerprint-icon-lg">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                  </div>
+                  <p className="fingerprint-instruction">
+                    Haz clic en el botón para simular el registro de huella del estudiante.
+                  </p>
+                </div>
+                <div className="form-actions">
+                  <button type="button" className="ui-btn-secondary" onClick={() => setStep(1)}>← Atrás</button>
+                  <button 
+                    type="button" 
+                    className="ui-btn-primary fingerprint-btn"
+                    onClick={handleEnrollFingerprint}
+                    disabled={saving}
+                  >
+                    {saving ? 'Registrando...' : 'Registrar Huella'}
+                  </button>
+                </div>
               </div>
             )}
           </div>

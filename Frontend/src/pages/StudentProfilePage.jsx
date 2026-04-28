@@ -105,9 +105,42 @@ export default function StudentProfilePage() {
     </div>
   )
 
+  function calculateAge(dateString) {
+    if (!dateString) return null
+    const birthDate = new Date(dateString)
+    const today = new Date()
+    
+    let years = today.getFullYear() - birthDate.getFullYear()
+    let months = today.getMonth() - birthDate.getMonth()
+    
+    if (months < 0) {
+      years--
+      months += 12
+    }
+    
+    if (today.getDate() < birthDate.getDate()) {
+      months--
+      if (months < 0) {
+        years--
+        months += 12
+      }
+    }
+    
+    if (years < 0) return null
+    if (years === 0 && months === 0) return 'Menos de 1 mes'
+    
+    const yearsText = years === 1 ? '1 año' : `${years} años`
+    const monthsText = months === 1 ? '1 mes' : `${months} meses`
+    
+    if (years === 0) return monthsText
+    if (months === 0) return yearsText
+    return `${yearsText} y ${monthsText}`
+  }
+
   const userFields = [
     { key: 'Documento',       val: student.documento },
     { key: 'Número de carnet', val: student.numeroCarnet },
+    { key: 'Edad',            val: calculateAge(student.fechaNacimiento) },
     { key: 'Email',           val: student.email },
     { key: 'Teléfono',        val: student.telefono },
     { key: 'EPS',             val: student.eps },

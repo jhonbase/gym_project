@@ -13,6 +13,14 @@ const createUserSchema = z.object({
     .max(20, 'El documento debe tener máximo 20 caracteres.')
     .trim(),
 
+  tipoDocumento: z
+    .string()
+    .optional(),
+
+  fechaNacimiento: z
+    .string()
+    .optional(),
+
   email: z
     .string({ required_error: 'El correo es obligatorio.' })
     .email('Debe ser un correo electrónico válido.')
@@ -39,10 +47,8 @@ const createUserSchema = z.object({
     ),
 
   contactoEmergencia: z
-    .string({ required_error: 'El contacto de emergencia es obligatorio.' })
-    .min(5, 'El contacto de emergencia debe tener al menos 5 caracteres.')
-    .max(200, 'El contacto de emergencia debe tener máximo 200 caracteres.')
-    .trim(),
+    .string()
+    .optional(),
 
   programa: z
     .string({ required_error: 'El programa es obligatorio.' })

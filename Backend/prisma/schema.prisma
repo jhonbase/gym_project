@@ -13,9 +13,11 @@ model User {
   id                 String        @id @default(uuid())
   nombre             String
   documento          String        @unique
-  numeroCarnet       String
+  tipoDocumento      String        // CC, TI, CE, RC
+  numeroCarnet       String        @unique
   email              String        @unique
-  telefono           String
+  telefono           String        @unique
+  fechaNacimiento    DateTime?
   eps                String
   grupoSanguineo     String        // Ej: "O+", "A-", "B+", "AB-"
   contactoEmergencia String        // Nombre + teléfono del contacto

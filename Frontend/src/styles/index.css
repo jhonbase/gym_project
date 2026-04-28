@@ -240,6 +240,10 @@ select.ui-input {
   animation: ui-alert-slide-in 0.3s ease-out;
 }
 
+.ui-alert-closing {
+  animation: ui-alert-slide-out 0.3s ease-in forwards;
+}
+
 @keyframes ui-alert-slide-in {
   from {
     opacity: 0;
@@ -248,6 +252,17 @@ select.ui-input {
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@keyframes ui-alert-slide-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
   }
 }
 
@@ -3020,4 +3035,37 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   font-size: 0.8rem;
   color: var(--color-muted);
   font-style: italic;
+}
+
+/* ─── Step 2: Huella ──────────────────────────── */
+.step-2-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+.fingerprint-enroll-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: var(--color-surface2);
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--color-border);
+  margin: 1rem 0;
+  width: 100%;
+}
+.fingerprint-icon-lg {
+  color: var(--color-muted);
+}
+.fingerprint-instruction {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+.fingerprint-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }

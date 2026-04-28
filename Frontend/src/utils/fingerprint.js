@@ -46,3 +46,12 @@ export function mutateTemplate(template) {
   }
   return mutated.join('')
 }
+
+// Genera un template aleatorio de 64 caracteres (simula escaneo)
+export function generateRandomTemplate() {
+  let template = ''
+  for (let i = 0; i < 64; i++) {
+    template += CHARS.charAt(Math.floor(Math.random() * CHARS.length))
+  }
+  return template
+}

@@ -4,13 +4,22 @@ function errorHandler(err, req, res, _next) {
   // Registrar el error con contexto (qué endpoint falló)
   logger.error(`${err.message} | ${req.method} ${req.originalUrl}`)
 
-  // Prisma: violación de constraint unique (ej: email ya existe)
-  // Código P2002 = "Unique constraint failed"
+  // Mapeo de nombres de campos para mensajes legibles
+const fieldLabels = {
+  numeroCarnet: 'número de carnet',
+  documento: 'documento',
+  email: 'correo electrónico',
+  telefono: 'teléfono',
+}
+
+// Prisma: violación de constraint unique (ej: email ya existe)
+// Código P2002 = "Unique constraint failed"
   if (err.code === 'P2002') {
-    const field = err.meta?.target?.join(', ') || 'campo'
+    const rawField = err.meta?.target?.join(', ') || 'campo'
+    const label = fieldLabels[rawField] || rawField
     return res.status(409).json({
       success: false,
-      error: `Ya existe un registro con ese ${field}.`,
+      error: `Ya existe un registro con ese ${label}.`,
     })
   }
 

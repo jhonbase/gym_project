@@ -635,11 +635,16 @@ export default function AssessmentResultPage() {
           <div className="result-objetivo">
             <div className="result-objetivo-value">{a.objetivoUsuario}</div>
           </div>
-          {a.observacion && (
-            <p className="result-obs">
-              <strong style={{ color: 'var(--color-muted)' }}>Observaciones: </strong>{a.observacion}
-            </p>
-          )}
+        </SectionCard>
+      )}
+
+      {a.observacion && (
+        <SectionCard 
+          icon={<span style={{ fontSize: '1.2rem' }}>📝</span>} 
+          title="Observaciones"
+          className="observaciones-section"
+        >
+          <p className="result-obs">{a.observacion}</p>
         </SectionCard>
       )}
 

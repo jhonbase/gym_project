@@ -7,7 +7,7 @@ function AlertStack({ alerts, onDismiss }) {
     const timers = alerts.map((alert, index) => 
       setTimeout(() => {
         onDismiss(alert.id)
-      }, 5000 + (index * 500))
+      }, 3000 + (index * 500))
     )
 
     return () => timers.forEach(clearTimeout)
@@ -48,7 +48,7 @@ export default function AlertMessage({ type, message, onClose }) {
 
     const timer = setTimeout(() => {
       onClose()
-    }, 5000)
+    }, 3000)
 
     return () => clearTimeout(timer)
   }, [message, onClose])

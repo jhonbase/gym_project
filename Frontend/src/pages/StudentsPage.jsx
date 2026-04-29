@@ -59,6 +59,8 @@ export default function StudentsPage() {
   const [certificadoEps, setCertificadoEps] = useState(null)
   const [enrollmentError, setEnrollmentError] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
+  const [acceptedSensitive, setAcceptedSensitive] = useState(false)
 
   useEffect(() => {
     loadStudents()
@@ -194,6 +196,8 @@ function resetForm() {
     setStep(1)
     setTempUserId(null)
     setEditingUser(null)
+    setAcceptedPrivacy(false)
+    setAcceptedSensitive(false)
   }
 
   function handleCertificadoChange(e) {
@@ -590,13 +594,62 @@ if (file.type !== 'application/pdf') {
                     Haz clic en el botón para simular el registro de huella del estudiante.
                   </p>
                 </div>
+
+                <p style={{ 
+                  marginTop: '1.5rem', 
+                  marginBottom: '1.5rem',
+                  color: 'var(--color-muted)', 
+                  fontSize: '0.875rem',
+                  textAlign: 'left',
+                  lineHeight: '1.5'
+                }}>
+                  Por favor, lee nuestra{' '}
+                  <a 
+                    href="/politica" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}
+                  >
+                    política de tratamiento de datos
+                  </a>
+                  {' '}y acepta los siguientes acuerdos para continuar con el registro.
+                </p>
+
+                <div style={{ marginBottom: '1.5rem', textAlign: 'left', width: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                    <input
+                      type="checkbox"
+                      id="privacy-checkbox"
+                      checked={acceptedPrivacy}
+                      onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                      style={{ marginRight: '0.75rem', marginTop: '0.25rem', width: '1.125rem', height: '1.125rem' }}
+                    />
+                    <label htmlFor="privacy-checkbox" style={{ color: 'var(--color-muted)', fontSize: '0.8rem', lineHeight: '1.4', cursor: 'pointer' }}>
+                      Declaro que he leído y acepto la política de tratamiento de datos personales, y autorizo el tratamiento de mis datos conforme a las finalidades allí descritas.
+                    </label>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                    <input
+                      type="checkbox"
+                      id="sensitive-checkbox"
+                      checked={acceptedSensitive}
+                      onChange={(e) => setAcceptedSensitive(e.target.checked)}
+                      style={{ marginRight: '0.75rem', marginTop: '0.25rem', width: '1.125rem', height: '1.125rem' }}
+                    />
+                    <label htmlFor="sensitive-checkbox" style={{ color: 'var(--color-muted)', fontSize: '0.8rem', lineHeight: '1.4', cursor: 'pointer' }}>
+                      Autorizo de manera libre, previa, expresa e informada el tratamiento de mis datos sensibles, incluyendo información relacionada con mi estado de salud y condición física, con el fin de realizar valoraciones, seguimiento y personalización de mi entrenamiento.
+                    </label>
+                  </div>
+                </div>
+
                 <div className="form-actions">
                   <button type="button" className="ui-btn-secondary" onClick={() => setStep(1)}>← Atrás</button>
                   <button 
                     type="button" 
                     className="ui-btn-primary fingerprint-btn"
                     onClick={handleEnrollFingerprint}
-                    disabled={saving}
+                    disabled={saving || !(acceptedPrivacy && acceptedSensitive)}
                   >
                     {saving ? 'Registrando...' : 'Registrar Huella'}
                   </button>

@@ -6,6 +6,7 @@ import { AlertProvider } from './context/AlertContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import Layout from './components/Layout.jsx'
 import LoginPage from './pages/LoginPage.jsx'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import StudentsPage from './pages/StudentsPage.jsx'
 import StudentProfilePage from './pages/StudentProfilePage.jsx'
@@ -21,6 +22,7 @@ export default function App() {
           <Routes>
             {/* Rutas públicas (sin login) */}
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/politica" element={<PrivacyPolicyPage />} />
 
             {/* Rutas protegidas (requieren login) */}
             <Route element={<ProtectedRoute />}>

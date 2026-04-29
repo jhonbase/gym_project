@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth.js'
 import apiClient from '../api/client.js'
 import AlertMessage from '../components/AlertMessage.jsx'
 import BrandLogo from '../components/BrandLogo.jsx'
+import Footer from '../components/Footer.jsx'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -83,6 +84,7 @@ export default function LoginPage() {
           ¿Olvidaste tu password? Contacta al administrador.
         </p>
       </div>
+      <Footer />
     </div>
   )
 }

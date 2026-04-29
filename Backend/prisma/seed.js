@@ -19,7 +19,7 @@ async function main() {
 
   const user = await prisma.user.create({
     data: {
-      nombre: 'Entrenador Admin',
+      nombre: 'Entrenador',
       documento: '9999999999',
       numeroCarnet: '9999999999',
       email,
@@ -34,6 +34,7 @@ async function main() {
       esEgresado: false,
       rol: 'entrenador',
       password: hashedPassword,
+      tipoDocumento: 'no aplica'
     },
   })
 

@@ -1,6 +1,7 @@
 // Layout común: Navbar arriba + contenido abajo
 import { Outlet } from 'react-router-dom'
 import Navbar from './Navbar.jsx'
+import Footer from './Footer.jsx'
 import { AlertStack } from './AlertMessage.jsx'
 import { useAlerts } from '../context/AlertContext.jsx'
 
@@ -16,6 +17,7 @@ export default function Layout() {
       <main className="app-main">
         <Outlet />
       </main>
+      <Footer />
       <AlertStackWrapper />
     </div>
   )

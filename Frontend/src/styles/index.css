@@ -9,6 +9,7 @@
   --color-border: #2A2A2A;
   --color-accent: #E10600;
   --color-accent-h: #C40500;
+  --color-primary: #3B82F6;
   --color-text: #FFFFFF;
   --color-muted: #BFBFBF;
   --color-dim: #555555;
@@ -436,6 +437,7 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
 .login-page {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 2rem 1.5rem;
@@ -3107,4 +3109,142 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* ─── Privacy Policy Page ──────────────────────────────── */
+.privacy-policy-page {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+}
+
+.privacy-policy-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.privacy-policy-brand {
+  display: inline-flex;
+}
+
+.privacy-policy-main {
+  padding: 2rem 1rem;
+}
+
+.privacy-policy-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.privacy-policy-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  transition: color 0.2s;
+}
+
+.privacy-policy-back:hover {
+  color: var(--color-text);
+}
+
+.privacy-policy-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.privacy-policy-section {
+  margin-bottom: 1.5rem;
+}
+
+.privacy-policy-section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.privacy-policy-section p {
+  color: var(--color-muted);
+  line-height: 1.6;
+  font-size: 0.875rem;
+}
+
+.privacy-policy-section ul {
+  list-style: none;
+  margin-top: 0.5rem;
+}
+
+.privacy-policy-section li {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.privacy-policy-section li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--color-accent);
+}
+
+.privacy-policy-footer-link {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.privacy-policy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-accent);
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.privacy-policy-btn:hover {
+  background-color: var(--color-accent-h);
+}
+
+/* ─── Footer ──────────────────────────────── */
+.app-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: center;
+  alignItems: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.footer-copyright {
+  color: var(--color-dim);
+}
+
+.footer-divider {
+  color: var(--color-dim);
+}
+
+.footer-link {
+  color: var(--color-muted);
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.footer-link:hover {
+  color: var(--color-text);
 }

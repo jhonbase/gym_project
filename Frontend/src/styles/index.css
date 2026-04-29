@@ -3248,3 +3248,354 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
 .footer-link:hover {
   color: var(--color-text);
 }
+
+/* ─── Student Progress Sidebar ─────────────────────────────── */
+.dashboard-page-content {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.dashboard-page-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.student-progress-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebar-progress-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.sidebar-progress-btn:hover {
+  background: var(--color-surface2);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.sidebar-training-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+
+.sidebar-training-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* ─── Training History Graph ─────────────────────────────── */
+.training-history-graph {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.contrib-filters {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--color-surface2);
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+}
+
+.contrib-filter-btn {
+  flex: 1;
+  padding: 0.375rem 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--color-dim);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.contrib-filter-btn:hover {
+  color: var(--color-muted);
+}
+
+.contrib-filter-btn.active {
+  background: var(--color-accent);
+  color: var(--color-text);
+}
+
+.contrib-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: var(--color-surface2);
+  border-radius: var(--radius-sm);
+}
+
+.contrib-summary-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.contrib-summary-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.contrib-summary-label {
+  font-size: 0.75rem;
+  color: var(--color-dim);
+}
+
+.contrib-summary-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border);
+}
+
+/* Contrib Graph Container */
+.contrib-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 0;
+}
+
+.contrib-months {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 2px;
+  margin-left: 28px;
+  margin-bottom: 2px;
+}
+
+.contrib-month-label {
+  font-size: 0.65rem;
+  color: var(--color-dim);
+}
+
+.contrib-grid {
+  display: flex;
+  gap: 2px;
+}
+
+.contrib-days-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-right: 4px;
+}
+
+.contrib-day-label {
+  height: 11px;
+  font-size: 0.6rem;
+  color: var(--color-dim);
+  line-height: 11px;
+}
+
+.contrib-weeks {
+  display: flex;
+  gap: 2px;
+}
+
+.contrib-week {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contrib-day {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  transition: opacity 0.15s;
+}
+
+.contrib-day:hover {
+  opacity: 0.7;
+}
+
+.contrib-level-0 {
+  background: var(--color-surface2);
+}
+
+.contrib-level-1 {
+  background: #9ca3af;
+}
+
+.contrib-level-2 {
+  background: #f97316;
+}
+
+.contrib-level-3 {
+  background: #ef4444;
+}
+
+.contrib-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.contrib-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.contrib-legend-box {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.contrib-legend-text {
+  font-size: 0.7rem;
+  color: var(--color-muted);
+}
+
+.contrib-view-all-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+/* ─── Student Progress Page ─────────────────────────────── */
+.progress-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.progress-page-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.progress-page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.progress-pagecoming {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.progress-pagecoming-icon {
+  color: var(--color-dim);
+  margin-bottom: 1.5rem;
+}
+
+.progress-pagecoming h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.progress-pagecoming p {
+  color: var(--color-muted);
+  margin-bottom: 1rem;
+}
+
+.progress-pagecoming ul {
+  list-style: none;
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.progress-pagecoming li {
+  color: var(--color-muted);
+  padding: 0.375rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.progress-pagecoming li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--color-accent);
+}
+
+.progress-metrics-preview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  width: 100%;
+  margin: 2rem 0;
+}
+
+.progress-metric-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.progress-metric-icon {
+  color: var(--color-accent);
+}
+
+.progress-metric-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.progress-metric-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.progress-metric-unit {
+  font-size: 0.75rem;
+  color: var(--color-dim);
+}
+
+.progress-metric-label {
+  font-size: 0.7rem;
+  color: var(--color-dim);
+  margin-top: 0.125rem;
+}
+
+.progress-pagecoming-note {
+  font-size: 0.8rem;
+  color: var(--color-dim);
+  font-style: italic;
+}

@@ -5,6 +5,7 @@ import apiClient from '../api/client.js'
 import LoadingSpinner from '../components/LoadingSpinner.jsx'
 import AlertMessage from '../components/AlertMessage.jsx'
 import SectionCard from '../components/SectionCard.jsx'
+import StudentProgressSidebar from '../components/StudentProgressSidebar.jsx'
 
 const IconUser = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -167,6 +168,8 @@ export default function StudentProfilePage() {
 
       <AlertMessage {...alert} onClose={() => setAlert(null)} />
 
+      <div className="dashboard-page-content">
+        <div className="dashboard-page-main">
       {/* Información del estudiante */}
       <SectionCard icon={<IconUser />} title={`${student.nombre}`}>
         <div className="dashboard-user-grid">
@@ -255,6 +258,11 @@ export default function StudentProfilePage() {
           </div>
         )}
       </SectionCard>
+        </div>
+
+        {/* Sidebar derecho */}
+        <StudentProgressSidebar />
+      </div>
     </div>
   )
 }

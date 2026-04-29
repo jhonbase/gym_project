@@ -13,6 +13,7 @@ import StudentProfilePage from './pages/StudentProfilePage.jsx'
 import AssessmentFormPage from './pages/AssessmentFormPage.jsx'
 import AssessmentResultPage from './pages/AssessmentResultPage.jsx'
 import AssessmentEditPage from './pages/AssessmentEditPage.jsx'
+import StudentProgressPage from './pages/StudentProgressPage.jsx'
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/students" element={<StudentsPage />} />
                 <Route path="/student/:id" element={<StudentProfilePage />} />
+                <Route path="/student/:id/progress" element={<StudentProgressPage />} />
                 <Route path="/student/:userId/assessment/new" element={<AssessmentFormPage />} />
                 <Route path="/assessment/new" element={<AssessmentFormPage />} />
                 <Route path="/assessment/:id" element={<AssessmentResultPage />} />

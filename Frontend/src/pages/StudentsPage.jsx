@@ -326,7 +326,7 @@ if (file.type !== 'application/pdf') {
                     <span className="student-meta">{student.programa} · {student.documento}</span>
                     {getProximaValoracion(student) && (
                       <span className="student-proxima">
-                        📅 Próxima valoración: {new Date(getProximaValoracion(student).proximaFechaValoracion).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })}
+                        📅 Próxima valoración: {new Date(getProximaValoracion(student).proximaFechaValoracion).toLocaleDateString('es-CO', { month: 'long ', day: 'numeric' })}
                       </span>
                     )}
                   </div>

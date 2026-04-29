@@ -232,7 +232,7 @@ export default function StudentProfilePage() {
                   </div>
                   {a.proximaFechaValoracion && (
                     <span className={`assessment-row-proxima ${new Date(a.proximaFechaValoracion) < new Date() ? 'assessment-row-proxima-overdue' : ''}`}>
-                      📅 Próxima: {new Date(a.proximaFechaValoracion).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })}
+                      📅 Próxima: {new Date(a.proximaFechaValoracion).toLocaleDateString('es-CO', { month: 'long', day: 'numeric' })}
                     </span>
                   )}
                 </Link>

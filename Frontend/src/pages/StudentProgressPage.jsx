@@ -1,106 +1,102 @@
-import { Link, useParams, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth.js'
-import { useEffect, useState } from 'react'
-import apiClient from '../api/client.js'
+import { useParams, useNavigate } from 'react-router-dom'
 import LoadingSpinner from '../components/LoadingSpinner.jsx'
+import EvolutionChart from '../components/EvolutionChart.jsx'
+import MetricsTable from '../components/MetricsTable.jsx'
+import ObjectiveCard from '../components/ObjectiveCard.jsx'
+import HealthBlock from '../components/HealthBlock.jsx'
+import SidebarCards from '../components/SidebarCards.jsx'
+import TrainingIndications from '../components/TrainingIndications.jsx'
+import NextAssessment from '../components/NextAssessment.jsx'
+import { useStudentProgress } from '../hooks/useStudentProgress.js'
+import { metrics } from '../mocks/progressMock.js'
 
 const IconArrowLeft = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <polyline points="15 18 9 12 15 6"/>
   </svg>
 )
 
-const IconTrendUp = () => (
-  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
-  </svg>
-)
-
-const IconScale = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 2v16M8 2v16M3 10h18M3 14h18"/>
-  </svg>
-)
-
-const IconRuler = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 12H3M21 4H3M21 20H3M12 3v18M19 3v4M19 17v4M12 21v-2"/>
-  </svg>
-)
-
-const IconActivity = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-  </svg>
-)
-
-const IconTarget = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
-  </svg>
-)
-
-function MetricCard({ icon, label, value, unit }) {
-  return (
-    <div className="progress-metric-card">
-      <div className="progress-metric-icon">{icon}</div>
-      <div className="progress-metric-content">
-        <span className="progress-metric-value">{value}</span>
-        <span className="progress-metric-unit">{unit}</span>
-        <span className="progress-metric-label">{label}</span>
-      </div>
-    </div>
-  )
-}
-
 export default function StudentProgressPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const [student, setStudent] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    apiClient.get(`/users/${id}`)
-      .then(res => setStudent(res.data.data.user))
-      .catch(() => navigate(`/student/${id}`))
-      .finally(() => setLoading(false))
-  }, [id])
+  const { loading, error, data, metric, dateRange, metrics: metricOptions, changeMetric, changeDateRange } = useStudentProgress(id)
 
   if (loading) return <LoadingSpinner />
+  if (error) return <div className="error">{error}</div>
+
+  const currentMetric = metrics.find(m => m.value === metric)
 
   return (
     <div className="progress-page">
-      <div className="progress-page-header">
+      <header className="progress-header">
         <button className="back-btn" onClick={() => navigate(`/student/${id}`)}>
           <IconArrowLeft /> Volver
         </button>
-        <h1 className="progress-page-title">Progreso de {student?.nombre}</h1>
-      </div>
+        <h1>Progreso del estudiante</h1>
+      </header>
 
-      <div className="progress-pagecoming">
-        <div className="progress-pagecoming-icon">
-          <IconTrendUp />
-        </div>
-        <h2>Próximamente</h2>
-        <p>Esta página mostrará el progreso físico del estudiante, incluyendo:</p>
-        <ul>
-          <li>Evolución de peso y composición corporal</li>
-          <li>IMC y porcentaje de grasa</li>
-          <li>Masa muscular y fuerza</li>
-          <li>Comparativas entre valoraciones</li>
-        </ul>
-        
-        <div className="progress-metrics-preview">
-          <MetricCard icon={<IconScale />} label="Peso" value="--" unit="kg" />
-          <MetricCard icon={<IconRuler />} label="Estatura" value="--" unit="cm" />
-          <MetricCard icon={<IconActivity />} label="% Grasa" value="--" unit="%" />
-          <MetricCard icon={<IconTarget />} label="IMC" value="--" unit="" />
-        </div>
+      <div className="progress-content">
+        <main className="progress-main">
+          {/* Selector de métrica y rango */}
+          <div className="progress-filters">
+            <select 
+              value={metric} 
+              onChange={(e) => changeMetric(e.target.value)}
+              className="ui-select"
+            >
+              {metricOptions.map(m => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </select>
+            <select 
+              value={dateRange} 
+              onChange={(e) => changeDateRange(e.target.value)}
+              className="ui-select"
+            >
+              <option value="7d">7 días</option>
+              <option value="1m">1 mes</option>
+              <option value="3m">3 meses</option>
+              <option value="6m">6 meses</option>
+            </select>
+          </div>
 
-        <p className="progress-pagecoming-note">
-          Los datos se cargarán automáticamente desde las valoraciones físicas registradas.
-        </p>
+          {/* Gráfica de evolución - fila completa */}
+          <section className="progress-chart-row">
+            <h2>Evolución - {currentMetric?.label}</h2>
+            <EvolutionChart 
+              data={data?.evolution} 
+              metric={metric} 
+              unit={currentMetric?.unit}
+              filter={dateRange}
+            />
+          </section>
+
+          {/* Area principal con las demás tarjetas */}
+          <div className="progress-cards-row">
+            {/* Tabla comparativa */}
+            <section className="progress-section">
+              <h2>Comparativa</h2>
+              <MetricsTable data={data?.comparison} />
+            </section>
+
+            {/* Objetivo */}
+            <section className="progress-section">
+              <ObjectiveCard data={data?.objective} />
+            </section>
+          </div>
+
+          {/* Indicaciones - fila completa abajo */}
+          <section className="progress-section progress-indications-full">
+            <TrainingIndications data={data?.indications} />
+          </section>
+        </main>
+
+        {/* Sidebar derecho */}
+        <aside className="progress-sidebar">
+          <SidebarCards data={data?.sidebar} objective={data?.objective} />
+          <HealthBlock data={data?.health} />
+          <NextAssessment data={data?.next} />
+        </aside>
       </div>
     </div>
   )

@@ -56,4 +56,38 @@ async function deleteUser(id) {
   })
 }
 
-export { createUser, getAllUsers, getUserById, getUserByEmail, updateUser, deleteUser }
+async function generarTokenActivacion(id) {
+  const token = crypto.randomUUID()
+  const expira = new Date(Date.now() + 60 * 60 * 1000)
+  return prisma.user.update({
+    where: { id },
+    data: { tokenActivacion: token, tokenActivacionExpira: expira },
+  })
+}
+
+async function validarTokenActivacion(token) {
+  return prisma.user.findFirst({
+    where: {
+      tokenActivacion: token,
+      tokenActivacionExpira: { gt: new Date() },
+    },
+  })
+}
+
+async function activarCuenta(token, password) {
+  const user = await prisma.user.findFirst({
+    where: { tokenActivacion: token },
+  })
+  if (!user) return null
+  return prisma.user.update({
+    where: { id: user.id },
+    data: {
+      cuentaActivada: true,
+      password,
+      tokenActivacion: null,
+      tokenActivacionExpira: null,
+    },
+  })
+}
+
+export { createUser, getAllUsers, getUserById, getUserByEmail, updateUser, deleteUser, generarTokenActivacion, validarTokenActivacion, activarCuenta }

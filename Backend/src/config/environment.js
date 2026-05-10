@@ -9,6 +9,9 @@ const config = {
   jwtSecret:      process.env.JWT_SECRET || 'cambiar-en-produccion',
   jwtExpiresIn:   process.env.JWT_EXPIRES_IN || '8h',
   // CORS — origins permitidos (separados por coma si son varios)
+  gmailUser:       process.env.GMAIL_USER || null,
+  gmailPassword:   process.env.GMAIL_PASSWORD || null,
+  frontendUrl:     process.env.FRONTEND_URL || 'http://localhost:5173',
   allowedOrigin:  process.env.ALLOWED_ORIGIN || 'http://localhost:3000',
 }
 

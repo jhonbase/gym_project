@@ -27,6 +27,9 @@ model User {
   semestre           Int
   esEgresado         Boolean       @default(false)
   rol                String        @default("usuario") // "usuario" | "entrenador" | "admin"
+  cuentaActivada    Boolean       @default(false)
+  tokenActivacion    String?
+  tokenActivacionExpira DateTime?
   certificadoEps     String?       // Ruta del certificado de EPS (PDF)
   password          String?       // Password para login (solo trainers)
   createdAt          DateTime      @default(now())

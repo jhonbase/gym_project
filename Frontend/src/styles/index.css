@@ -4300,3 +4300,144 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   color: var(--color-dim);
   font-style: italic;
 }
+
+/* ═══════════════════════════════════════════
+   COMPARISON MODE — Selector + Banner
+═══════════════════════════════════════════ */
+
+.compare-selectors {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+}
+
+.compare-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  background: rgba(225, 6, 0, 0.15);
+  border: 1px solid rgba(225, 6, 0, 0.4);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #f87171;
+  margin-top: -0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.compare-banner strong {
+  color: #fca5a5;
+}
+
+.compare-clear-btn {
+  background: none;
+  border: none;
+  color: #f87171;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: background 0.15s;
+}
+
+.compare-clear-btn:hover {
+  background: rgba(225, 6, 0, 0.2);
+}
+
+/* ═══════════════════════════════════════════
+   EVOLUTION CHART — Leyenda comparación
+═══════════════════════════════════════════ */
+
+.chart-legend {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--color-dim);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR CARDS — Comparación y delta
+═══════════════════════════════════════════ */
+
+.kpi-compare-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.kpi-card-value-compare {
+  font-size: 0.9rem;
+  color: #00B4D8;
+  font-weight: 600;
+}
+
+.delta-positive {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #22c55e;
+}
+
+.delta-negative {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+.delta-neutral {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-dim);
+}
+
+/* ═══════════════════════════════════════════
+   METRICS TABLE — Neutral change
+═══════════════════════════════════════════ */
+
+.change-neutral {
+  color: var(--color-dim);
+}
+
+/* ═══════════════════════════════════════════
+   HEALTH BLOCK — Comparación
+═══════════════════════════════════════════ */
+
+.health-compare-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.2rem;
+}
+
+.health-item-value-secondary {
+  font-size: 0.8rem;
+  color: #00B4D8;
+  font-weight: 600;
+}
+
+.health-delta {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.health-delta.up { color: #ef4444; }
+.health-delta.down { color: #22c55e; }
+.health-delta.neutral { color: var(--color-dim); }

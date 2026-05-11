@@ -305,6 +305,41 @@ async function getHistorial(req, res, next) {
   }
 }
 
+// NEW: Delete historial clínico
+async function deleteHistorial(req, res, next) {
+  try {
+    const { id } = req.params
+    const assessment = await assessmentService.getById(id)
+
+    if (!assessment) {
+      return response.error(res, 'Valoración no encontrada.', 404)
+    }
+
+    if (!assessment.historialClinico) {
+      return response.error(res, 'No hay historial clínico para eliminar.', 404)
+    }
+
+    const absolutePath = path.join(process.cwd(), assessment.historialClinico)
+
+    // Remove file from disk if it exists
+    if (fs.existsSync(absolutePath)) {
+      try {
+        fs.unlinkSync(absolutePath)
+      } catch (e) {
+        // Log but continue; file may already be missing
+        logger.error(`Error deleting historial file: ${e.message}`)
+      }
+    }
+
+    // Update DB to null
+    const updated = await assessmentService.updateHistorial(id, { historialClinico: null })
+
+    return response.success(res, { assessment: updated, message: 'Historial clínico eliminado' })
+  } catch (error) {
+    next(error)
+  }
+}
+
 /**
  * PUT /api/assessments/:id
  * Actualiza una valoración completa.
@@ -379,4 +414,4 @@ async function updateTrainingPlan(req, res, next) {
 }
 
 
-export { createAssessment, getAssessment, getByUser, getAllAssessments, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, deleteLesionFile, uploadHistorial, getHistorial, updateAssessment, deleteAssessment, updateTrainingPlan }
+export { createAssessment, getAssessment, getByUser, getAllAssessments, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, deleteLesionFile, uploadHistorial, getHistorial, deleteHistorial, updateAssessment, deleteAssessment, updateTrainingPlan }

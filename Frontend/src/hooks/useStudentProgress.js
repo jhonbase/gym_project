@@ -17,9 +17,15 @@ export function useStudentProgress(studentId) {
   const [metric, setMetric] = useState('peso')
   const [dateRange, setDateRange] = useState('1m')
 
+  // Estados de comparación
+  const [assessments, setAssessments] = useState([])
+  const [compareMode, setCompareMode] = useState(false)
+  const [compareIds, setCompareIds] = useState({ id1: null, id2: null })
+
   // Cargar datos iniciales
   useEffect(() => {
     loadAllData()
+    loadAssessments()
   }, [studentId])
 
   // Recargar evolution cuando cambia metric o dateRange
@@ -54,6 +60,16 @@ export function useStudentProgress(studentId) {
     }
   }
 
+  // Cargar lista de valoraciones
+  async function loadAssessments() {
+    try {
+      const list = await progressService.getAssessments(studentId)
+      setAssessments(list)
+    } catch (err) {
+      console.error('Error cargando valoraciones:', err)
+    }
+  }
+
   // Cambiar métrica
   const changeMetric = useCallback((newMetric) => {
     setMetric(newMetric)
@@ -62,6 +78,18 @@ export function useStudentProgress(studentId) {
   // Cambiar rango de fechas
   const changeDateRange = useCallback((newRange) => {
     setDateRange(newRange)
+  }, [])
+
+  // Activar modo comparación
+  const startCompare = useCallback((id1, id2) => {
+    setCompareIds({ id1, id2 })
+    setCompareMode(true)
+  }, [])
+
+  // Limpiar comparación
+  const clearComparison = useCallback(() => {
+    setCompareMode(false)
+    setCompareIds({ id1: null, id2: null })
   }, [])
 
   // Obtener label de métrica actual
@@ -86,6 +114,12 @@ export function useStudentProgress(studentId) {
     changeDateRange,
     getMetricLabel,
     getDateRangeLabel,
-    reload: loadAllData
+    reload: loadAllData,
+    // Comparación
+    assessments,
+    compareMode,
+    compareIds,
+    startCompare,
+    clearComparison
   }
 }

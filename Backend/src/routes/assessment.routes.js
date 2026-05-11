@@ -24,8 +24,8 @@ router.post('/:id/lesion', protectRoutes, authorize('entrenador', 'admin'), uplo
 router.delete('/:id/lesion/:filename', protectRoutes, authorize('entrenador', 'admin'), assessmentController.deleteLesionFile)
 router.get('/:id/lesion', protectRoutes, authorize('entrenador', 'admin'), assessmentController.getLesion)
 router.post('/:id/historial', protectRoutes, authorize('entrenador', 'admin'), uploadHistorial.single('archivo'), assessmentController.uploadHistorial)
+router.delete('/:id/historial', protectRoutes, authorize('entrenador', 'admin'), assessmentController.deleteHistorial)
 router.get('/:id/historial', protectRoutes, authorize('entrenador', 'admin'), assessmentController.getHistorial)
-router.delete('/:id', protectRoutes, authorize('entrenador', 'admin'), assessmentController.deleteAssessment)
 router.put('/:id/training-plan', protectRoutes, authorize('entrenador', 'admin'), assessmentController.updateTrainingPlan)
 
 export default router

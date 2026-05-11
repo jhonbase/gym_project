@@ -1,5 +1,6 @@
 /**
  * Bloque de salud con indicadores visuales
+ * Soporta modo comparación entre dos valoraciones
  */
 
 const IconHeart = () => (
@@ -29,25 +30,28 @@ const IconLayers = () => (
 function getStatusColor(status) {
   switch (status) {
     case 'normal':
-    case 'good':
-      return 'status-normal'
-    case 'warning':
-      return 'status-warning'
-    case 'danger':
-      return 'status-danger'
-    default:
-      return 'status-normal'
+    case 'good':   return 'status-normal'
+    case 'warning': return 'status-warning'
+    case 'danger':  return 'status-danger'
+    default:        return 'status-normal'
   }
 }
 
-export default function HealthBlock({ data }) {
+function compareValues(v1, v2) {
+  const n1 = typeof v1 === 'string' ? parseFloat(v1) : v1
+  const n2 = typeof v2 === 'string' ? parseFloat(v2) : v2
+  if (n1 === n2) return 'neutral'
+  return n2 > n1 ? 'up' : 'down'
+}
+
+export default function HealthBlock({ data, compareData }) {
   if (!data) return null
 
   const indicators = [
     { key: 'presionArterial', label: 'Presión arterial', value: data.presionArterial.value, status: data.presionArterial.status, icon: IconHeart },
-    { key: 'ppm', label: 'PPM', value: data.ppm.value, status: data.ppm.status, icon: IconActivity },
-    { key: 'edadMetabolica', label: 'Edad metabólica', value: data.edadMetabolica.value + ' años', status: data.edadMetabolica.status, icon: IconClock },
-    { key: 'grasaVisceral', label: 'Grasa visceral', value: data.grasaVisceral.value, status: data.grasaVisceral.status, icon: IconLayers }
+    { key: 'ppm',             label: 'PPM',             value: data.ppm.value,             status: data.ppm.status,             icon: IconActivity },
+    { key: 'edadMetabolica',  label: 'Edad metabólica', value: data.edadMetabolica.value + ' años', status: data.edadMetabolica.status, icon: IconClock },
+    { key: 'grasaVisceral',   label: 'Grasa visceral',  value: data.grasaVisceral.value,   status: data.grasaVisceral.status,   icon: IconLayers }
   ]
 
   return (
@@ -56,6 +60,9 @@ export default function HealthBlock({ data }) {
       <div className="health-grid">
         {indicators.map(ind => {
           const Icon = ind.icon
+          const comp = compareData ? compareData[ind.key] : null
+          const direction = comp ? compareValues(data[ind.key].value, comp.value) : null
+
           return (
             <div key={ind.key} className="health-item">
               <div className="health-item-header">
@@ -65,6 +72,16 @@ export default function HealthBlock({ data }) {
               <div className={`health-item-value ${getStatusColor(ind.status)}`}>
                 {ind.value}
               </div>
+              {comp && (
+                <div className="health-compare-row">
+                  <span className="health-item-value-secondary">{comp.value}</span>
+                  {direction !== 'neutral' && (
+                    <span className={`health-delta ${direction}`}>
+                      {direction === 'up' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </div>
+              )}
               <span className={`health-item-label ${getStatusColor(ind.status)}`}>
                 {ind.status === 'normal' || ind.status === 'good' ? '✓ Normal' : ind.status}
               </span>

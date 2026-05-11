@@ -99,3 +99,36 @@ export async function getProgressData(studentId) {
     next
   }
 }
+
+/**
+ * Obtiene lista de valoraciones del estudiante
+ * Simula datos reales para poblar los dropdowns de comparación
+ */
+export async function getAssessments(studentId) {
+  await new Promise(resolve => setTimeout(resolve, 300))
+
+  const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+  const now = new Date()
+  const assessments = []
+
+  for (let i = 7; i >= 0; i--) {
+    const date = new Date(now)
+    date.setMonth(date.getMonth() - i)
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = months[date.getMonth()]
+    const year = date.getFullYear()
+
+    assessments.push({
+      id: `assess-${i}`,
+      fecha: `${day} ${month} ${year}`,
+      fechaRaw: date.toISOString(),
+      peso: Math.round((55 + Math.random() * 30) * 10) / 10,
+      grasaCorporal: Math.round((15 + Math.random() * 15) * 10) / 10,
+      masaMuscular: Math.round((25 + Math.random() * 15) * 10) / 10,
+      imc: Math.round((18 + Math.random() * 10) * 10) / 10,
+      grasaVisceral: Math.round(1 + Math.random() * 14)
+    })
+  }
+
+  return assessments
+}

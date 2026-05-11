@@ -1,6 +1,7 @@
 /**
  * Sidebar Cards - Premium KPI Cards
  * CON texto mejorado y jerarquía visual
+ * Soporta modo comparación con valores apilados y delta
  */
 
 const IconScale = () => (
@@ -29,7 +30,16 @@ const IconFire = () => (
 
 const round = (num, decimals = 1) => Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals)
 
-export default function SidebarCards({ data, objective }) {
+function DeltaBadge({ diff, unit }) {
+  if (diff === 0) return <span className="delta-neutral">– 0 {unit}</span>
+  return (
+    <span className={diff < 0 ? 'delta-positive' : 'delta-negative'}>
+      {diff < 0 ? '↓' : '↑'} {Math.abs(diff)} {unit}
+    </span>
+  )
+}
+
+export default function SidebarCards({ data, objective, compareData }) {
   if (!data) return null
 
   const cards = [
@@ -41,7 +51,8 @@ export default function SidebarCards({ data, objective }) {
       icon: IconScale,
       isPrimary: true,
       meta: 'Meta: 75 kg',
-      metaProgress: 78
+      metaProgress: 78,
+      compareKey: 'peso'
     },
     {
       label: 'Grasa corporal',
@@ -50,7 +61,8 @@ export default function SidebarCards({ data, objective }) {
       change: round(data.grasa.cambio, 1),
       icon: IconPercent,
       isPrimary: false,
-      context: data.grasa.actual < 20 ? 'Buena' : 'Elevada'
+      context: data.grasa.actual < 20 ? 'Buena' : 'Elevada',
+      compareKey: 'grasaCorporal'
     },
     {
       label: 'IMC',
@@ -58,7 +70,8 @@ export default function SidebarCards({ data, objective }) {
       unit: '',
       icon: IconActivity,
       isPrimary: false,
-      context: data.imc.categoria
+      context: data.imc.categoria,
+      compareKey: 'imc'
     },
     {
       label: 'Entrenamiento',
@@ -66,7 +79,8 @@ export default function SidebarCards({ data, objective }) {
       sub: `🔥 ${data.streakActual} días streak`,
       icon: IconFire,
       isPrimary: true,
-      isStreak: true
+      isStreak: true,
+      compareKey: null
     }
   ]
 
@@ -75,26 +89,56 @@ export default function SidebarCards({ data, objective }) {
       {cards.map((card, i) => {
         const Icon = card.icon
         const hasChange = card.change !== undefined
-        
+        const hasCompare = compareData && card.compareKey
+
+        let compareDiff = null
+        if (hasCompare) {
+          const key = card.compareKey
+          const base = data[key]?.actual ?? data[key]?.current
+          const comp = compareData[key]?.actual ?? compareData[key]?.current
+          if (base !== undefined && comp !== undefined) {
+            compareDiff = Math.round((comp - base) * 10) / 10
+          }
+        }
+
         return (
           <div key={i} className={`kpi-card ${card.isPrimary ? 'primary' : ''}`}>
             <div className="kpi-card-header">
               <Icon />
               <span>{card.label}</span>
             </div>
-            
-            <div className="kpi-card-value">
-              {card.value}
-              {card.unit && <small>{card.unit}</small>}
-            </div>
 
-            {hasChange && (
+            {hasCompare ? (
+              <div className="kpi-compare-group">
+                <div className="kpi-card-value">
+                  {card.value}
+                  {card.unit && <small>{card.unit}</small>}
+                </div>
+                <div className="kpi-card-value kpi-card-value-compare">
+                  {round(
+                    hasCompare && compareData
+                      ? (compareData[card.compareKey]?.actual ?? compareData[card.compareKey]?.current ?? card.value)
+                      : card.value
+                  , 1)} {card.unit}
+                </div>
+                {compareDiff !== null && (
+                  <DeltaBadge diff={compareDiff} unit={card.unit} />
+                )}
+              </div>
+            ) : (
+              <div className="kpi-card-value">
+                {card.value}
+                {card.unit && <small>{card.unit}</small>}
+              </div>
+            )}
+
+            {hasChange && !hasCompare && (
               <div className={`kpi-change ${card.change > 0 ? 'positive' : 'negative'}`}>
                 {card.change > 0 ? '↑' : '↓'} {Math.abs(card.change)} {card.unit} esta semana
               </div>
             )}
 
-            {card.meta && (
+            {card.meta && !hasCompare && (
               <div className="kpi-meta">
                 <span>{card.meta}</span>
                 <div className="kpi-progress-bar">
@@ -103,7 +147,7 @@ export default function SidebarCards({ data, objective }) {
               </div>
             )}
 
-            {card.context && (
+            {card.context && !hasCompare && (
               <div className={`kpi-context ${card.isStreak ? 'streak' : ''}`}>
                 {card.context}
               </div>

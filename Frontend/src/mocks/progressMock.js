@@ -29,7 +29,9 @@ const BASE_VALUES = {
   peso: { min: 55, max: 100 },
   grasaCorporal: { min: 15, max: 35 },
   masaMuscular: { min: 25, max: 45 },
-  imc: { min: 18, max: 32 }
+  imc: { min: 18, max: 32 },
+  // Grasa visceral es un entero (nivel) entre 1 y 15
+  grasaVisceral: { min: 1, max: 15 }
 }
 
 /**
@@ -39,7 +41,8 @@ const TRENDS = {
   peso: -0.03,        // disminuye ~0.03 kg por día
   grasaCorporal: -0.05, // decreases
   masaMuscular: +0.02,   // aumenta
-  imc: -0.02           // decrease
+  imc: -0.02,           // decrease
+  grasaVisceral: -0.01   // ligero descenso diario en nivel
 }
 
 /**
@@ -68,10 +71,12 @@ export function generateEvolutionData(studentId, metric, daysBack = 30) {
     
     // Mantener dentro de límites razonables
     currentValue = Math.max(base.min * 0.8, Math.min(base.max * 1.2, currentValue))
-    
+    const rounded = metric === 'grasaVisceral'
+      ? Math.round(currentValue)
+      : Math.round(currentValue * 10) / 10
     data.push({
       date: formatDate(date),
-      value: Math.round(currentValue * 10) / 10
+      value: rounded
     })
   }
   
@@ -87,15 +92,22 @@ export function generateMetricsComparison(studentId) {
   const grasa = generateEvolutionData(studentId, 'grasaCorporal', 180)
   const masa = generateEvolutionData(studentId, 'masaMuscular', 180)
   const imc = generateEvolutionData(studentId, 'imc', 180)
-  
+  const visceral = generateEvolutionData(studentId, 'grasaVisceral', 180)
+
   const getChange = (arr) => Math.round((arr[arr.length - 1].value - arr[0].value) * 10) / 10
-  const getUnit = (metric) => metric === 'imc' || metric === 'grasaCorporal' ? '%' : 'kg'
-  
+  const getUnit = (metric) => {
+    if (metric === 'imc') return ''
+    if (metric === 'grasaCorporal') return '%'
+    if (metric === 'grasaVisceral') return 'nivel'
+    return 'kg'
+  }
+
   return {
     peso: { start: peso[0].value, current: peso[peso.length - 1].value, change: getChange(peso), unit: 'kg' },
     grasaCorporal: { start: grasa[0].value, current: grasa[grasa.length - 1].value, change: getChange(grasa), unit: '%' },
     masaMuscular: { start: masa[0].value, current: masa[masa.length - 1].value, change: getChange(masa), unit: 'kg' },
-    imc: { start: imc[0].value, current: imc[imc.length - 1].value, change: getChange(imc), unit: '' }
+    imc: { start: imc[0].value, current: imc[imc.length - 1].value, change: getChange(imc), unit: '' },
+    grasaVisceral: { start: visceral[0].value, current: visceral[visceral.length - 1].value, change: getChange(visceral), unit: 'nivel' }
   }
 }
 
@@ -299,5 +311,6 @@ export const metrics = [
   { value: 'peso', label: 'Peso', unit: 'kg' },
   { value: 'grasaCorporal', label: 'Grasa corporal', unit: '%' },
   { value: 'masaMuscular', label: 'Masa muscular', unit: 'kg' },
-  { value: 'imc', label: 'IMC', unit: '' }
+  { value: 'imc', label: 'IMC', unit: '' },
+  { value: 'grasaVisceral', label: 'Grasa visceral', unit: 'nivel' }
 ]

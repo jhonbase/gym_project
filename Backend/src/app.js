@@ -28,9 +28,41 @@ app.set('trust proxy', 1)
 // ─── Seguridad: headers HTTP ────────────────────────────────────────────────
 app.use(helmet())
 
-// ─── Seguridad: CORS restringido ────────────────────────────────────────────
+// ─── Seguridad: CORS dinámico según entorno ────────────────────────────────
+function corsOriginCallback(origin, callback) {
+  // Development: permitir todo automáticamente
+  if (config.isDevelopment) {
+    // Permitir requests sin origin (Postman, curl, servidores externos)
+    if (!origin) return callback(null, true)
+
+    // Permitir localhost en cualquier puerto (5173, 8081, etc)
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return callback(null, true)
+    }
+
+    // Permitir IPs de red locales (192.168.x.x) - para Expo Go en dispositivo físico
+    if (origin.match(/^https?:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/)) {
+      return callback(null, true)
+    }
+
+    // Permitir IPs de red locales (10.x.x.x) - para redes empresariales
+    if (origin.match(/^https?:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/)) {
+      return callback(null, true)
+    }
+
+    return callback(new Error('Origen no permitido en desarrollo'), false)
+  }
+
+  // Production: solo whitelist explícita
+  if (config.allowedOriginsList.includes(origin)) {
+    return callback(null, true)
+  }
+
+  callback(new Error('Origen no permitido'), false)
+}
+
 app.use(cors({
-  origin: config.allowedOrigin,
+  origin: corsOriginCallback,
   credentials: true,
 }))
 

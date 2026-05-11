@@ -10,19 +10,31 @@ async function enviarCorreoActivacion(email, nombre, token) {
     },
   })
 
-  const enlace = `${config.frontendUrl}/activar-cuenta?token=${token}`
+  // Desarrollo: usar esquema exp:// para Expo Go si EXPO_DEV_URL está configurada,
+  // de lo contrario usar http://localhost:8081 como fallback para pruebas en web
+  // Producción: usar esquema personalizado de la app
+  let deepLink
+  if (config.isDevelopment) {
+    if (config.expoDevUrl) {
+      deepLink = `${config.expoDevUrl}/--/crear-password?token=${token}`
+    } else {
+      deepLink = `http://localhost:8081/crear-password?token=${token}`
+    }
+  } else {
+    deepLink = `${config.expoProdUrl}crear-password?token=${token}`
+  }
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
-      <h2 style="color: #2563eb;">¡Activa tu cuenta UniFit!</h2>
+      <h2 style="color: #2563eb;">¡Crea tu contraseña UniFit!</h2>
       <p>Hola <strong>${nombre}</strong>,</p>
       <p>Se ha creado tu cuenta en el sistema de valoración física universitaria.</p>
-      <p>Para activar tu cuenta, haz clic en el siguiente botón:</p>
+      <p>Para crear tu contraseña, haz clic en el siguiente botón:</p>
       <div style="text-align: center; margin: 30px 0;">
-        <a href="${enlace}" style="background-color: #2563eb; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Activar cuenta</a>
+        <a href="${deepLink}" style="background-color: #2563eb; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Crear contraseña</a>
       </div>
       <p style="font-size: 14px; color: #666;">O copia y pega este enlace en tu navegador:</p>
-      <p style="font-size: 12px; color: #888; word-break: break-all;">${enlace}</p>
+      <p style="font-size: 12px; color: #888; word-break: break-all;">${deepLink}</p>
       <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
       <p style="font-size: 12px; color: #999;">Este enlace expira en 1 hora. Si no solicitaste este correo, ignóralo.</p>
     </div>
@@ -31,7 +43,7 @@ async function enviarCorreoActivacion(email, nombre, token) {
   await transporter.sendMail({
     from: `"UniFit - Valoración Física" <${config.gmailUser}>`,
     to: email,
-    subject: 'Activa tu cuenta UniFit',
+    subject: 'Crea tu contraseña UniFit',
     html,
   })
 }

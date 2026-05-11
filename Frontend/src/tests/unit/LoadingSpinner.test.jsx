@@ -6,11 +6,11 @@ describe('LoadingSpinner', () => {
 
   it('debe renderizar el contenedor del spinner', () => {
     const { container } = render(<LoadingSpinner />)
-    expect(container.querySelector('.spinner-container')).toBeInTheDocument()
+    expect(container.querySelector('.loading-container')).toBeInTheDocument()
   })
 
   it('debe renderizar el elemento spinner animado', () => {
     const { container } = render(<LoadingSpinner />)
-    expect(container.querySelector('.spinner')).toBeInTheDocument()
+    expect(container.querySelector('.ui-spinner')).toBeInTheDocument()
   })
 })

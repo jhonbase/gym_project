@@ -7,12 +7,20 @@ import { calculateSimilarity } from '../utils/fingerprintHelpers.js'
 const SIMILARITY_THRESHOLD = 90
 
 /**
- * Registra una huella en la BD asociada a un usuario.
+ * Registra una huella en la BD y activa la cuenta del usuario.
+ * Usa transacción para garantizar atomicidad: si falla crear la huella,
+ * no se activa la cuenta (evita estado inconsistente).
  */
 async function enrollFingerprint(userId, template) {
-  return prisma.fingerprint.create({
-    data: { userId, template },
-  })
+  return prisma.$transaction([
+    prisma.fingerprint.create({
+      data: { userId, template },
+    }),
+    prisma.user.update({
+      where: { id: userId },
+      data: { cuentaActivada: true },
+    }),
+  ])
 }
 
 /**

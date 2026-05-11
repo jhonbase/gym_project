@@ -17,12 +17,13 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-// Interceptor: adjunta el JWT en cada petición saliente
+// Interceptor: adjunta el JWT y el header de plataforma en cada petición saliente
 apiClient.interceptors.request.use(config => {
   const token = localStorage.getItem('gym_token')
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`
   }
+  config.headers['X-Platform'] = 'web'
   return config
 })
 

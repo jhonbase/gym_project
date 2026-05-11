@@ -66,28 +66,51 @@ async function generarTokenActivacion(id) {
 }
 
 async function validarTokenActivacion(token) {
-  return prisma.user.findFirst({
+  console.log('=== VALIDAR TOKEN SERVICE ===')
+  console.log('buscando token:', token)
+  console.log('expira después de:', new Date())
+  
+  const result = await prisma.user.findFirst({
     where: {
       tokenActivacion: token,
       tokenActivacionExpira: { gt: new Date() },
     },
   })
+  
+  console.log('resultado:', result ? result.email : 'NO ENCONTRADO')
+  return result
 }
 
 async function activarCuenta(token, password) {
+  console.log('=== SERVICIO ACTIVAR CUENTA ===')
+  console.log('1. Buscando usuario con token:', token)
+  
   const user = await prisma.user.findFirst({
     where: { tokenActivacion: token },
   })
+  
+  console.log('2. Usuario encontrado:', user ? user.email : 'NULL')
   if (!user) return null
-  return prisma.user.update({
-    where: { id: user.id },
-    data: {
-      cuentaActivada: true,
-      password,
-      tokenActivacion: null,
-      tokenActivacionExpira: null,
-    },
-  })
+  
+  console.log('3. Password a guardar (sin hash):', password ? 'YES' : 'NO')
+  console.log('4. Actualizando usuario en BD...')
+  
+  try {
+    const result = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        cuentaActivada: true,
+        password,
+        tokenActivacion: null,
+        tokenActivacionExpira: null,
+      },
+    })
+    console.log('5. Usuario actualizado:', result.email)
+    return result
+  } catch (error) {
+    console.log('ERROR en actualizar:', error.message)
+    throw error
+  }
 }
 
 export { createUser, getAllUsers, getUserById, getUserByEmail, updateUser, deleteUser, generarTokenActivacion, validarTokenActivacion, activarCuenta }

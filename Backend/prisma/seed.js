@@ -33,6 +33,7 @@ async function main() {
       semestre: 0,
       esEgresado: false,
       rol: 'entrenador',
+      cuentaActivada: true,
       password: hashedPassword,
       tipoDocumento: 'no aplica'
     },

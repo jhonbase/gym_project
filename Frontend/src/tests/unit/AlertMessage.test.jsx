@@ -21,7 +21,7 @@ describe('AlertMessage', () => {
 
   it('debe aplicar la clase CSS correcta según el tipo', () => {
     const { container } = render(<AlertMessage type="warning" message="Cuidado" />)
-    expect(container.firstChild).toHaveClass('alert-warning')
+    expect(container.firstChild.className).toContain('ui-alert-warning')
   })
 
   it('debe mostrar botón de cerrar si hay callback onClose', () => {

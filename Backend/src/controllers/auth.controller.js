@@ -27,6 +27,20 @@ export async function login(req, res, next) {
       return response.error(res, 'Esta cuenta no tiene password configurado.', 401)
     }
 
+    const platform = req.headers['x-platform']
+
+    if (!platform) {
+      return response.error(res, 'Plataforma no identificada.', 400)
+    }
+
+    if (platform === 'web' && user.rol === 'usuario') {
+      return response.error(res, 'Los estudiantes deben usar la app móvil.', 400)
+    }
+
+    if (platform === 'mobile' && user.rol === 'entrenador') {
+      return response.error(res, 'Los entrenadores deben usar el portal web.', 400)
+    }
+
     if (user.rol === 'usuario' && !user.cuentaActivada) {
       return response.error(res, 'Cuenta no activada. Revisa tu correo.', 401)
     }
@@ -65,7 +79,7 @@ export async function solicitarActivacion(req, res, next) {
     const user = await userService.getUserByEmail(email)
     if (!user) return response.error(res, 'No existe usuario con ese email.', 404)
     if (user.rol !== 'usuario') return response.error(res, 'Esta cuenta no es de estudiante.', 400)
-    if (user.cuentaActivada) return response.error(res, 'Esta cuenta ya está activada.', 400)
+    if (user.cuentaActivada && user.password) return response.error(res, 'Esta cuenta ya está activada.', 400)
 
     await userService.generarTokenActivacion(user.id)
     const updated = await userService.getUserByEmail(email)
@@ -80,17 +94,31 @@ export async function solicitarActivacion(req, res, next) {
 export async function activarCuenta(req, res, next) {
   try {
     const { token, password } = req.body
+    console.log('=== ACTIVAR CUENTA BACKEND ===')
+    console.log('token recibido:', token)
+    console.log('password length:', password?.length)
+
     if (!token || !password) return response.error(res, 'Token y password son requeridos.', 400)
     if (password.length < 6) return response.error(res, 'La contraseña debe tener al menos 6 caracteres.', 400)
 
     const user = await userService.validarTokenActivacion(token)
+    console.log('user encontrado:', user ? user.email : 'NULL')
     if (!user) return response.error(res, 'Token inválido o expirado.', 400)
 
+    console.log('Generando hash...')
     const hashed = await bcrypt.hash(password, 12)
+    console.log('Hash generado, actualizando cuenta...')
     await userService.activarCuenta(token, hashed)
+    console.log('Cuenta activada!')
+    console.log('=== ANTES DEL SUCCESS ===')
+    console.log('Enviando respuesta exitosa...')
 
     return response.success(res, { message: 'Cuenta activada correctamente.' })
   } catch (error) {
+    console.log('=== ERROR EN CONTROLLER ===')
+    console.log('Error:', error)
+    console.log('Error message:', error.message)
+    if (error.stack) console.log('Error stack:', error.stack)
     next(error)
   }
 }

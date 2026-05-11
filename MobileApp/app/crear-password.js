@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { MaterialIcons } from '@expo/vector-icons'
 import api from '../services/api.js'
 
 export default function CrearPasswordScreen() {
@@ -63,6 +64,9 @@ export default function CrearPasswordScreen() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.replace('/')}>
+        <MaterialIcons name="arrow-back" size={28} color="#FFFFFF" />
+      </TouchableOpacity>
       <View style={styles.card}>
         <Text style={styles.title}>Crea tu contraseña</Text>
         <Text style={styles.subtitle}>Ingresa una contraseña segura para tu cuenta.</Text>
@@ -94,12 +98,13 @@ export default function CrearPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f3f4f6', justifyContent: 'center', padding: 20 },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 },
-  title: { fontSize: 22, fontWeight: 'bold', color: '#1f2937', textAlign: 'center' },
-  subtitle: { fontSize: 14, color: '#6b7280', textAlign: 'center', marginBottom: 20, marginTop: 8 },
-  label: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6, marginTop: 12 },
-  input: { borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, padding: 12, fontSize: 16, backgroundColor: '#fff' },
-  btnPrimary: { backgroundColor: '#2563eb', borderRadius: 8, padding: 14, alignItems: 'center', marginTop: 20 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  container: { flex: 1, backgroundColor: '#0B0B0B', justifyContent: 'center', paddingHorizontal: 20 },
+  backBtn: { position: 'absolute', top: 40, left: 16, backgroundColor: '#1A1A1A', borderRadius: 20, padding: 8, zIndex: 1 },
+  card: { backgroundColor: '#1A1A1A', borderRadius: 12, padding: 24 },
+  title: { fontSize: 22, fontWeight: '700', color: '#FFFFFF', textAlign: 'center' },
+  subtitle: { fontSize: 14, color: '#888888', textAlign: 'center', marginBottom: 20, marginTop: 8 },
+  label: { fontSize: 14, fontWeight: '600', color: '#FFFFFF', marginBottom: 6, marginTop: 12 },
+  input: { borderWidth: 1, borderColor: '#3A3A3A', borderRadius: 8, padding: 12, fontSize: 16, backgroundColor: '#2A2A2A', color: '#FFFFFF' },
+  btnPrimary: { backgroundColor: '#E10600', borderRadius: 8, padding: 14, alignItems: 'center', marginTop: 20 },
+  btnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600' },
 })

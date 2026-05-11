@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Dimensions, ActivityIndicator } from 'react-native'
 import { useEffect, useState } from 'react'
 import Svg, { Path, Line, Text as SvgText } from 'react-native-svg'
 import api from '../../services/api.js'
@@ -28,8 +28,8 @@ function LineChart({ data, color, label }) {
     <View style={styles.chartContainer}>
       <Text style={styles.chartLabel}>{label}</Text>
       <Svg width={CHART_W} height={CHART_H + 20}>
-        <Line x1={PADDING} y1={PADDING} x2={PADDING} y2={CHART_H} stroke="#d1d5db" strokeWidth={1} />
-        <Line x1={PADDING} y1={CHART_H} x2={CHART_W - PADDING} y2={CHART_H} stroke="#d1d5db" strokeWidth={1} />
+        <Line x1={PADDING} y1={PADDING} x2={PADDING} y2={CHART_H} stroke="#3A3A3A" strokeWidth={1} />
+        <Line x1={PADDING} y1={CHART_H} x2={CHART_W - PADDING} y2={CHART_H} stroke="#3A3A3A" strokeWidth={1} />
         <Path d={`M${points}`} stroke={color} strokeWidth={2.5} fill="none" />
       </Svg>
       <Text style={styles.lastValue}>{last?.y.toFixed(1)} {label.split('(')[1]?.replace(')', '') || ''}</Text>
@@ -57,7 +57,7 @@ export default function MetricsScreen() {
   }, [user?.id])
 
   if (loading) {
-    return <View style={styles.center}><Text>Cargando...</Text></View>
+    return <View style={styles.center}><ActivityIndicator size="large" color="#E10600" /></View>
   }
 
   const pesoData = evaluaciones.map((e, i) => ({ x: i, y: e.peso }))
@@ -75,9 +75,9 @@ export default function MetricsScreen() {
         </View>
       ) : (
         <>
-          <LineChart data={pesoData} color="#2563eb" label="Peso (kg)" />
-          <LineChart data={grasaData} color="#ef4444" label="Grasa (%)" />
-          <LineChart data={imcData} color="#10b981" label="IMC" />
+          <LineChart data={pesoData} color="#3B82F6" label="Peso (kg)" />
+          <LineChart data={grasaData} color="#E10600" label="Grasa (%)" />
+          <LineChart data={imcData} color="#10B981" label="IMC" />
         </>
       )}
     </ScrollView>
@@ -85,13 +85,13 @@ export default function MetricsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f3f4f6' },
-  title: { fontSize: 20, fontWeight: 'bold', color: '#1f2937', margin: 16 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyCard: { backgroundColor: '#fff', borderRadius: 12, padding: 24, margin: 16, alignItems: 'center' },
-  emptyText: { fontSize: 16, fontWeight: '600', color: '#374151' },
-  emptySubtext: { fontSize: 14, color: '#6b7280', marginTop: 8, textAlign: 'center' },
-  chartContainer: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginHorizontal: 16, marginBottom: 12, alignItems: 'center' },
-  chartLabel: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 8 },
-  lastValue: { fontSize: 18, fontWeight: 'bold', color: '#1f2937', marginTop: 4 },
+  container: { flex: 1, backgroundColor: '#0B0B0B' },
+  title: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', margin: 16 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0B0B0B' },
+  emptyCard: { backgroundColor: '#1A1A1A', borderRadius: 12, padding: 24, margin: 16, alignItems: 'center' },
+  emptyText: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
+  emptySubtext: { fontSize: 14, color: '#888888', marginTop: 8, textAlign: 'center' },
+  chartContainer: { backgroundColor: '#1A1A1A', borderRadius: 12, padding: 16, marginHorizontal: 16, marginBottom: 12, alignItems: 'center' },
+  chartLabel: { fontSize: 14, fontWeight: '600', color: '#FFFFFF', marginBottom: 8 },
+  lastValue: { fontSize: 18, fontWeight: '700', color: '#FFFFFF', marginTop: 4 },
 })

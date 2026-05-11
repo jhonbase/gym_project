@@ -25,11 +25,11 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f3f4f6' },
-  header: { backgroundColor: '#2563eb', padding: 24, paddingTop: 40 },
-  greeting: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
-  subGreeting: { fontSize: 14, color: '#bfdbfe', marginTop: 4 },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 16, margin: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
-  cardTitle: { fontSize: 16, fontWeight: '600', color: '#1f2937', marginBottom: 8 },
-  cardText: { fontSize: 14, color: '#6b7280' },
+  container: { flex: 1, backgroundColor: '#0B0B0B' },
+  header: { backgroundColor: '#0B0B0B', padding: 24, paddingTop: 40 },
+  greeting: { fontSize: 24, fontWeight: '700', color: '#FFFFFF' },
+  subGreeting: { fontSize: 14, color: '#888888', marginTop: 4 },
+  card: { backgroundColor: '#1A1A1A', borderRadius: 12, padding: 16, margin: 16 },
+  cardTitle: { fontSize: 16, fontWeight: '600', color: '#FFFFFF', marginBottom: 8 },
+  cardText: { fontSize: 14, color: '#888888' },
 })

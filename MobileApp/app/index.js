@@ -130,13 +130,13 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f3f4f6', justifyContent: 'center', padding: 20 },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 },
-  logo: { fontSize: 32, fontWeight: 'bold', color: '#2563eb', textAlign: 'center' },
-  subtitle: { fontSize: 14, color: '#6b7280', textAlign: 'center', marginBottom: 24 },
-  label: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6, marginTop: 12 },
-  input: { borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, padding: 12, fontSize: 16, backgroundColor: '#fff' },
-  btnPrimary: { backgroundColor: '#2563eb', borderRadius: 8, padding: 14, alignItems: 'center', marginTop: 20 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  linkText: { color: '#2563eb', textAlign: 'center', marginTop: 16, fontSize: 14 },
+  container: { flex: 1, backgroundColor: '#0B0B0B', justifyContent: 'center', paddingHorizontal: 20 },
+  card: { backgroundColor: '#1A1A1A', borderRadius: 12, padding: 24 },
+  logo: { fontSize: 32, fontWeight: '700', color: '#E10600', textAlign: 'center' },
+  subtitle: { fontSize: 14, color: '#888888', textAlign: 'center', marginBottom: 24 },
+  label: { fontSize: 14, fontWeight: '600', color: '#FFFFFF', marginBottom: 6, marginTop: 12 },
+  input: { borderWidth: 1, borderColor: '#3A3A3A', borderRadius: 8, padding: 12, fontSize: 16, backgroundColor: '#2A2A2A', color: '#FFFFFF' },
+  btnPrimary: { backgroundColor: '#E10600', borderRadius: 8, padding: 14, alignItems: 'center', marginTop: 20 },
+  btnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600' },
+  linkText: { color: '#E10600', textAlign: 'center', marginTop: 16, fontSize: 14 },
 })

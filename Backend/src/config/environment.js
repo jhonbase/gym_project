@@ -19,6 +19,7 @@ const config = {
   // Deep Links — URLs para abrir la app móvil desde el correo
   expoDevUrl:      process.env.EXPO_DEV_URL || null,
   expoProdUrl:     process.env.EXPO_PROD_URL || null,
+  expoDevWebUrl:   process.env.EXPO_DEV_WEB_URL || null,
   allowedOriginsList: process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
     : [],

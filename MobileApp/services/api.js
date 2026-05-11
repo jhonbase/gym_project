@@ -33,4 +33,13 @@ api.interceptors.response.use(
   }
 )
 
+async function getUserMetrics(userId, from, to) {
+  const params = {}
+  if (from) params.from = from
+  if (to) params.to = to
+  const res = await api.get(`/users/${userId}/metricas`, { params })
+  return res.data.data.metricas || []
+}
+
+export { getUserMetrics }
 export default api

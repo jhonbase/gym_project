@@ -88,6 +88,20 @@ const createUserSchema = z.object({
   certificadoEps: z
     .string()
     .optional(),
+
+  genero: z
+    .enum(['masculino', 'femenino', 'otro'])
+    .optional(),
+
+  generoOtro: z
+    .string()
+    .max(100)
+    .trim()
+    .optional(),
+
+  institucion: z
+    .enum(['Universitaria de Colombia', 'Universitaria de Bogotá'])
+    .optional(),
 })
 
 export { createUserSchema }

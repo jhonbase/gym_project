@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import { useAlerts } from '../context/AlertContext.jsx'
@@ -25,6 +25,12 @@ const IconSearch = () => (
   </svg>
 )
 
+const IconFilter = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+  </svg>
+)
+
 function FormField({ label, error, children }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
@@ -33,6 +39,33 @@ function FormField({ label, error, children }) {
       {error && <div style={{ color: 'var(--color-error)', fontSize: '0.75rem' }}>{error}</div>}
     </div>
   )
+}
+
+function calcularEdad(fechaNacimiento) {
+  if (!fechaNacimiento) return null
+  const birth = new Date(fechaNacimiento)
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const m = today.getMonth() - birth.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--
+  return age
+}
+
+const FILTER_ORDER = ['institucion', 'programa', 'genero', 'jornada', 'edad']
+
+const FILTER_LABELS = {
+  institucion: { 'Universitaria de Colombia': 'Uni Colombia', 'Universitaria de Bogotá': 'Uni Bogotá' },
+  programa: {},
+  genero: { masculino: 'Masculino', femenino: 'Femenino', otro: 'Otro' },
+  jornada: { diurna: 'Diurna', nocturna: 'Nocturna' },
+  edad: { '18-22': '18-22', '23-27': '23-27', '28-35': '28-35', '36+': '36+' },
+}
+
+function formatChipLabel(key, val) {
+  const labels = FILTER_LABELS[key] || {}
+  const display = labels[val] || val
+  const prefix = { institucion: 'Institución', programa: 'Programa', genero: 'Género', jornada: 'Jornada', edad: 'Edad' }
+  return `${prefix[key]}: ${display}`
 }
 
 export default function StudentsPage() {
@@ -48,12 +81,23 @@ export default function StudentsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [editingUser, setEditingUser] = useState(null)
 
+  const [filters, setFilters] = useState({
+    institucion: '',
+    programa: '',
+    genero: '',
+    jornada: '',
+    edad: '',
+  })
+  const [showFilters, setShowFilters] = useState(false)
+  const filterDropdownRef = useRef(null)
+
   const [form, setForm] = useState({
     primerNombre: '', segundoNombre: '', primerApellido: '', segundoApellido: '',
     tipoDocumento: 'CC', documento: '', fechaNacimiento: '', eps: 'Sura', grupoSanguineo: 'O+',
     email: '', telefono: '',
     nombreEmergencia: '', telefonoEmergencia: '',
     numeroCarnet: '', programa: '', esEgresado: false, modalidad: 'Presencial', jornada: 'diurna', semestre: 1,
+    genero: '', generoOtro: '', institucion: '',
   })
 
   const [certificadoEps, setCertificadoEps] = useState(null)
@@ -61,6 +105,20 @@ export default function StudentsPage() {
   const [deletingId, setDeletingId] = useState(null)
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
   const [acceptedSensitive, setAcceptedSensitive] = useState(false)
+
+  const activeFilterCount = Object.values(filters).filter(v => v !== '').length
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (filterDropdownRef.current && !filterDropdownRef.current.contains(e.target)) {
+        setShowFilters(false)
+      }
+    }
+    if (showFilters) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showFilters])
 
   useEffect(() => {
     loadStudents()
@@ -88,8 +146,8 @@ export default function StudentsPage() {
   function buildPayload() {
     const {
       primerNombre, segundoNombre, primerApellido, segundoApellido,
-      nombreEmergencia, telefonoEmergencia, tipoDocumento, 
-      programa, numeroCarnet, esEgresado, modalidad, ...rest 
+      nombreEmergencia, telefonoEmergencia, tipoDocumento,
+      programa, numeroCarnet, esEgresado, modalidad, ...rest
     } = form
 
     const safeTrim = (str) => (str ? String(str).trim() : '')
@@ -171,7 +229,7 @@ async function handleSubmitStep1(e) {
         userId: tempUserId,
         template
       })
-      
+
       addAlert('success', 'Estudiante registrada con éxito!')
       setShowModal(false)
       resetForm()
@@ -184,13 +242,14 @@ async function handleSubmitStep1(e) {
     }
   }
 
-function resetForm() {
+  function resetForm() {
     setForm({
       primerNombre: '', segundoNombre: '', primerApellido: '', segundoApellido: '',
       tipoDocumento: 'CC', documento: '', eps: '', grupoSanguineo: 'O+',
       email: '', telefono: '',
       nombreEmergencia: '', telefonoEmergencia: '',
       numeroCarnet: '', programa: '', esEgresado: false, modalidad: 'Presencial', jornada: 'diurna', semestre: 1,
+      genero: '', generoOtro: '', institucion: '',
     })
     setCertificadoEps(null)
     setStep(1)
@@ -219,7 +278,7 @@ if (file.type !== 'application/pdf') {
     if (!confirm(`¿Estás seguro de eliminar a ${studentName}? Esta acción no se puede deshacer.`)) {
       return
     }
-    
+
     setDeletingId(studentId)
     try {
       await apiClient.delete(`/users/${studentId}`)
@@ -261,23 +320,34 @@ if (file.type !== 'application/pdf') {
       modalidad: student.modalidad || 'Presencial',
       jornada: student.jornada || 'diurna',
       semestre: student.semestre || 1,
+      genero: student.genero || '',
+      generoOtro: student.generoOtro || '',
+      institucion: student.institucion || '',
     })
     setEditingUser(student)
     setShowModal(true)
   }
 
-  const filteredStudents = students.filter(s => 
-    s.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.documento?.includes(searchTerm) ||
-    s.numeroCarnet?.includes(searchTerm)
-  ).sort((a, b) => {
-    const proxA = getProximaValoracion(a)
-    const proxB = getProximaValoracion(b)
-    if (!proxA && !proxB) return 0
-    if (!proxA) return 1
-    if (!proxB) return -1
-    return new Date(proxA.proximaFechaValoracion) - new Date(proxB.proximaFechaValoracion)
-  })
+  function studentMatchesFilters(s) {
+    if (searchTerm) {
+      const match = s.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.documento?.includes(searchTerm) ||
+        s.numeroCarnet?.includes(searchTerm)
+      if (!match) return false
+    }
+    if (filters.institucion && s.institucion !== filters.institucion) return false
+    if (filters.programa && s.programa !== filters.programa) return false
+    if (filters.genero && s.genero !== filters.genero) return false
+    if (filters.jornada && s.jornada !== filters.jornada) return false
+    if (filters.edad) {
+      const edad = calcularEdad(s.fechaNacimiento)
+      if (edad === null) return false
+      const ranges = { '18-22': [18, 22], '23-27': [23, 27], '28-35': [28, 35], '36+': [36, 999] }
+      const [min, max] = ranges[filters.edad]
+      if (edad < min || edad > max) return false
+    }
+    return true
+  }
 
   function getProximaValoracion(student) {
     if (!student.assessments?.length) return null
@@ -287,6 +357,17 @@ if (file.type !== 'application/pdf') {
       .sort((a, b) => new Date(a.proximaFechaValoracion) - new Date(b.proximaFechaValoracion))
     return upcoming[0] || null
   }
+
+  const filteredStudents = students
+    .filter(studentMatchesFilters)
+    .sort((a, b) => {
+      const proxA = getProximaValoracion(a)
+      const proxB = getProximaValoracion(b)
+      if (!proxA && !proxB) return 0
+      if (!proxA) return 1
+      if (!proxB) return -1
+      return new Date(proxA.proximaFechaValoracion) - new Date(proxB.proximaFechaValoracion)
+    })
 
   if (loading && students.length === 0) return <LoadingSpinner />
 
@@ -299,7 +380,7 @@ if (file.type !== 'application/pdf') {
         </button>
       </div>
 
-      {/* Buscador */}
+      {/* Buscador + botón filtros */}
       <div className="search-bar">
         <IconSearch />
         <input
@@ -309,7 +390,147 @@ if (file.type !== 'application/pdf') {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
         />
+        <button
+          className={`ui-btn-secondary filter-btn ${showFilters ? 'filter-btn-active' : ''}`}
+          onClick={() => setShowFilters(v => !v)}
+        >
+          <IconFilter />
+          Filtros
+          {activeFilterCount > 0 && (
+            <span className="filter-badge">{activeFilterCount}</span>
+          )}
+        </button>
       </div>
+
+      {/* Dropdown de filtros */}
+      {showFilters && (
+        <div className="filter-dropdown" ref={filterDropdownRef}>
+          <div className="filter-column">
+            <label className="filter-label">Institución</label>
+            <select
+              className="ui-input"
+              value={filters.institucion}
+              onChange={e => setFilters(p => ({ ...p, institucion: e.target.value }))}
+            >
+              <option value="">Todas</option>
+              <option value="Universitaria de Colombia">Universitaria de Colombia</option>
+              <option value="Universitaria de Bogotá">Universitaria de Bogotá</option>
+            </select>
+          </div>
+
+          <div className="filter-column">
+            <label className="filter-label">Programa</label>
+            <select
+              className="ui-input"
+              value={filters.programa}
+              onChange={e => setFilters(p => ({ ...p, programa: e.target.value }))}
+            >
+              <option value="">Todos</option>
+              <optgroup label="Profesional">
+                <option value="Administración de Empresas">Administración de Empresas</option>
+                <option value="Arquitectura">Arquitectura</option>
+                <option value="Contaduria Publica">Contaduria Publica</option>
+                <option value="Derecho">Derecho</option>
+                <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+                <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
+                <option value="Ingenieria de Software">Ingenieria de Software</option>
+                <option value="Psicologia">Psicologia</option>
+                <option value="Medicina Veterinaria y Zootecnia">Medicina Veterinaria y Zootecnia</option>
+              </optgroup>
+              <optgroup label="Técnico / Tecnológico">
+                <option value="Auxiliar Administrativo">Auxiliar Administrativo</option>
+                <option value="Cocina Nacional e Internacional">Cocina Nacional e Internacional</option>
+                <option value="Auxiliar en Clinica Veterinaria">Auxiliar en Clinica Veterinaria</option>
+                <option value="Animación 2D y 3D">Animación 2D y 3D</option>
+                <option value="Diseño Grafico">Diseño Grafico</option>
+                <option value="Auxiliar Contable y Financiero">Auxiliar Contable y Financiero</option>
+                <option value="Investigadores Criminalisticos y Judiciales">Investigadores Criminalisticos y Judiciales</option>
+                <option value="Auxiliar en Enfermeria">Auxiliar en Enfermeria</option>
+                <option value="Seguridad Ocupacional">Seguridad Ocupacional</option>
+                <option value="Auxiliar en Productos Interactivos y Digitales">Auxiliar en Productos Interactivos y Digitales</option>
+                <option value="Auxiliar de Talento Humano">Auxiliar de Talento Humano</option>
+                <option value="Diseño, Confección y Mercadeo de Modas">Diseño, Confección y Mercadeo de Modas</option>
+                <option value="Conocimientos Acádemicos en Inglés y Francés">Conocimientos Acádemicos en Inglés y Francés</option>
+                <option value="Operaciones de Software y Redes de Cómputo">Operaciones de Software y Redes de Cómputo</option>
+              </optgroup>
+              <optgroup label="Especialización">
+                <option value="Derecho Administrativo y Contractual">Derecho Administrativo y Contractual</option>
+                <option value="Gerencia de Empresas">Gerencia de Empresas</option>
+                <option value="Gerencia del Talento Humano">Gerencia del Talento Humano</option>
+                <option value="Derecho Penal y Criminalistica">Derecho Penal y Criminalistica</option>
+                <option value="Gerencia Financiera">Gerencia Financiera</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div className="filter-column">
+            <label className="filter-label">Género</label>
+            <select
+              className="ui-input"
+              value={filters.genero}
+              onChange={e => setFilters(p => ({ ...p, genero: e.target.value }))}
+            >
+              <option value="">Todos</option>
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+
+          <div className="filter-column">
+            <label className="filter-label">Jornada</label>
+            <select
+              className="ui-input"
+              value={filters.jornada}
+              onChange={e => setFilters(p => ({ ...p, jornada: e.target.value }))}
+            >
+              <option value="">Todas</option>
+              <option value="diurna">Diurna</option>
+              <option value="nocturna">Nocturna</option>
+            </select>
+          </div>
+
+          <div className="filter-column">
+            <label className="filter-label">Rango de edad</label>
+            <select
+              className="ui-input"
+              value={filters.edad}
+              onChange={e => setFilters(p => ({ ...p, edad: e.target.value }))}
+            >
+              <option value="">Todos</option>
+              <option value="18-22">18-22</option>
+              <option value="23-27">23-27</option>
+              <option value="28-35">28-35</option>
+              <option value="36+">36+</option>
+            </select>
+          </div>
+
+          {activeFilterCount > 0 && (
+            <button
+              className="filter-clear-all"
+              onClick={() => setFilters({ institucion: '', programa: '', genero: '', jornada: '', edad: '' })}
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Chips de filtros activos */}
+      {activeFilterCount > 0 && (
+        <div className="filter-chips">
+          {FILTER_ORDER.map(key => {
+            const val = filters[key]
+            if (!val) return null
+            return (
+              <span key={key} className="filter-chip">
+                {formatChipLabel(key, val)}
+                <button onClick={() => setFilters(p => ({ ...p, [key]: '' }))}>×</button>
+              </span>
+            )
+          })}
+        </div>
+      )}
 
       {/* Lista de estudiantes - diseño vertical */}
       {filteredStudents.length > 0 ? (
@@ -336,7 +557,7 @@ if (file.type !== 'application/pdf') {
                   <span className="stat-label">valoraciones</span>
                 </div>
               </Link>
-              <button 
+              <button
                 className="student-edit-btn"
                 onClick={() => handleEditStudent(student)}
                 title="Editar estudiante"
@@ -346,7 +567,7 @@ if (file.type !== 'application/pdf') {
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
               </button>
-              <button 
+              <button
                 className="student-delete-btn"
                 onClick={() => handleDeleteStudent(student.id, student.nombre)}
                   disabled={deletingId === student.id}
@@ -423,6 +644,19 @@ if (file.type !== 'application/pdf') {
                     <FormField label="Fecha de nacimiento">
                       <input type="date" className="ui-input" name="fechaNacimiento" value={form.fechaNacimiento} onChange={handleChange} max={new Date().toISOString().split('T')[0]} />
                     </FormField>
+                    <FormField label="Género">
+                      <select className="ui-input" name="genero" value={form.genero} onChange={handleChange}>
+                        <option value="">Seleccionar</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="femenino">Femenino</option>
+                        <option value="otro">Otro</option>
+                      </select>
+                    </FormField>
+                    {form.genero === 'otro' && (
+                      <FormField label="Especificar género">
+                        <input className="ui-input" name="generoOtro" value={form.generoOtro} onChange={handleChange} placeholder="¿Cuál?" />
+                      </FormField>
+                    )}
                   </div>
                 </div>
 
@@ -535,6 +769,13 @@ if (file.type !== 'application/pdf') {
                         </optgroup>
                       </select>
                     </FormField>
+                    <FormField label="Institución">
+                      <select className="ui-input" name="institucion" value={form.institucion} onChange={handleChange}>
+                        <option value="">Seleccionar</option>
+                        <option value="Universitaria de Colombia">Universitaria de Colombia</option>
+                        <option value="Universitaria de Bogotá">Universitaria de Bogotá</option>
+                      </select>
+                    </FormField>
                     <FormField label="Semestre *">
                       <select className="ui-input" name="semestre" value={form.semestre} onChange={handleChange} required>
                         {[1,2,3,4,5,6,7,8,9].map(s => (
@@ -556,7 +797,7 @@ if (file.type !== 'application/pdf') {
                       </select>
                     </FormField>
                     <FormField label="Estado">
-                      <button 
+                      <button
                         type="button"
                         className={`toggle-btn ${form.esEgresado ? 'toggle-btn-active' : ''}`}
                         onClick={() => setForm(prev => ({ ...prev, esEgresado: !prev.esEgresado }))}
@@ -595,18 +836,18 @@ if (file.type !== 'application/pdf') {
                   </p>
                 </div>
 
-                <p style={{ 
-                  marginTop: '1.5rem', 
+                <p style={{
+                  marginTop: '1.5rem',
                   marginBottom: '1.5rem',
-                  color: 'var(--color-muted)', 
+                  color: 'var(--color-muted)',
                   fontSize: '0.875rem',
                   textAlign: 'left',
                   lineHeight: '1.5'
                 }}>
                   Por favor, lee nuestra{' '}
-                  <a 
-                    href="/politica" 
-                    target="_blank" 
+                  <a
+                    href="/politica"
+                    target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}
                   >
@@ -645,8 +886,8 @@ if (file.type !== 'application/pdf') {
 
                 <div className="form-actions">
                   <button type="button" className="ui-btn-secondary" onClick={() => setStep(1)}>← Atrás</button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="ui-btn-primary fingerprint-btn"
                     onClick={handleEnrollFingerprint}
                     disabled={saving || !(acceptedPrivacy && acceptedSensitive)}

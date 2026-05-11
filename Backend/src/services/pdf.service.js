@@ -43,6 +43,10 @@ function generateAssessmentPdf(assessment, outputStream) {
   doc.font('Helvetica').text(`${user.eps || '-'}`)
   doc.font('Helvetica-Bold').text(`Grupo Sanguíneo: `, { continued: true })
   doc.font('Helvetica').text(`${user.grupoSanguineo || '-'}`)
+  if (user.genero) {
+    doc.font('Helvetica-Bold').text(`Género: `, { continued: true })
+    doc.font('Helvetica').text(user.genero === 'otro' ? (user.generoOtro || 'Otro') : (user.genero.charAt(0).toUpperCase() + user.genero.slice(1)))
+  }
   doc.moveDown(1.5)
 
   // ── COMPOSICIÓN CORPORAL ──
@@ -126,8 +130,8 @@ function generateAssessmentPdf(assessment, outputStream) {
     doc.moveDown(0.5)
     doc.lineWidth(0.5).moveTo(left, doc.y).lineTo(doc.page.width - right, doc.y).strokeColor('#dddddd').stroke()
     doc.moveDown(0.8)
-    
-    doc.fontSize(10).font('Helvetica').text(assessment.observacion, { width: usableWidth, align: 'justify', lineGap: 2 })
+
+    doc.fontSize(10).font('Helvetica').fillColor('#333333').text(assessment.observacion, { width: usableWidth, align: 'justify', lineGap: 2 })
     doc.moveDown(1.5)
   }
 

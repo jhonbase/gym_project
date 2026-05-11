@@ -31,6 +31,9 @@ model User {
   tokenActivacion    String?
   tokenActivacionExpira DateTime?
   certificadoEps     String?       // Ruta del certificado de EPS (PDF)
+  genero             String?
+  generoOtro         String?
+  institucion        String?
   password          String?       // Password para login (solo trainers)
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt

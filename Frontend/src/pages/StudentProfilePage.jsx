@@ -147,6 +147,8 @@ export default function StudentProfilePage() {
     { key: 'EPS',             val: student.eps },
     { key: 'Certificado EPS', val: student.certificadoEps ? 'Subido' : 'Pendiente', isCertificado: true, canUpload: true },
     { key: 'Grupo sanguíneo', val: student.grupoSanguineo },
+    { key: 'Género',          val: student.genero === 'otro' ? student.generoOtro : (student.genero ? student.genero.charAt(0).toUpperCase() + student.genero.slice(1) : null) },
+    { key: 'Institución',     val: student.institucion },
     { key: 'Programa',        val: student.programa },
     { key: 'Modalidad',       val: student.modalidad },
     { key: 'Jornada',         val: student.jornada },

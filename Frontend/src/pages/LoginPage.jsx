@@ -81,7 +81,7 @@ export default function LoginPage() {
         </form>
 
         <p className="login-hint" style={{ marginTop: '1rem', fontSize: '0.8rem' }}>
-          ¿Olvidaste tu password? Contacta al administrador.
+          ¿Olvidaste tu contraseña? Contacta al administrador.
         </p>
       </div>
       <Footer />

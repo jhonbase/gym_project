@@ -20,7 +20,7 @@
   "description": "",
   "dependencies": {
     "@google/genai": "^1.50.1",
-    "@prisma/client": "^6.19.2",
+    "@prisma/client": "^5.22.0",
     "axios": "^1.13.5",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
@@ -34,7 +34,7 @@
     "nodemailer": "^8.0.7",
     "nodemon": "^3.1.11",
     "pdfkit": "^0.17.2",
-    "prisma": "^6.19.2",
+    "prisma": "^5.22.0",
     "serverless-http": "^4.0.0",
     "zod": "^4.3.6"
   },

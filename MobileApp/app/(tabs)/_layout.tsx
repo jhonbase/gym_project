@@ -50,20 +50,11 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="calendar"
+          name="training-plan"
           options={{
-            title: 'Calendario',
+            title: 'Plan',
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="calendar" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: 'Perfil',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="person" size={size} color={color} />
+              <Ionicons name="fitness" size={size} color={color} />
             ),
           }}
         />

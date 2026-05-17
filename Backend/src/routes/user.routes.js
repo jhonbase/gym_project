@@ -23,4 +23,8 @@ router.post('/:id/certificado', protectRoutes, authorize('entrenador', 'admin'),
 router.get('/:id/certificado', protectRoutes, authorize('entrenador', 'admin'), userController.downloadCertificado)
 router.delete('/:id', protectRoutes, authorize('entrenador', 'admin'), userController.deleteUser)
 
+// Disponibilidad
+router.get('/:id/status', protectRoutes, userController.getUserStatus)
+router.patch('/me/status', protectRoutes, authorize('entrenador', 'admin'), userController.updateMyStatus)
+
 export default router

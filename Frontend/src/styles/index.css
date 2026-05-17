@@ -565,7 +565,7 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-  overflow: hidden;
+  /* overflow: hidden - eliminado para permitir dropdowns anidados */
   animation: dropdown-in 0.15s ease;
   z-index: 100;
 }
@@ -4570,3 +4570,161 @@ select.register-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='
 .health-delta.up { color: #ef4444; }
 .health-delta.down { color: #22c55e; }
 .health-delta.neutral { color: var(--color-dim); }
+
+/* ─── Trainer Status (Discord style) ────────────────── */
+.trainer-status { position: relative; }
+
+.trainer-status-skeleton {
+  width: 140px;
+  height: 32px;
+  background: var(--color-surface2);
+  border-radius: 20px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+.trainer-status-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.trainer-status-btn:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+}
+
+.trainer-status-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.trainer-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.trainer-status-text {
+  white-space: nowrap;
+}
+
+.trainer-status-chevron {
+  color: var(--color-muted);
+  transition: transform 0.2s;
+}
+
+.trainer-status-chevron.open {
+  transform: rotate(180deg);
+}
+
+.trainer-status-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 180px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  overflow: hidden;
+  z-index: 100;
+  animation: dropdown-in 0.15s ease;
+}
+
+.trainer-status-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: transparent;
+  border: none;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-align: left;
+}
+
+.trainer-status-option:hover {
+  background: rgba(255,255,255,0.04);
+  color: var(--color-text);
+}
+
+.trainer-status-option.active {
+  background: rgba(225,6,0,0.08);
+  color: var(--color-text);
+}
+
+.trainer-status-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.trainer-status-option-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ─── Avatar + Badge de estado ────────────────── */
+.navbar-avatar-wrapper { position: relative; }
+.avatar-status-badge {
+  position: absolute; bottom: -2px; right: -2px;
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 2px solid var(--color-surface);
+}
+
+/* ─── Status en dropdown ────────────────── */
+.navbar-dropdown-status {
+  padding: 0.75rem 1rem;
+}
+.dropdown-status-label {
+  display: block; font-size: 0.7rem; font-weight: 600;
+  color: var(--color-dim); text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.dropdown-status { position: relative; }
+.dropdown-status-btn {
+  display: flex; align-items: center; gap: 0.5rem;
+  width: 100%; padding: 0.5rem 0.75rem;
+  background: var(--color-surface2); border: 1px solid var(--color-border);
+  border-radius: 6px; color: var(--color-text); font-size: 0.85rem;
+  cursor: pointer; transition: border-color 0.2s;
+}
+.dropdown-status-btn:hover { border-color: var(--color-accent); }
+.dropdown-status-btn svg { margin-left: auto; transition: transform 0.2s; }
+.dropdown-status-btn svg.open { transform: rotate(180deg); }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.dropdown-status-menu {
+  position: absolute; top: 100%; left: 0; right: 0;
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: 6px; margin-top: 4px; overflow: hidden; z-index: 10;
+}
+.dropdown-status-option {
+  display: flex; align-items: center; gap: 0.5rem;
+  width: 100%; padding: 0.6rem 0.75rem;
+  background: transparent; border: none;
+  color: var(--color-muted); font-size: 0.85rem;
+  cursor: pointer; text-align: left;
+}
+.dropdown-status-option:hover { background: rgba(255,255,255,0.04); color: var(--color-text); }
+.dropdown-status-option.active { color: var(--color-text); }

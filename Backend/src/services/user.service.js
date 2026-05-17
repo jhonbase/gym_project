@@ -113,4 +113,18 @@ async function activarCuenta(token, password) {
   }
 }
 
-export { createUser, getAllUsers, getUserById, getUserByEmail, updateUser, deleteUser, generarTokenActivacion, validarTokenActivacion, activarCuenta }
+async function getUserDisponibilidad(id) {
+  return prisma.user.findUnique({
+    where: { id },
+    select: { disponibilidad: true, nombre: true },
+  })
+}
+
+async function updateDisponibilidad(id, disponibilidad) {
+  return prisma.user.update({
+    where: { id },
+    data: { disponibilidad },
+  })
+}
+
+export { createUser, getAllUsers, getUserById, getUserByEmail, updateUser, deleteUser, generarTokenActivacion, validarTokenActivacion, activarCuenta, getUserDisponibilidad, updateDisponibilidad }

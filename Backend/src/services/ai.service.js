@@ -83,8 +83,33 @@ Genera planes de entrenamiento detallados en español.`,
       max_tokens: 4096,
     })
 
-    const plan = chatCompletion.choices[0]?.message?.content || null
-    logger.info(`Plan de entrenamiento generado: ${plan ? 'OK (' + plan.length + ' chars)' : 'VACÍO'}`)
+    let planRaw = chatCompletion.choices[0]?.message?.content || null
+    
+    if (!planRaw) {
+      return null
+    }
+
+    // Limpiar markdown si lo hay
+    planRaw = planRaw.replace(/```json\s*/g, '').replace(/```\s*$/g, '').trim()
+
+    // Validar y parsear JSON
+    let plan = null
+    try {
+      plan = JSON.parse(planRaw)
+      
+      // Validar estructura mínima
+      if (!plan.dias || !Array.isArray(plan.dias)) {
+        logger.warn('IA devolvió JSON sin estructura válida de días')
+        return null
+      }
+      
+      logger.info(`Plan de entrenamiento generado: OK (${planRaw.length} chars)`)
+    } catch (parseError) {
+      logger.error(`Error al parsear JSON del plan: ${parseError.message}`)
+      logger.error(`Contenido recibido: ${planRaw.substring(0, 200)}...`)
+      return null
+    }
+
     return plan
   } catch (error) {
     logger.error(`Error en Groq API (plan): ${error.message}`)
@@ -154,7 +179,7 @@ function buildTrainingPlanPrompt(data) {
 
   return `
 Eres un Entrenador Personal Certificado con más de 10 años de experiencia. 
-Genera un plan de entrenamiento semanal completo y detallado en ESPAÑOL.
+Genera un plan de entrenamiento semanal en formato JSON estructurado.
 
 DATOS DEL CLIENTE:
 - Objetivo: ${objetivoTexto}
@@ -166,22 +191,26 @@ DATOS DEL CLIENTE:
 - ${diasTexto}
 ${adaptaciones ? '\nCONSIDERACIONES ESPECIALES:\n' + adaptaciones : ''}
 
-INSTRUCCIONES:
-1. Genera un plan de entrenamiento para los días ${diasDisponibles.length > 0 ? 'específicos' : '4-5'} que el cliente tiene disponibles
-2. Incluye: día de entrenamiento, grupo muscular principal, ejercicios específicos, series, repeticiones, tiempo de descanso
-3. Considera el objetivo del usuario para definir intensidad y tipo de ejercicios
-4. Incluye recomendaciones de calentamiento y enfriamiento
-5. Adapta los ejercicios según las lesiones/antecedentes del usuario
-6. El plan debe ser realista y progresivo
-7. USA SOLO LOS DÍAS QUE EL CLIENTE TIENE DISPONIBLES - NO inventes días adicionales
-
-FORMAT DE RESPUESTA (usa este formato de tabla):
-| Día | Grupo Muscular | Ejercicio | Series | Reps | Descanso |
-|-----|----------------|-----------|--------|------|----------|
-| Lunes | Pierna | Sentadilla | 4 | 10-12 | 90s |
-| Martes | Pecho | Press Banca | 3 | 8-10 | 60s |
-
-Agrega también una sección de "Notas" al final con recomendaciones adicionales para el entrenamiento de este cliente específico.
+INSTRUCCIONES ESTRICTAS:
+1. Devuelve SOLO JSON válido, sin texto adicional, sin markdown, sin explicaciones
+2. El JSON debe tener esta estructura exacta:
+{
+  "objetivo": "Pérdida de peso",
+  "nivel": "Intermedio",
+  "frecuencia": "4 días",
+  "dias": [
+    {
+      "dia": "Lunes",
+      "ejercicios": [
+        { "grupo": "Pierna", "nombre": "Sentadilla", "series": 4, "reps": "10-12", "descanso": 90 }
+      ]
+    }
+  ],
+  "notas": "Recomendaciones..."
+}
+3. USA SOLO LOS DÍAS que el cliente tiene disponibles
+4. Cada ejercicio debe tener: grupo, nombre, series, reps, descanso (en segundos)
+5. Nivel deduce: principiante (<2 años gym), intermedio (2-4 años), avanzado (>4 años)
 `.trim()
 }
 

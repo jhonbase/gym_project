@@ -32,7 +32,7 @@ export function authenticate(req, res, next) {
   try {
     const payload = jwt.verify(token, config.jwtSecret)
     req.userId = payload.sub
-    req.user = { id: payload.sub, nombre: payload.nombre, rol: payload.rol }
+    req.user = { sub: payload.sub, nombre: payload.nombre, rol: payload.rol }
     next()
   } catch {
     return res.status(401).json({

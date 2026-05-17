@@ -156,4 +156,43 @@ async function deleteUser(req, res, next) {
   }
 }
 
-export { createUser, getUsers, getUserById, updateUser, uploadCertificado, downloadCertificado, deleteUser }
+const ESTADOS_VALIDOS = ['DISPONIBLE', 'OCUPADO', 'NO_DISPONIBLE']
+
+async function getUserStatus(req, res, next) {
+  try {
+    const { id } = req.params
+    const user = await userService.getUserDisponibilidad(id)
+
+    if (!user) {
+      return response.error(res, 'Usuario no encontrado.', 404)
+    }
+
+    return response.success(res, { 
+      disponibilidad: user.disponibilidad,
+      trainer: user.nombre
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+async function updateMyStatus(req, res, next) {
+  try {
+    if (!req.user) {
+      return response.error(res, 'No autorizado.', 401)
+    }
+
+    const { disponibilidad } = req.body
+
+    if (!disponibilidad || !ESTADOS_VALIDOS.includes(disponibilidad)) {
+      return response.error(res, 'Estado inválido. Debe ser: DISPONIBLE, OCUPADO o NO_DISPONIBLE', 400)
+    }
+
+    const updated = await userService.updateDisponibilidad(req.user.sub, disponibilidad)
+    return response.success(res, { disponibilidad: updated.disponibilidad })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export { createUser, getUsers, getUserById, updateUser, uploadCertificado, downloadCertificado, deleteUser, getUserStatus, updateMyStatus }

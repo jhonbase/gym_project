@@ -41,5 +41,10 @@ async function getUserMetrics(userId, from, to) {
   return res.data.data.metricas || []
 }
 
-export { getUserMetrics }
+async function getMyTrainingPlan() {
+  const res = await api.get('/assessments/my/training-plan')
+  return res.data.data
+}
+
+export { getUserMetrics, getMyTrainingPlan }
 export default api

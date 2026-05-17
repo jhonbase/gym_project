@@ -27,6 +27,7 @@ model User {
   semestre           Int
   esEgresado         Boolean       @default(false)
   rol                String        @default("usuario") // "usuario" | "entrenador" | "admin"
+  disponibilidad     String        @default("NO_DISPONIBLE") // DISPONIBLE | OCUPADO | NO_DISPONIBLE
   cuentaActivada    Boolean       @default(false)
   tokenActivacion    String?
   tokenActivacionExpira DateTime?

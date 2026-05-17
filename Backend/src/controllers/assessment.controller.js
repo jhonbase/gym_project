@@ -413,5 +413,33 @@ async function updateTrainingPlan(req, res, next) {
   }
 }
 
+async function getMyTrainingPlan(req, res, next) {
+  try {
+    const userId = req.user.sub
+    
+    const assessments = await assessmentService.getByUserId(userId)
+    
+    if (!assessments || assessments.length === 0) {
+      return response.error(res, 'No tienes valoraciones yet. Contacta a tu trainer.', 404)
+    }
 
-export { createAssessment, getAssessment, getByUser, getAllAssessments, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, deleteLesionFile, uploadHistorial, getHistorial, deleteHistorial, updateAssessment, deleteAssessment, updateTrainingPlan }
+    // Ordenar por fecha, get la más reciente
+    const latestAssessment = assessments.sort((a, b) => 
+      new Date(b.createdAt) - new Date(a.createdAt)
+    )[0]
+
+    if (!latestAssessment.planEntrenamiento) {
+      return response.error(res, 'Tu plan de entrenamiento aún no está disponible.', 404)
+    }
+
+    return response.success(res, { 
+      planEntrenamiento: latestAssessment.planEntrenamiento,
+      valoracionFecha: latestAssessment.createdAt,
+      objetivo: latestAssessment.objetivoUsuario
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export { createAssessment, getAssessment, getByUser, getAllAssessments, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, deleteLesionFile, uploadHistorial, getHistorial, deleteHistorial, updateAssessment, deleteAssessment, updateTrainingPlan, getMyTrainingPlan }

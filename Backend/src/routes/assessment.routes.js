@@ -28,4 +28,7 @@ router.delete('/:id/historial', protectRoutes, authorize('entrenador', 'admin'),
 router.get('/:id/historial', protectRoutes, authorize('entrenador', 'admin'), assessmentController.getHistorial)
 router.put('/:id/training-plan', protectRoutes, authorize('entrenador', 'admin'), assessmentController.updateTrainingPlan)
 
+// Mi plan de entrenamiento (usuario puede ver el suyo)
+router.get('/my/training-plan', protectRoutes, assessmentController.getMyTrainingPlan)
+
 export default router

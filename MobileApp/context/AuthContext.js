@@ -46,8 +46,12 @@ export function AuthProvider({ children }) {
     await AsyncStorage.removeItem('gym_token')
   }
 
+  function updateUser(newData) {
+    setUser(prev => ({ ...prev, ...newData }))
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   )

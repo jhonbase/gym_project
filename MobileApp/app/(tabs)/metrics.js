@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, Dimensions, ActivityIndicator, TouchableOpacity } from 'react-native'
 import { useEffect, useState } from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import Svg, { Path, Line, Circle, Text as SvgText } from 'react-native-svg'
 import mockMetricas, { mockUser } from '../../mocks/metricsMock.js'
 
@@ -235,7 +236,8 @@ export default function MetricsScreen() {
   }))
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+    <ScrollView contentContainerStyle={styles.scrollContent}>
       <Text style={styles.title}>Tu evolución</Text>
       <Text style={styles.subtitle}>Hola, {mockUser.nombre}</Text>
 
@@ -276,6 +278,7 @@ export default function MetricsScreen() {
         </>
       )}
     </ScrollView>
+    </SafeAreaView>
   )
 }
 

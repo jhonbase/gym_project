@@ -1,4 +1,6 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Image } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { useRouter } from 'expo-router'
 import { useAuth } from '../../context/AuthContext.js'
 import { useTrainerStatus } from '../../hooks/useTrainerStatus.js'
 import { STATUS_COLORS, STATUS_LABELS } from '../../constants/App.js'
@@ -6,7 +8,8 @@ import { Ionicons } from '@expo/vector-icons'
 
 export default function HomeScreen() {
   const { user } = useAuth()
-  const { status: trainerStatus, trainerName, loading: statusLoading } = useTrainerStatus()
+  const router = useRouter()
+  const { status: trainerStatus, trainerName, loading: statusLoading, refetch } = useTrainerStatus()
 
   function getStatusColor() {
     if (!trainerStatus) return '#888888'
@@ -18,14 +21,46 @@ export default function HomeScreen() {
     return STATUS_LABELS[trainerStatus] || trainerStatus
   }
 
+  function getFirstName(nombre) {
+    if (!nombre) return 'Usuario'
+    const parts = nombre.trim().split(' ')
+    return parts[0]
+  }
+
+  function getInitials(nombre) {
+    if (!nombre) return '?'
+    const parts = nombre.trim().split(' ')
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
+  }
+
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Hola, {user?.nombre || 'Usuario'}</Text>
-          <Text style={styles.subGreeting}>Bienvenido a UniFit</Text>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView 
+        refreshControl={
+          <RefreshControl
+            refreshing={statusLoading}
+            onRefresh={refetch}
+            tintColor="#E10600"
+            colors={['#E10600']}
+          />
+        }
+      >
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>Hola, {getFirstName(user?.nombre)}</Text>
+            <Text style={styles.subGreeting}>Bienvenido a UniFit</Text>
+          </View>
+          <TouchableOpacity onPress={() => router.push('/profile')} style={styles.avatarButton}>
+            {user?.avatar ? (
+              <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Text style={styles.avatarText}>{getInitials(user?.nombre)}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
-      </View>
 
       <View style={styles.statusCard}>
         <View style={styles.statusHeader}>
@@ -71,14 +106,19 @@ export default function HomeScreen() {
         </Text>
       </View>
     </ScrollView>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0B0B0B' },
-  header: { backgroundColor: '#0B0B0B', padding: 24, paddingTop: 40, paddingBottom: 16 },
+  header: { backgroundColor: '#0B0B0B', padding: 24, paddingTop: 16, paddingBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   greeting: { fontSize: 24, fontWeight: '700', color: '#FFFFFF' },
   subGreeting: { fontSize: 14, color: '#888888', marginTop: 4 },
+  avatarButton: { marginLeft: 16, overflow: 'visible' },
+  avatarImage: { width: 44, height: 44, borderRadius: 22 },
+  avatarPlaceholder: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#E10600', alignItems: 'center', justifyContent: 'center' },
+  avatarText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },
 
   statusCard: { backgroundColor: '#1A1A1A', borderRadius: 12, padding: 16, marginHorizontal: 16, marginBottom: 24, borderLeftWidth: 4, borderLeftColor: '#E10600' },
   statusHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },

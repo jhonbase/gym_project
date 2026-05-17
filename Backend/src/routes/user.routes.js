@@ -5,6 +5,7 @@ import { authenticate } from '../middlewares/authenticate.js'
 import { authorize } from '../middlewares/authorize.js'
 import { createUserSchema } from '../validations/user.validation.js'
 import upload from '../config/multer.js'
+import uploadAvatar from '../config/multer.avatar.js'
 
 const router = Router()
 
@@ -15,6 +16,10 @@ router.post('/', upload.single('certificado'), validateRequest(createUserSchema)
 const protectRoutes = (req, res, next) => {
   authenticate(req, res, next)
 }
+
+// Usuario actual - debe estar ANTES de /:id para evitar conflictos
+router.get('/me', protectRoutes, userController.getMe)
+router.patch('/me/avatar', protectRoutes, uploadAvatar.single('avatar'), userController.uploadAvatar)
 
 router.get('/', protectRoutes, authorize('entrenador', 'admin'), userController.getUsers)
 router.get('/:id', protectRoutes, authorize('entrenador', 'admin'), userController.getUserById)

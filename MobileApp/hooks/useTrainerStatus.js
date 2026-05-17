@@ -15,6 +15,13 @@ export function useTrainerStatus() {
       return
     }
     fetchStatus()
+
+    // Polling cada 60 segundos para mantener status actualizado
+    const interval = setInterval(() => {
+      fetchStatus()
+    }, 60000)
+
+    return () => clearInterval(interval)
   }, [])
 
   async function fetchStatus() {

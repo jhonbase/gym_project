@@ -11,6 +11,30 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 /**
+ * Limpia la respuesta de la IA eliminando markdown y texto innecesario.
+ */
+function cleanAIResponse(text) {
+  if (!text || typeof text !== 'string') return ''
+  return text
+    .replace(/```json\s*/g, '')
+    .replace(/```\s*$/g, '')
+    .replace(/```/g, '')
+    .trim()
+}
+
+/**
+ * Valida que el JSON del plan tenga la estructura mínima requerida.
+ */
+function validateTrainingPlanJSON(obj) {
+  if (!obj || typeof obj !== 'object') return false
+  if (!obj.objetivo || typeof obj.objetivo !== 'string') return false
+  if (!obj.nivel || typeof obj.nivel !== 'string') return false
+  if (!obj.frecuencia || typeof obj.frecuencia !== 'string') return false
+  if (!obj.dias || !Array.isArray(obj.dias) || obj.dias.length === 0) return false
+  return true
+}
+
+/**
  * POST /api/assessments
  * Crea una nueva valoración física e intenta generar análisis IA y plan de entrenamiento.
  */
@@ -19,23 +43,41 @@ async function createAssessment(req, res, next) {
     const assessment = await assessmentService.create({
       ...req.body,
       estadoValoracion: 'completada',
+      aiStatus: 'PENDING',
     })
 
-    const analysis = await aiService.generateAssessmentAnalysis(assessment)
-    const trainingPlan = await aiService.generateTrainingPlan(assessment)
+    let analysis = null
+    let trainingPlan = null
 
-    if (analysis || trainingPlan) {
-      const updated = await assessmentService.updateAnalysisAndPlan(
-        assessment.id,
-        analysis,
-        trainingPlan
-      )
-      logger.info(`Valoración ${updated.id} creada con análisis IA y plan de entrenamiento.`)
-      return response.success(res, { assessment: updated }, 201)
+    try {
+      analysis = await aiService.generateAssessmentAnalysis(assessment)
+    } catch (e) {
+      logger.error(`Error generando análisis IA: ${e.message}`)
     }
 
-    logger.info(`Valoración ${assessment.id} creada sin análisis IA (IA no disponible).`)
-    return response.success(res, { assessment, aiStatus: 'pending' }, 201)
+    try {
+      trainingPlan = await aiService.generateTrainingPlan(assessment)
+    } catch (e) {
+      logger.error(`Error generando plan IA: ${e.message}`)
+    }
+
+    const hasAnalysis = analysis !== null
+    const hasTrainingPlan = trainingPlan !== null
+
+    let aiStatus
+    if (hasAnalysis && hasTrainingPlan) aiStatus = 'COMPLETED'
+    else if (hasAnalysis || hasTrainingPlan) aiStatus = 'PARTIAL'
+    else aiStatus = 'FAILED'
+
+    const updated = await assessmentService.update(assessment.id, {
+      analisisIA: analysis,
+      planEntrenamiento: trainingPlan ? JSON.stringify(trainingPlan) : null,
+      aiStatus,
+      estadoValoracion: aiStatus === 'FAILED' ? 'completada' : 'analizada',
+    })
+
+    logger.info(`Valoración ${updated.id} creada con aiStatus: ${aiStatus}`)
+    return response.success(res, { assessment: updated }, 201)
   } catch (error) {
     next(error)
   }
@@ -97,26 +139,39 @@ async function retryAnalysis(req, res, next) {
       return response.error(res, 'Valoración no encontrada.', 404)
     }
 
-    // Siempre regeneramos (el usuario puede elegir regenerar aunque ya tenga)
     logger.info(`Regenerando análisis y plan para valoración ${assessment.id}`)
 
-    const analysis = await aiService.generateAssessmentAnalysis(assessment)
-    const trainingPlan = await aiService.generateTrainingPlan(assessment)
+    let analysis = null
+    let trainingPlan = null
 
-    if (!analysis && !trainingPlan) {
-      return response.error(
-        res,
-        'Servicio de IA no disponible. Intenta de nuevo cuando tengas conexión a internet.',
-        503
-      )
+    try {
+      analysis = await aiService.generateAssessmentAnalysis(assessment)
+    } catch (e) {
+      logger.error(`Error generando análisis IA: ${e.message}`)
     }
 
-    const updated = await assessmentService.updateAnalysisAndPlan(
-      assessment.id,
-      analysis,
-      trainingPlan
-    )
-    logger.info(`Análisis y plan regenerados para valoración ${updated.id}.`)
+    try {
+      trainingPlan = await aiService.generateTrainingPlan(assessment)
+    } catch (e) {
+      logger.error(`Error generando plan IA: ${e.message}`)
+    }
+
+    const hasAnalysis = analysis !== null
+    const hasTrainingPlan = trainingPlan !== null
+
+    let aiStatus
+    if (hasAnalysis && hasTrainingPlan) aiStatus = 'COMPLETED'
+    else if (hasAnalysis || hasTrainingPlan) aiStatus = 'PARTIAL'
+    else aiStatus = 'FAILED'
+
+    const updated = await assessmentService.update(assessment.id, {
+      analisisIA: analysis,
+      planEntrenamiento: trainingPlan ? JSON.stringify(trainingPlan) : null,
+      aiStatus,
+      estadoValoracion: aiStatus === 'FAILED' ? 'completada' : 'analizada',
+    })
+
+    logger.info(`Análisis regenerado para valoración ${updated.id}, aiStatus: ${aiStatus}`)
     return response.success(res, { assessment: updated })
   } catch (error) {
     next(error)
@@ -423,17 +478,54 @@ async function getMyTrainingPlan(req, res, next) {
       return response.error(res, 'No tienes valoraciones yet. Contacta a tu trainer.', 404)
     }
 
-    // Ordenar por fecha, get la más reciente
     const latestAssessment = assessments.sort((a, b) => 
       new Date(b.createdAt) - new Date(a.createdAt)
     )[0]
+
+    const aiStatus = latestAssessment.aiStatus || 'PENDING'
+
+    if (aiStatus === 'PENDING' || aiStatus === 'FAILED') {
+      return response.success(res, {
+        aiStatus,
+        message: aiStatus === 'PENDING' 
+          ? 'Tu plan aún se está generando. Esto puede tardar unos minutos.'
+          : 'Hubo un problema generando tu plan. El entrenador puede regenerarlo.',
+        planEntrenamiento: null,
+        rawPlan: null,
+        valoracionFecha: latestAssessment.createdAt,
+        objetivo: latestAssessment.objetivoUsuario,
+      })
+    }
 
     if (!latestAssessment.planEntrenamiento) {
       return response.error(res, 'Tu plan de entrenamiento aún no está disponible.', 404)
     }
 
+    let planObj = null
+    let rawPlan = null
+
+    try {
+      planObj = JSON.parse(latestAssessment.planEntrenamiento)
+      if (!validateTrainingPlanJSON(planObj)) {
+        logger.warn(`Plan parseado pero sin estructura válida - guardando como raw`)
+        rawPlan = latestAssessment.planEntrenamiento
+        planObj = null
+      }
+    } catch (e) {
+      logger.warn(`Error parseando planEntrenamiento: ${e.message}`)
+      rawPlan = latestAssessment.planEntrenamiento
+      planObj = null
+    }
+
+    const message = aiStatus === 'PARTIAL' 
+      ? 'Tu plan está incompleto. El entrenador puede completar la generación.'
+      : null
+
     return response.success(res, { 
-      planEntrenamiento: latestAssessment.planEntrenamiento,
+      aiStatus,
+      planEntrenamiento: planObj,
+      rawPlan,
+      message,
       valoracionFecha: latestAssessment.createdAt,
       objetivo: latestAssessment.objetivoUsuario
     })
@@ -442,4 +534,32 @@ async function getMyTrainingPlan(req, res, next) {
   }
 }
 
-export { createAssessment, getAssessment, getByUser, getAllAssessments, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, deleteLesionFile, uploadHistorial, getHistorial, deleteHistorial, updateAssessment, deleteAssessment, updateTrainingPlan, getMyTrainingPlan }
+/**
+ * GET /api/assessments/my/assessments
+ * Obtiene el historial de valoraciones del usuario autenticado.
+ */
+async function getMyAssessments(req, res, next) {
+  try {
+    const userId = req.user.sub
+    const assessments = await assessmentService.getByUserId(userId)
+    
+    const history = assessments
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .map(a => ({
+        id: a.id,
+        createdAt: a.createdAt,
+        objetivoUsuario: a.objetivoUsuario,
+        aiStatus: a.aiStatus,
+        peso: a.peso,
+        masaMuscular: a.masaMuscular,
+        grasaCorporal: a.grasaCorporal,
+        imc: a.imc,
+      }))
+
+    return response.success(res, { assessments: history })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export { createAssessment, getAssessment, getByUser, getAllAssessments, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, deleteLesionFile, uploadHistorial, getHistorial, deleteHistorial, updateAssessment, deleteAssessment, updateTrainingPlan, getMyTrainingPlan, getMyAssessments }

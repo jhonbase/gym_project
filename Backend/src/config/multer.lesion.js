@@ -1,21 +1,15 @@
 import multer from 'multer'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { createCloudinaryStorage } from '../services/storage.service.js'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+// NOTA: Cloudinary se usa como proveedor de almacenamiento para ambiente
+// de desarrollo y pruebas. Para producción real se recomienda migrar a
+// AWS S3, Google Cloud Storage o Azure Blob Storage con políticas de
+// acceso privado, en cumplimiento con la Ley 1581 de 2012 (Habeas Data)
+// y normativas de protección de datos de salud.
+// El cambio de proveedor solo requiere modificar storage.service.js
+// y las variables de entorno correspondientes.
 
-const lesionStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../../uploads/lesiones'))
-  },
-  filename: function (req, file, cb) {
-    const assessmentId = req.params.assessmentId || 'unknown'
-    const timestamp = Date.now()
-    const ext = path.extname(file.originalname)
-    cb(null, `lesion_${assessmentId}_${timestamp}${ext}`)
-  }
-})
+const lesionStorage = createCloudinaryStorage('lesiones')
 
 const lesionFileFilter = (req, file, cb) => {
   const allowedMimes = [

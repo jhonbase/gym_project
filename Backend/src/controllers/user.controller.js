@@ -195,4 +195,65 @@ async function updateMyStatus(req, res, next) {
   }
 }
 
-export { createUser, getUsers, getUserById, updateUser, uploadCertificado, downloadCertificado, deleteUser, getUserStatus, updateMyStatus }
+/**
+ * GET /api/users/me
+ * Obtiene los datos del usuario actualmente autenticado.
+ */
+async function getMe(req, res, next) {
+  try {
+    const userId = req.user.sub
+    const user = await userService.getUserById(userId)
+    
+    if (!user) {
+      return response.error(res, 'Usuario no encontrado.', 404)
+    }
+
+    return response.success(res, {
+      user: {
+        id: user.id,
+        nombre: user.nombre,
+        email: user.email,
+        rol: user.rol,
+        avatar: user.avatar,
+        documento: user.documento,
+        telefono: user.telefono,
+        eps: user.eps,
+        programa: user.programa,
+        modalidad: user.modalidad,
+        jornada: user.jornada,
+        semestre: user.semestre,
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
+ * PATCH /api/users/me/avatar
+ * Sube la foto de perfil del usuario autenticado.
+ */
+async function uploadAvatar(req, res, next) {
+  try {
+    if (!req.file) {
+      return response.error(res, 'No se ha proporcionado la imagen.', 400)
+    }
+
+    const userId = req.user.sub
+    const avatarUrl = req.file.path
+
+    const updated = await userService.updateUser(userId, { avatar: avatarUrl })
+    
+    return response.success(res, {
+      user: {
+        id: updated.id,
+        nombre: updated.nombre,
+        avatar: updated.avatar
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export { createUser, getUsers, getUserById, updateUser, uploadCertificado, downloadCertificado, deleteUser, getUserStatus, updateMyStatus, getMe, uploadAvatar }

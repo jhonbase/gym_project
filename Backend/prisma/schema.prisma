@@ -36,6 +36,7 @@ model User {
   generoOtro         String?
   institucion        String?
   password          String?       // Password para login (solo trainers)
+  avatar             String?       // URL de la foto de perfil en Cloudinary
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
@@ -109,8 +110,9 @@ model Assessment {
   proximaFechaValoracion DateTime? // Fecha programada para la próxima valoración
 
   // Análisis IA
-  analisisIA           String?  
+  analisisIA           String?
   planEntrenamiento   String?  // Plan de entrenamiento generado por IA
+  aiStatus             String   @default("PENDING") // "PENDING" | "COMPLETED" | "PARTIAL" | "FAILED"
   estadoValoracion     String   @default("pendiente") // "pendiente" | "completada" | "analizada"
 
   createdAt            DateTime @default(now())

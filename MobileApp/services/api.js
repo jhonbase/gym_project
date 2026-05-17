@@ -37,7 +37,7 @@ async function getUserMetrics(userId, from, to) {
   const params = {}
   if (from) params.from = from
   if (to) params.to = to
-  const res = await api.get(`/users/${userId}/metricas`, { params })
+  const res = await api.get(`/metrics/${userId}/metricas`, { params })
   return res.data.data.metricas || []
 }
 
@@ -46,5 +46,35 @@ async function getMyTrainingPlan() {
   return res.data.data
 }
 
-export { getUserMetrics, getMyTrainingPlan }
+async function getMe() {
+  const res = await api.get('/users/me')
+  return res.data.data.user
+}
+
+async function uploadAvatar(imageUri) {
+  const formData = new FormData()
+  const filename = imageUri.split('/').pop()
+  const match = /\.(\w+)$/.exec(filename)
+  const type = match ? `image/${match[1]}` : 'image'
+
+  formData.append('avatar', {
+    uri: imageUri,
+    name: filename,
+    type,
+  })
+
+  const res = await api.patch('/users/me/avatar', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+  return res.data.data.user
+}
+
+async function getMyAssessments() {
+  const res = await api.get('/assessments/my/assessments')
+  return res.data.data.assessments || []
+}
+
+export { getUserMetrics, getMyTrainingPlan, getMe, uploadAvatar, getMyAssessments }
 export default api

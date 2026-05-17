@@ -8,7 +8,7 @@ import metricsRoutes from './metrics.routes.js'
 const router = Router()
 
 router.use('/users', userRoutes)
-router.use('/users', metricsRoutes)
+router.use('/metrics', metricsRoutes)
 router.use('/fingerprint', fingerprintRoutes)
 router.use('/assessments', assessmentRoutes)
 router.use('/auth', authRoutes)

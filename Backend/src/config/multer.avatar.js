@@ -9,22 +9,24 @@ import { createCloudinaryStorage } from '../services/storage.service.js'
 // El cambio de proveedor solo requiere modificar storage.service.js
 // y las variables de entorno correspondientes.
 
-const cloudinaryStorage = createCloudinaryStorage('certificados')
+const avatarStorage = createCloudinaryStorage('avatares')
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'application/pdf') {
+const avatarFileFilter = (req, file, cb) => {
+  const allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
+  
+  if (allowedMimes.includes(file.mimetype)) {
     cb(null, true)
   } else {
-    cb(new Error('Solo se permiten archivos PDF'), false)
+    cb(new Error('Solo se permiten imágenes (JPEG, PNG, WebP)'), false)
   }
 }
 
-const upload = multer({
-  storage: cloudinaryStorage,
-  fileFilter,
+const uploadAvatar = multer({
+  storage: avatarStorage,
+  fileFilter: avatarFileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024
   }
 })
 
-export default upload
+export default uploadAvatar

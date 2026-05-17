@@ -211,7 +211,9 @@ INSTRUCCIONES ESTRICTAS:
 3. USA SOLO LOS DÍAS que el cliente tiene disponibles
 4. Cada ejercicio debe tener: grupo, nombre, series, reps, descanso (en segundos)
 5. Nivel deduce: principiante (<2 años gym), intermedio (2-4 años), avanzado (>4 años)
-`.trim()
+6. IMPORTANTE: El primer carácter de tu respuesta debe ser { y el último debe ser }.
+   No escribas nada antes ni después del JSON.
+  `.trim()
 }
 
 export { generateAssessmentAnalysis, generateTrainingPlan }

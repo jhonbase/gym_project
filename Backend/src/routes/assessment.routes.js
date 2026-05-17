@@ -31,4 +31,7 @@ router.put('/:id/training-plan', protectRoutes, authorize('entrenador', 'admin')
 // Mi plan de entrenamiento (usuario puede ver el suyo)
 router.get('/my/training-plan', protectRoutes, assessmentController.getMyTrainingPlan)
 
+// Mis valoraciones (historial completo del usuario)
+router.get('/my/assessments', protectRoutes, assessmentController.getMyAssessments)
+
 export default router

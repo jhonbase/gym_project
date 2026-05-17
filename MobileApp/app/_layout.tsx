@@ -17,6 +17,8 @@ export default function RootLayout() {
         <Stack.Screen name="activate" options={{ title: 'Activar cuenta' }} />
         <Stack.Screen name="crear-password" options={{ title: 'Crear contraseña' }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="profile" options={{ title: 'Perfil', headerShown: false }} />
+        <Stack.Screen name="valoraciones" options={{ title: 'Valoraciones', headerShown: false }} />
       </Stack>
     </AuthProvider>
   )

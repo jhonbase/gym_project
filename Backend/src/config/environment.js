@@ -23,6 +23,10 @@ const config = {
   allowedOriginsList: process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
     : [],
+  // Cloudinary — almacenamiento de archivos (obligatorio para Netlify)
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || null,
+  cloudinaryApiKey:    process.env.CLOUDINARY_API_KEY || null,
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || null,
 }
 
 export default config

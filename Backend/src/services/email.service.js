@@ -10,12 +10,13 @@ async function enviarCorreoActivacion(email, nombre, token) {
     },
   })
 
-  const deepLink = `${config.expoProdUrl || 'unifit://'}crear-password?token=${token}`
-  const webDevLink = config.expoDevWebUrl
+  // Si hay URL de desarrollo configurada, usarla (abre Expo Go desde navegador)
+  // Si no, usar deep link scheme (para producción/app nativa)
+  const deepLink = config.expoDevWebUrl
     ? `${config.expoDevWebUrl}/crear-password?token=${token}`
-    : null
-
-  const html = `
+    : `${config.expoProdUrl || 'unifit://'}crear-password?token=${token}`
+  
+const html = `
     <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
       <h2 style="color: #2563eb;">¡Crea tu contraseña UniFit!</h2>
       <p>Hola <strong>${nombre}</strong>,</p>
@@ -26,12 +27,6 @@ async function enviarCorreoActivacion(email, nombre, token) {
       </div>
       <p style="font-size: 14px; color: #666;">O copia y pega este enlace en tu navegador:</p>
       <p style="font-size: 12px; color: #888; word-break: break-all;">${deepLink}</p>
-      ${webDevLink ? `
-      <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
-      <p style="font-size: 13px; color: #666;">¿Prefieres abrirlo en el navegador de desarrollo?</p>
-      <p style="font-size: 12px; color: #999; margin-top: 4px;">
-        <a href="${webDevLink}" style="color: #2563eb;">Abrir en navegador (desarrollo)</a>
-      </p>` : ''}
       <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
       <p style="font-size: 12px; color: #999;">Este enlace expira en 1 hora. Si no solicitaste este correo, ignóralo.</p>
     </div>

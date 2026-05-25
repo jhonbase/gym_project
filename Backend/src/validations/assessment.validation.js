@@ -35,6 +35,10 @@ const baseSchema = {
   observacion: z.string().optional().nullable(),
   objetivoUsuario: z.string().min(1).optional(),
   proximaFechaValoracion: z.string().datetime().optional().nullable(),
+  indicaciones: z.array(z.object({
+    tipo: z.enum(['mejora', 'restriccion', 'recomendacion', 'seguir']),
+    texto: z.string().min(1)
+  })).optional()
 }
 
 const createAssessmentSchema = z.object({

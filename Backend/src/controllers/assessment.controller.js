@@ -562,4 +562,27 @@ async function getMyAssessments(req, res, next) {
   }
 }
 
-export { createAssessment, getAssessment, getByUser, getAllAssessments, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, deleteLesionFile, uploadHistorial, getHistorial, deleteHistorial, updateAssessment, deleteAssessment, updateTrainingPlan, getMyTrainingPlan, getMyAssessments }
+/**
+ * GET /api/assessments/user/:userId/progress
+ * Obtiene datos de progreso para un usuario en formato específico para el frontend.
+ */
+async function getProgress(req, res, next) {
+  try {
+    // Authorization logic: estudiantes pueden ver solo su propio progreso
+    // entrenadores y admin pueden ver el progreso de cualquier usuario
+    if (req.user && req.user.rol === 'usuario') {
+      // Estudiantes pueden acceder solo a su propio progreso
+      if (req.params.userId !== req.user.sub) {
+        return response.error(res, 'No autorizado', 403)
+      }
+    }
+    // Para roles 'entrenador' y 'admin', se permite acceso a cualquier userId
+    
+    const progressData = await assessmentService.getProgress(req.params.userId)
+    return response.success(res, progressData)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export { createAssessment, getAssessment, getByUser, getAllAssessments, retryAnalysis, getAssessmentPdf, uploadLesion, getLesion, deleteLesionFile, uploadHistorial, getHistorial, deleteHistorial, updateAssessment, deleteAssessment, updateTrainingPlan, getMyTrainingPlan, getMyAssessments, getProgress }

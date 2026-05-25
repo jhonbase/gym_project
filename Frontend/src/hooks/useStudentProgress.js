@@ -5,7 +5,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import * as progressService from '../services/progressService.js'
-import { dateRanges, metrics } from '../mocks/progressMock.js'
 
 export function useStudentProgress(studentId) {
   // Estados principales
@@ -21,6 +20,15 @@ export function useStudentProgress(studentId) {
   const [assessments, setAssessments] = useState([])
   const [compareMode, setCompareMode] = useState(false)
   const [compareIds, setCompareIds] = useState({ id1: null, id2: null })
+
+  // Métricas disponibles (copiado de progressMock.js para evitar importar mocks)
+  const metrics = [
+    { value: 'peso', label: 'Peso', unit: 'kg' },
+    { value: 'grasaCorporal', label: 'Grasa corporal', unit: '%' },
+    { value: 'masaMuscular', label: 'Masa muscular', unit: 'kg' },
+    { value: 'imc', label: 'IMC', unit: '' },
+    { value: 'grasaVisceral', label: 'Grasa visceral', unit: 'nivel' }
+  ]
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -95,12 +103,18 @@ export function useStudentProgress(studentId) {
   // Obtener label de métrica actual
   const getMetricLabel = useCallback(() => {
     return metrics.find(m => m.value === metric)?.label || metric
-  }, [metric])
+  }, [metrics]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Obtener label de rango actual
   const getDateRangeLabel = useCallback(() => {
+    const dateRanges = [
+      { value: '7d', label: '7 días' },
+      { value: '1m', label: '1 mes' },
+      { value: '3m', label: '3 meses' },
+      { value: '6m', label: '6 meses' }
+    ]
     return dateRanges.find(r => r.value === dateRange)?.label || dateRange
-  }, [dateRange])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     loading,
@@ -108,7 +122,6 @@ export function useStudentProgress(studentId) {
     data,
     metric,
     dateRange,
-    dateRanges,
     metrics,
     changeMetric,
     changeDateRange,

@@ -153,7 +153,11 @@ export default function StudentProgressPage() {
           <div className="progress-cards-row">
             <section className="progress-section">
               <h2>Comparativa</h2>
-              <MetricsTable data={data?.comparison} compareData={compareData} />
+              {assessments.length < 2 ? (
+                <p>Se mostrará la comparativa cuando tengas más de una valoración</p>
+              ) : (
+                <MetricsTable data={data?.comparison} compareData={compareData} />
+              )}
             </section>
             <section className="progress-section">
               <ObjectiveCard data={data?.objective} />

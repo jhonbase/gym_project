@@ -26,6 +26,7 @@ router.get('/:id/lesion', protectRoutes, authorize('entrenador', 'admin'), asses
 router.post('/:id/historial', protectRoutes, authorize('entrenador', 'admin'), uploadHistorial.single('archivo'), assessmentController.uploadHistorial)
 router.delete('/:id/historial', protectRoutes, authorize('entrenador', 'admin'), assessmentController.deleteHistorial)
 router.get('/:id/historial', protectRoutes, authorize('entrenador', 'admin'), assessmentController.getHistorial)
+router.get('/user/:userId/progress', protectRoutes, assessmentController.getProgress)
 router.put('/:id/training-plan', protectRoutes, authorize('entrenador', 'admin'), assessmentController.updateTrainingPlan)
 
 // Mi plan de entrenamiento (usuario puede ver el suyo)

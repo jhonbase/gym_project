@@ -85,23 +85,26 @@ export default function AssessmentEditPage() {
   const [saving, setSaving] = useState(false)
   const [alert, setAlert] = useState(null)
 
-  const [form, setForm] = useState({
-    peso: '', estatura: '', grasaCorporal: '', masaMuscular: '',
-    imc: '', masaMagra: '', aguaCorporal: '', grasaVisceral: '',
-    presionArterial: '', edadMetabolica: '',
-    resistenciaMuscular: '',
-    nivelActividadFisica: 'sedentario', 
-    diasDisponibles: ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'],
-    observacion: '', objetivoUsuario: '',
-    proximaFechaValoracion: '',
-    tieneLesion: false, lesionDescripcion: '',
-    anteOsteomuscular: false, anteOsteomuscularDesc: '',
-    anteCardiovascular: false, anteCardiovascularDesc: '',
-    anteRespiratorio: false, anteRespiratorioDesc: '',
-    anteMetabolico: false, anteMetabolicoDesc: '',
-    antePsiquiatrico: false, antePsiquiatricoDesc: '',
-    antePsicologico: false, antePsicologicoDesc: '',
-  })
+   const [form, setForm] = useState({
+     peso: '', estatura: '', grasaCorporal: '', masaMuscular: '',
+     imc: '', masaMagra: '', aguaCorporal: '', grasaVisceral: '',
+     presionArterial: '', edadMetabolica: '',
+     resistenciaMuscular: '',
+     nivelActividadFisica: 'sedentario', 
+     diasDisponibles: ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'],
+     observacion: '', objetivoUsuario: '',
+     proximaFechaValoracion: '',
+     tieneLesion: false, lesionDescripcion: '',
+     anteOsteomuscular: false, anteOsteomuscularDesc: '',
+     anteCardiovascular: false, anteCardiovascularDesc: '',
+     anteRespiratorio: false, anteRespiratorioDesc: '',
+     anteMetabolico: false, anteMetabolicoDesc: '',
+     antePsiquiatrico: false, antePsiquiatricoDesc: '',
+     antePsicologico: false, antePsicologicoDesc: '',
+     indicaciones: [],
+     nuevaIndicacionTipo: '',
+     nuevaIndicacionTexto: ''
+   })
 
   const [lesionFiles, setLesionFiles] = useState([])
   const [lesionExisting, setLesionExisting] = useState([])
@@ -113,42 +116,43 @@ export default function AssessmentEditPage() {
     apiClient.get(`/assessments/${id}`)
       .then(res => {
         const a = res.data.data.assessment
-        setForm({
-          peso: a.peso || '',
-          estatura: a.estatura || '',
-          grasaCorporal: a.grasaCorporal || '',
-          masaMuscular: a.masaMuscular || '',
-          imc: a.imc || '',
-          masaMagra: a.masaMagra || '',
-          aguaCorporal: a.aguaCorporal || '',
-          grasaVisceral: a.grasaVisceral || '',
-          presionArterial: a.presionArterial || '',
-          edadMetabolica: a.edadMetabolica || '',
-          resistenciaMuscular: a.resistenciaMuscular || '',
-          nivelActividadFisica: a.nivelActividadFisica || 'sedentario',
-          diasDisponibles: a.diasDisponibles && a.diasDisponibles.length > 0 
-            ? a.diasDisponibles 
-            : ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'],
-          observacion: a.observacion || '',
-          objetivoUsuario: a.objetivoUsuario || '',
-          proximaFechaValoracion: a.proximaFechaValoracion ? new Date(a.proximaFechaValoracion).toISOString().split('T')[0] : '',
-          tieneLesion: !!a.lesionDescripcion || (a.lesionesEvidencia?.length > 0),
-          lesionDescripcion: a.lesionDescripcion || '',
-          lesionesExisting: a.lesionesEvidencia || [],
-          historialExisting: a.historialClinico || null,
-          anteOsteomuscular: a.anteOsteomuscular || false,
-          anteOsteomuscularDesc: a.anteOsteomuscularDesc || '',
-          anteCardiovascular: a.anteCardiovascular || false,
-          anteCardiovascularDesc: a.anteCardiovascularDesc || '',
-          anteRespiratorio: a.anteRespiratorio || false,
-          anteRespiratorioDesc: a.anteRespiratorioDesc || '',
-          anteMetabolico: a.anteMetabolico || false,
-          anteMetabolicoDesc: a.anteMetabolicoDesc || '',
-          antePsiquiatrico: a.antePsiquiatrico || false,
-          antePsiquiatricoDesc: a.antePsiquiatricoDesc || '',
-antePsicologico: a.antePsicologico || false,
-          antePsicologicoDesc: a.antePsicologicoDesc || '',
-        })
+         setForm({
+           peso: a.peso || '',
+           estatura: a.estatura || '',
+           grasaCorporal: a.grasaCorporal || '',
+           masaMuscular: a.masaMuscular || '',
+           imc: a.imc || '',
+           masaMagra: a.masaMagra || '',
+           aguaCorporal: a.aguaCorporal || '',
+           grasaVisceral: a.grasaVisceral || '',
+           presionArterial: a.presionArterial || '',
+           edadMetabolica: a.edadMetabolica || '',
+           resistenciaMuscular: a.resistenciaMuscular || '',
+           nivelActividadFisica: a.nivelActividadFisica || 'sedentario',
+           diasDisponibles: a.diasDisponibles && a.diasDisponibles.length > 0 
+             ? a.diasDisponibles 
+             : ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'],
+           observacion: a.observacion || '',
+           objetivoUsuario: a.objetivoUsuario || '',
+           proximaFechaValoracion: a.proximaFechaValoracion ? new Date(a.proximaFechaValoracion).toISOString().split('T')[0] : '',
+           tieneLesion: !!a.lesionDescripcion || (a.lesionesEvidencia?.length > 0),
+           lesionDescripcion: a.lesionDescripcion || '',
+           lesionesExisting: a.lesionesEvidencia || [],
+           historialExisting: a.historialClinico || null,
+           anteOsteomuscular: a.anteOsteomuscular || false,
+           anteOsteomuscularDesc: a.anteOsteomuscularDesc || '',
+           anteCardiovascular: a.anteCardiovascular || false,
+           anteCardiovascularDesc: a.anteCardiovascularDesc || '',
+           anteRespiratorio: a.anteRespiratorio || false,
+           anteRespiratorioDesc: a.anteRespiratorioDesc || '',
+           anteMetabolico: a.anteMetabolico || false,
+           anteMetabolicoDesc: a.anteMetabolicoDesc || '',
+           antePsiquiatrico: a.antePsiquiatrico || false,
+           antePsiquiatricoDesc: a.antePsiquiatricoDesc || '',
+           antePsicologico: a.antePsicologico || false,
+           antePsicologicoDesc: a.antePsicologicoDesc || '',
+           indicaciones: a.indicaciones || [],
+         })
         setLesionExisting(a.lesionesEvidencia || [])
         setHistorialExisting(a.historialClinico || null)
       })
@@ -245,40 +249,41 @@ antePsicologico: a.antePsicologico || false,
     setFieldErrors({})
     
     try {
-      const data = {
-        peso: Number(form.peso),
-        estatura: Number(form.estatura),
-        grasaCorporal: form.grasaCorporal ? Number(form.grasaCorporal) : null,
-        masaMuscular: form.masaMuscular ? Number(form.masaMuscular) : null,
-        imc: form.imc ? Number(form.imc) : null,
-        masaMagra: form.masaMagra ? Number(form.masaMagra) : null,
-        aguaCorporal: form.aguaCorporal ? Number(form.aguaCorporal) : null,
-        grasaVisceral: form.grasaVisceral ? Number(form.grasaVisceral) : null,
-        presionArterial: form.presionArterial,
-        edadMetabolica: form.edadMetabolica ? Number(form.edadMetabolica) : null,
-        fuerzaAgarre: 1,
-        resistenciaMuscular: form.resistenciaMuscular,
-        rmEstimado: 1,
-        ppm: 30,
-        nivelActividadFisica: form.nivelActividadFisica,
-        diasDisponibles: form.diasDisponibles,
-        observacion: form.observacion || null,
-        objetivoUsuario: form.objetivoUsuario,
-        proximaFechaValoracion: form.proximaFechaValoracion ? new Date(form.proximaFechaValoracion).toISOString() : null,
-        lesionDescripcion: form.tieneLesion && form.lesionDescripcion ? form.lesionDescripcion : null,
-        anteOsteomuscular: form.anteOsteomuscular,
-        anteOsteomuscularDesc: form.anteOsteomuscular ? (form.anteOsteomuscularDesc || null) : null,
-        anteCardiovascular: form.anteCardiovascular,
-        anteCardiovascularDesc: form.anteCardiovascular ? (form.anteCardiovascularDesc || null) : null,
-        anteRespiratorio: form.anteRespiratorio,
-        anteRespiratorioDesc: form.anteRespiratorio ? (form.anteRespiratorioDesc || null) : null,
-        anteMetabolico: form.anteMetabolico,
-        anteMetabolicoDesc: form.anteMetabolico ? (form.anteMetabolicoDesc || null) : null,
-        antePsiquiatrico: form.antePsiquiatrico,
-        antePsiquiatricoDesc: form.antePsiquiatrico ? (form.antePsiquiatricoDesc || null) : null,
-        antePsicologico: form.antePsicologico,
-        antePsicologicoDesc: form.antePsicologico ? (form.antePsicologicoDesc || null) : null,
-      }
+        const data = {
+          peso: Number(form.peso),
+          estatura: Number(form.estatura),
+          grasaCorporal: form.grasaCorporal ? Number(form.grasaCorporal) : null,
+          masaMuscular: form.masaMuscular ? Number(form.masaMuscular) : null,
+          imc: form.imc ? Number(form.imc) : null,
+          masaMagra: form.masaMagra ? Number(form.masaMagra) : null,
+          aguaCorporal: form.aguaCorporal ? Number(form.aguaCorporal) : null,
+          grasaVisceral: form.grasaVisceral ? Number(form.grasaVisceral) : null,
+          presionArterial: form.presionArterial,
+          edadMetabolica: form.edadMetabolica ? Number(form.edadMetabolica) : null,
+          fuerzaAgarre: 1,
+          resistenciaMuscular: form.resistenciaMuscular,
+          rmEstimado: 1,
+          ppm: 30,
+          nivelActividadFisica: form.nivelActividadFisica,
+          diasDisponibles: form.diasDisponibles,
+          observacion: form.observacion || null,
+          objetivoUsuario: form.objetivoUsuario,
+          proximaFechaValoracion: form.proximaFechaValoracion ? new Date(form.proximaFechaValoracion).toISOString() : null,
+          lesionDescripcion: form.tieneLesion && form.lesionDescripcion ? form.lesionDescripcion : null,
+          anteOsteomuscular: form.anteOsteomuscular,
+          anteOsteomuscularDesc: form.anteOsteomuscular ? (form.anteOsteomuscularDesc || null) : null,
+          anteCardiovascular: form.anteCardiovascular,
+          anteCardiovascularDesc: form.anteCardiovascular ? (form.anteCardiovascularDesc || null) : null,
+          anteRespiratorio: form.anteRespiratorio,
+          anteRespiratorioDesc: form.anteRespiratorio ? (form.anteRespiratorioDesc || null) : null,
+          anteMetabolico: form.anteMetabolico,
+          anteMetabolicoDesc: form.anteMetabolico ? (form.anteMetabolicoDesc || null) : null,
+          antePsiquiatrico: form.antePsiquiatrico,
+          antePsiquiatricoDesc: form.antePsiquiatrico ? (form.antePsiquiatricoDesc || null) : null,
+          antePsicologico: form.antePsicologico,
+          antePsicologicoDesc: form.antePsicologico ? (form.antePsicologicoDesc || null) : null,
+          indicaciones: form.indicaciones
+        }
 
       await apiClient.put(`/assessments/${id}`, data)
 
@@ -574,42 +579,150 @@ antePsicologico: a.antePsicologico || false,
                 min={new Date().toISOString().split('T')[0]}
               />
             </div>
-            <FormField label="Observaciones (opcional)" error={fe.observacion}>
-              <textarea className="ui-input" name="observacion" value={form.observacion} onChange={handleChange} rows="3" style={{ resize: 'vertical', minHeight: '80px' }} />
-            </FormField>
-            <div>
-              <label className="ui-label">Días disponibles para entrenar</label>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
-                {['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].map(dia => (
-                  <button
-                    key={dia}
-                    type="button"
-                    className={`antecedente-chip ${form.diasDisponibles.includes(dia) ? 'antecedente-chip-active' : ''}`}
-                    onClick={() => {
-                      const nuevosDias = form.diasDisponibles.includes(dia)
-                        ? form.diasDisponibles.filter(d => d !== dia)
-                        : [...form.diasDisponibles, dia]
-                      setForm(prev => ({ ...prev, diasDisponibles: nuevosDias }))
-                    }}
-                  >
-                    <span className="antecedente-chip-icon">{form.diasDisponibles.includes(dia) ? '✓' : '+'}</span>
-                    <span style={{ textTransform: 'capitalize' }}>{dia}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </SectionCard>
+       <FormField label="Observaciones (opcional)" error={fe.observacion}>
+               <textarea className="ui-input" name="observacion" value={form.observacion} onChange={handleChange} rows="3" style={{ resize: 'vertical', minHeight: '80px' }} />
+             </FormField>
+             <div>
+               <label className="ui-label">Días disponibles para entrenar</label>
+               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
+                 {['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].map(dia => (
+                   <button
+                     key={dia}
+                     type="button"
+                     className={`antecedente-chip ${form.diasDisponibles.includes(dia) ? 'antecedente-chip-active' : ''}`}
+                     onClick={() => {
+                       const nuevosDias = form.diasDisponibles.includes(dia)
+                         ? form.diasDisponibles.filter(d => d !== dia)
+                         : [...form.diasDisponibles, dia]
+                       setForm(prev => ({ ...prev, diasDisponibles: nuevosDias }))
+                     }}
+                   >
+                     <span className="antecedente-chip-icon">{form.diasDisponibles.includes(dia) ? '✓' : '+'}</span>
+                     <span style={{ textTransform: 'capitalize' }}>{dia}</span>
+                   </button>
+                 ))}
+               </div>
+             </div>
+           </div>
+         </SectionCard>
 
-        <div className="form-actions">
-          <button type="button" className="ui-btn-secondary" onClick={() => navigate(`/assessment/${id}`)}>
-            Cancelar
-          </button>
-          <button type="submit" className="ui-btn-primary" disabled={saving}>
-            {saving ? 'Guardando...' : 'Guardar cambios →'}
-          </button>
-        </div>
-      </form>
-    </div>
-  )
-}
+         {/* Indicaciones de entrenamiento */}
+         <SectionCard icon={<IconContext />} title="INDICACIONES DE ENTRENAMIENTO">
+           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+             {form.indicaciones && form.indicaciones.length > 0 ? (
+               <div className="indicaciones-list">
+                 {form.indicaciones.map((indicacion, index) => (
+                   <div key={index} className="indicacion-chip" style={{ 
+                     display: 'flex', 
+                     alignItems: 'center', 
+                     gap: '0.5rem',
+                     padding: '0.5rem',
+                     backgroundColor: getIndicacionColor(indicacion.tipo),
+                     borderRadius: '0.25rem',
+                     color: 'white'
+                   }}>
+                     <span className="indicacion-icon">{getIndicacionIcon(indicacion.tipo)}</span>
+                     <span>{indicacion.texto}</span>
+                     <button 
+                       type="button"
+                       onClick={() => {
+                         const nuevasIndicaciones = [...form.indicaciones];
+                         nuevasIndicaciones.splice(index, 1);
+                         setForm(prev => ({ ...prev, indicaciones: nuevasIndicaciones }));
+                       }}
+                       style={{ 
+                         background: 'none', 
+                         border: 'none', 
+                         color: 'rgba(255,255,255,0.7)', 
+                         cursor: 'pointer',
+                         fontSize: '1.2rem'
+                       }}
+                     >
+                       ×
+                     </button>
+                   </div>
+                 ))}
+               </div>
+             ) : null}
+             <div className="add-indicacion-row" style={{ 
+               display: 'flex', 
+               gap: '0.5rem', 
+               flexWrap: 'wrap',
+               marginTop: '0.5rem'
+             }}>
+               <select 
+                 className="ui-input"
+                 value={form.nuevaIndicacionTipo || ''}
+                 onChange={(e) => setForm(prev => ({ ...prev, nuevaIndicacionTipo: e.target.value }))}
+                 style={{ minWidth: '120px' }}
+               >
+                 <option value="">Seleccionar tipo</option>
+                 <option value="mejora">Mejora</option>
+                 <option value="restriccion">Restricción</option>
+                 <option value="recomendacion">Recomendación</option>
+                 <option value="seguir">Continuar</option>
+               </select>
+               <input 
+                 className="ui-input"
+                 type="text"
+                 placeholder="Descripción de la indicación"
+                 value={form.nuevaIndicacionTexto || ''}
+                 onChange={(e) => setForm(prev => ({ ...prev, nuevaIndicacionTexto: e.target.value }))}
+                 style={{ flex: 1, minWidth: '200px' }}
+               />
+               <button 
+                 type="button"
+                 className="ui-btn-secondary"
+                 onClick={() => {
+                   if (form.nuevaIndicacionTipo && form.nuevaIndicacionTexto.trim() !== '') {
+                     setForm(prev => ({
+                       ...prev,
+                       indicaciones: [...prev.indicaciones, {
+                         tipo: prev.nuevaIndicacionTipo,
+                         texto: prev.nuevaIndicacionTexto.trim()
+                       }],
+                       nuevaIndicacionTipo: '',
+                       nuevaIndicacionTexto: ''
+                     }));
+                   }
+                 }}
+                 disabled={!form.nuevaIndicacionTipo || !form.nuevaIndicacionTexto.trim()}
+               >
+                 + Agregar indicación
+               </button>
+             </div>
+           </div>
+         </SectionCard>
+
+         <div className="form-actions">
+           <button type="button" className="ui-btn-secondary" onClick={() => navigate(`/assessment/${id}`)}>
+             Cancelar
+           </button>
+           <button type="submit" className="ui-btn-primary" disabled={saving}>
+             {saving ? 'Guardando...' : 'Guardar cambios →'}
+           </button>
+         </div>
+       </form>
+     </div>
+   )
+ }
+
+ function getIndicacionColor(tipo) {
+   switch (tipo) {
+     case 'restriccion': return '#ef4444' // rojo
+     case 'recomendacion': return '#22c55e' // verde
+     case 'mejora': return '#3b82f6' // azul
+     case 'seguir': return '#f97316' // naranja
+     default: return '#6b7280' // gris
+   }
+ }
+
+ function getIndicacionIcon(tipo) {
+   switch (tipo) {
+     case 'restriccion': return '⚠️'
+     case 'recomendacion': return '✅'
+     case 'mejora': return '📈'
+     case 'seguir': return '⭐'
+     default: return 'ℹ️'
+   }
+ }

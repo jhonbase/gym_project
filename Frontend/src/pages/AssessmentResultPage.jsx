@@ -4,6 +4,7 @@ import apiClient from '../api/client.js'
 import LoadingSpinner from '../components/LoadingSpinner.jsx'
 import AlertMessage from '../components/AlertMessage.jsx'
 import SectionCard from '../components/SectionCard.jsx'
+import TrainingIndications from '../components/TrainingIndications.jsx'
 
 /* ─── Iconos ──────────────────────────────────── */
 const IconBody = () => (
@@ -756,6 +757,11 @@ export default function AssessmentResultPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Indicaciones de entrenamiento */}
+      {Array.isArray(a.indicaciones) && a.indicaciones.length > 0 && (
+        <TrainingIndications data={a.indicaciones} />
       )}
 
       {/* Próxima fecha de valoración */}

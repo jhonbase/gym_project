@@ -95,8 +95,8 @@ function calcPoints(data, width, height, padding) {
 export default function EvolutionChart({ data, metric, unit, filter = '1m', data2, label2, unit2 }) {
   const [hoveredPoint, setHoveredPoint] = useState(null)
 
-  if (!data || data.length === 0) {
-    return <div className="evolution-chart-empty"><p>Sin datos disponibles</p></div>
+  if (!data || data.length < 2) {
+    return <div className="evolution-chart-empty"><p>Necesitas al menos 2 valoraciones para ver tu evolución</p></div>
   }
 
   const padding = filter === '7d' ? 45 : filter === '1m' ? 40 : filter === '3m' ? 30 : 25

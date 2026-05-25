@@ -39,7 +39,7 @@ export default function NextAssessment({ data }) {
       <div className="next-assessment-days">
         {data.diasRestantes > 0 
           ? `En ${data.diasRestantes} días` 
-          : 'Hace alguns días'
+          : 'Hace algunos días'
         }
       </div>
       {getEstadoBadge()}

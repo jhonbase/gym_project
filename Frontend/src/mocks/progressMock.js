@@ -1,3 +1,4 @@
+// MOCK DATA - Ya no se usa en producción. Mantener como referencia.
 /**
  * Data Generator - Generador centralizado de datos mock aleatorios
  * Lista para futura integración con backend real

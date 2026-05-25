@@ -42,6 +42,8 @@ function DeltaBadge({ diff, unit }) {
 export default function SidebarCards({ data, objective, compareData }) {
   if (!data) return null
 
+  const showEntrenamiento = data.diasEntrenados > 0 || data.streakActual > 0
+
   const cards = [
     {
       label: 'Peso actual',
@@ -50,8 +52,7 @@ export default function SidebarCards({ data, objective, compareData }) {
       change: round(data.peso.cambio, 1),
       icon: IconScale,
       isPrimary: true,
-      meta: 'Meta: 75 kg',
-      metaProgress: 78,
+      meta: objective?.objetivo ? `Meta: ${objective.objetivo}` : null,
       compareKey: 'peso'
     },
     {
@@ -73,7 +74,10 @@ export default function SidebarCards({ data, objective, compareData }) {
       context: data.imc.categoria,
       compareKey: 'imc'
     },
-    {
+  ]
+
+  if (showEntrenamiento) {
+    cards.push({
       label: 'Entrenamiento',
       value: `${data.diasEntrenados} sesiones`,
       sub: `🔥 ${data.streakActual} días streak`,
@@ -81,8 +85,8 @@ export default function SidebarCards({ data, objective, compareData }) {
       isPrimary: true,
       isStreak: true,
       compareKey: null
-    }
-  ]
+    })
+  }
 
   return (
     <div className="sidebar-cards">
@@ -132,7 +136,7 @@ export default function SidebarCards({ data, objective, compareData }) {
               </div>
             )}
 
-            {hasChange && !hasCompare && (
+            {hasChange && !hasCompare && card.change !== 0 && (
               <div className={`kpi-change ${card.change > 0 ? 'positive' : 'negative'}`}>
                 {card.change > 0 ? '↑' : '↓'} {Math.abs(card.change)} {card.unit} esta semana
               </div>
@@ -141,9 +145,6 @@ export default function SidebarCards({ data, objective, compareData }) {
             {card.meta && !hasCompare && (
               <div className="kpi-meta">
                 <span>{card.meta}</span>
-                <div className="kpi-progress-bar">
-                  <div className="kpi-progress-fill" style={{ width: `${card.metaProgress}%` }} />
-                </div>
               </div>
             )}
 

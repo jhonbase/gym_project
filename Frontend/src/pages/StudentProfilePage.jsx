@@ -263,7 +263,7 @@ export default function StudentProfilePage() {
         </div>
 
         {/* Sidebar derecho */}
-        <StudentProgressSidebar />
+        <StudentProgressSidebar studentAssessments={student.assessments || []} />
       </div>
     </div>
   )

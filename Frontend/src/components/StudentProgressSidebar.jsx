@@ -17,7 +17,15 @@ const IconCalendar = () => (
  * Botón principal: "Ver Progreso"
  * Redirige a página de progreso del estudiante
  */
-function ProgressButton({ studentId }) {
+function ProgressButton({ studentId, hasAssessments }) {
+  if (!hasAssessments) {
+    return (
+      <span className="sidebar-progress-btn" style={{ opacity: 0.5, cursor: 'not-allowed' }}>
+        <IconTrendUp />
+        <span>Ver Progreso</span>
+      </span>
+    )
+  }
   return (
     <Link to={`/student/${studentId}/progress`} className="sidebar-progress-btn">
       <IconTrendUp />
@@ -45,12 +53,12 @@ function TrainingHistorySection({ studentId }) {
  * Componente principal: StudentProgressSidebar
  * Sidebar derecho para el perfil del estudiante
  */
-export default function StudentProgressSidebar() {
+export default function StudentProgressSidebar({ studentAssessments = [] }) {
   const { id: studentId } = useParams()
 
   return (
     <aside className="student-progress-sidebar">
-      <ProgressButton studentId={studentId} />
+      <ProgressButton studentId={studentId} hasAssessments={studentAssessments.length > 0} />
       <TrainingHistorySection studentId={studentId} />
     </aside>
   )

@@ -56,6 +56,29 @@ export default function StudentProgressPage() {
     grasaVisceral: { current: sel2.grasaVisceral, value: sel2.grasaVisceral, unit: 'nivel' },
   } : null
 
+  const selectStyle = {
+    background: '#2a2a2a',
+    border: '1px solid #333333',
+    borderRadius: '8px',
+    padding: '8px 12px',
+    color: '#ffffff',
+    fontSize: '14px',
+  }
+
+  const compararDisabled = !localId1 || !localId2
+  const compararStyle = compararDisabled
+    ? { padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, background: '#2a2a2a', color: '#555555', border: '1px solid #333333', cursor: 'not-allowed', transition: 'all 0.2s ease' }
+    : { padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, background: '#E10600', color: '#ffffff', border: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }
+
+  const limpiarStyle = {
+    background: 'none',
+    border: 'none',
+    color: '#E10600',
+    padding: '8px 12px',
+    fontSize: '14px',
+    cursor: 'pointer',
+  }
+
   return (
     <div className="progress-page">
       <header className="progress-header">
@@ -73,12 +96,15 @@ export default function StudentProgressPage() {
 
       <div className="progress-content">
         <main className="progress-main">
-          <div className="progress-filters">
+          <div className="progress-filters"
+            style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', background: '#1a1a1a', borderRadius: '12px' }}
+          >
             <select
               value={metric}
               onChange={(e) => changeMetric(e.target.value)}
               className="ui-select"
               disabled={compareMode}
+              style={selectStyle}
             >
               {metricOptions.map(m => (
                 <option key={m.value} value={m.value}>{m.label}</option>
@@ -89,6 +115,7 @@ export default function StudentProgressPage() {
               onChange={(e) => changeDateRange(e.target.value)}
               className="ui-select"
               disabled={compareMode}
+              style={selectStyle}
             >
               <option value="7d">7 días</option>
               <option value="1m">1 mes</option>
@@ -101,6 +128,7 @@ export default function StudentProgressPage() {
                 value={localId1}
                 onChange={(e) => setLocalId1(e.target.value)}
                 className="ui-select"
+                style={selectStyle}
               >
                 <option value="">Evaluación 1</option>
                 {assessments.map(a => (
@@ -111,6 +139,7 @@ export default function StudentProgressPage() {
                 value={localId2}
                 onChange={(e) => setLocalId2(e.target.value)}
                 className="ui-select"
+                style={selectStyle}
               >
                 <option value="">Evaluación 2</option>
                 {assessments.map(a => (
@@ -120,7 +149,8 @@ export default function StudentProgressPage() {
               <button
                 className="ui-btn"
                 onClick={() => startCompare(localId1, localId2)}
-                disabled={!localId1 || !localId2}
+                disabled={compararDisabled}
+                style={compararStyle}
               >
                 Comparar
               </button>
@@ -131,6 +161,7 @@ export default function StudentProgressPage() {
                   setLocalId1('')
                   setLocalId2('')
                 }}
+                style={limpiarStyle}
               >
                 Limpiar
               </button>

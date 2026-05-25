@@ -92,7 +92,8 @@ export default function ObjectiveCard({ data }) {
             gap: '6px',
             marginTop: '16px',
             fontSize: '12px',
-            color: '#666666',
+            color: '#F59E0B',
+            fontWeight: 500,
           }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

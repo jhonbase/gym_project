@@ -347,6 +347,29 @@ function PlanVisualization({ plan, onSave, readOnly = true, onAlert }) {
 
 /* ─── Parser del Plan de Entrenamiento ─── */
 function parseTrainingPlan(planText) {
+  // Intentar formato JSON (planes generados por IA)
+  try {
+    const json = JSON.parse(planText)
+    if (json && Array.isArray(json.dias)) {
+      const table = []
+      for (const day of json.dias) {
+        if (!Array.isArray(day.ejercicios)) continue
+        for (const ex of day.ejercicios) {
+          table.push({
+            dia: day.dia,
+            grupo: ex.grupo || '-',
+            ejercicio: ex.nombre || '',
+            series: String(ex.series ?? '-'),
+            reps: ex.reps ?? '-',
+            descanso: ex.descanso != null ? String(ex.descanso) + (typeof ex.descanso === 'number' ? 's' : '') : '-',
+          })
+        }
+      }
+      if (table.length > 0) return { table, notes: json.notas ? [json.notas] : [] }
+    }
+  } catch {}
+
+  // Fallback: formato pipe-table markdown (legacy)
   const table = []
   const notes = []
   const lines = planText.split('\n')

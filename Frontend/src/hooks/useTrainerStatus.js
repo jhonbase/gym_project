@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase.js'
 import apiClient from '../api/client.js'
 
 const ESTADOS = {
@@ -13,13 +14,42 @@ export function useTrainerStatus(trainerId) {
 
   useEffect(() => {
     if (!trainerId) { setLoading(false); return }
+
     fetchStatus()
+
+    const channel = supabase
+      .channel(`trainer-status-${trainerId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'User',
+          filter: `id=eq.${trainerId}`
+        },
+        (payload) => {
+          if (payload.new.disponibilidad) {
+            setStatus(payload.new.disponibilidad)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [trainerId])
 
   async function fetchStatus() {
     try {
-      const res = await apiClient.get(`/users/${trainerId}/status`)
-      setStatus(res.data.data.disponibilidad)
+      const { data, error } = await supabase
+        .from('User')
+        .select('disponibilidad')
+        .eq('id', trainerId)
+        .single()
+
+      if (error) throw error
+      if (data) setStatus(data.disponibilidad)
     } catch (err) { console.error('Error fetching status:', err) }
     finally { setLoading(false) }
   }
@@ -32,11 +62,11 @@ export function useTrainerStatus(trainerId) {
     } catch (err) { console.error('Error updating status:', err); return false }
   }
 
-  return { 
-    status, 
-    loading, 
-    updateStatus, 
-    getStatusColor: () => ESTADOS[status]?.color || ESTADOS.NO_DISPONIBLE.color 
+  return {
+    status,
+    loading,
+    updateStatus,
+    getStatusColor: () => ESTADOS[status]?.color || ESTADOS.NO_DISPONIBLE.color
   }
 }
 

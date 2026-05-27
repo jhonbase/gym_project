@@ -1,1 +1,1 @@
-ALTER TABLE "assessment" ADD COLUMN "indicaciones" jsonb;
+ALTER TABLE "Assessment" ADD COLUMN "indicaciones" jsonb;

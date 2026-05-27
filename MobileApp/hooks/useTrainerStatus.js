@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import api from '../services/api.js'
+import { supabase } from '../lib/supabase.js'
 import { DEFAULT_TRAINER_ID } from '../constants/App.js'
 
 export function useTrainerStatus() {
@@ -14,22 +14,49 @@ export function useTrainerStatus() {
       setError('Trainer no configurado')
       return
     }
+
     fetchStatus()
 
-    // Polling cada 60 segundos para mantener status actualizado
-    const interval = setInterval(() => {
-      fetchStatus()
-    }, 60000)
+    const channel = supabase
+      .channel(`trainer-status-${DEFAULT_TRAINER_ID}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'User',
+          filter: `id=eq.${DEFAULT_TRAINER_ID}`
+        },
+        (payload) => {
+          if (payload.new.disponibilidad) {
+            setStatus(payload.new.disponibilidad)
+          }
+          if (payload.new.nombre) {
+            setTrainerName(payload.new.nombre)
+          }
+        }
+      )
+      .subscribe()
 
-    return () => clearInterval(interval)
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   async function fetchStatus() {
     try {
       setLoading(true)
-      const res = await api.get(`/users/${DEFAULT_TRAINER_ID}/status`)
-      setStatus(res.data.data.disponibilidad)
-      setTrainerName(res.data.data.trainer)
+      const { data, error } = await supabase
+        .from('User')
+        .select('disponibilidad, nombre')
+        .eq('id', DEFAULT_TRAINER_ID)
+        .single()
+
+      if (error) throw error
+      if (data) {
+        setStatus(data.disponibilidad)
+        setTrainerName(data.nombre)
+      }
     } catch (err) {
       console.error('Error fetching trainer status:', err)
       setError(err.message)

@@ -17,6 +17,8 @@ export function useTrainerStatus() {
 
     fetchStatus()
 
+    if (!supabase) return
+
     const channel = supabase
       .channel(`trainer-status-${DEFAULT_TRAINER_ID}`)
       .on(
@@ -46,6 +48,16 @@ export function useTrainerStatus() {
   async function fetchStatus() {
     try {
       setLoading(true)
+      if (!supabase) {
+        const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api'
+        const res = await fetch(`${API_BASE}/users/${DEFAULT_TRAINER_ID}/status`)
+        const body = await res.json()
+        if (body.success && body.data) {
+          setStatus(body.data.disponibilidad)
+          setTrainerName(body.data.trainer)
+        }
+        return
+      }
       const { data, error } = await supabase
         .from('User')
         .select('disponibilidad, nombre')

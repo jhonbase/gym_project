@@ -17,10 +17,12 @@ export function useTrainerStatus() {
 
     fetchStatus()
 
-    if (!supabase) return
+    const channelName = `trainer-status-${DEFAULT_TRAINER_ID}`
+    const existing = supabase.getChannels().find(c => c.topic === `realtime:${channelName}`)
+    if (existing) supabase.removeChannel(existing)
 
     const channel = supabase
-      .channel(`trainer-status-${DEFAULT_TRAINER_ID}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -30,15 +32,12 @@ export function useTrainerStatus() {
           filter: `id=eq.${DEFAULT_TRAINER_ID}`
         },
         (payload) => {
-          if (payload.new.disponibilidad) {
-            setStatus(payload.new.disponibilidad)
-          }
-          if (payload.new.nombre) {
-            setTrainerName(payload.new.nombre)
-          }
+          if (payload.new.disponibilidad) setStatus(payload.new.disponibilidad)
+          if (payload.new.nombre) setTrainerName(payload.new.nombre)
         }
       )
-      .subscribe()
+
+    channel.subscribe()
 
     return () => {
       supabase.removeChannel(channel)
@@ -48,16 +47,6 @@ export function useTrainerStatus() {
   async function fetchStatus() {
     try {
       setLoading(true)
-      if (!supabase) {
-        const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api'
-        const res = await fetch(`${API_BASE}/users/${DEFAULT_TRAINER_ID}/status`)
-        const body = await res.json()
-        if (body.success && body.data) {
-          setStatus(body.data.disponibilidad)
-          setTrainerName(body.data.trainer)
-        }
-        return
-      }
       const { data, error } = await supabase
         .from('User')
         .select('disponibilidad, nombre')

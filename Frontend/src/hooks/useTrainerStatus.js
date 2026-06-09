@@ -7,21 +7,24 @@ const ESTADOS = {
   NO_DISPONIBLE: { label: 'No disponible', color: '#ef4444' }
 }
 
-export function useTrainerStatus(trainerId) {
+export function useTrainerStatus(isEntrenador) {
   const [status, setStatus] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!trainerId) { setLoading(false); return }
+    if (!isEntrenador) { setLoading(false); return }
     fetchStatus()
-  }, [trainerId])
+  }, [isEntrenador])
 
   async function fetchStatus() {
     try {
-      const res = await apiClient.get(`/users/${trainerId}/status`)
+      const res = await apiClient.get('/users/me/status')
       setStatus(res.data.data.disponibilidad)
-    } catch (err) { console.error('Error fetching status:', err) }
-    finally { setLoading(false) }
+    } catch {
+      setStatus('NO_DISPONIBLE')
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function updateStatus(nuevoEstado) {
@@ -29,7 +32,7 @@ export function useTrainerStatus(trainerId) {
       const res = await apiClient.patch('/users/me/status', { disponibilidad: nuevoEstado })
       setStatus(res.data.data.disponibilidad)
       return true
-    } catch (err) { console.error('Error updating status:', err); return false }
+    } catch { return false }
   }
 
   return { 

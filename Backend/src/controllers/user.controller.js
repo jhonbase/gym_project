@@ -176,6 +176,24 @@ async function getUserStatus(req, res, next) {
   }
 }
 
+async function getMyStatus(req, res, next) {
+  try {
+    if (!req.user) {
+      return response.error(res, 'No autorizado.', 401)
+    }
+    const user = await userService.getUserDisponibilidad(req.user.sub)
+    if (!user) {
+      return response.error(res, 'Usuario no encontrado.', 404)
+    }
+    return response.success(res, { 
+      disponibilidad: user.disponibilidad,
+      trainer: user.nombre
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 async function updateMyStatus(req, res, next) {
   try {
     if (!req.user) {
@@ -256,4 +274,4 @@ async function uploadAvatar(req, res, next) {
   }
 }
 
-export { createUser, getUsers, getUserById, updateUser, uploadCertificado, downloadCertificado, deleteUser, getUserStatus, updateMyStatus, getMe, uploadAvatar }
+export { createUser, getUsers, getUserById, updateUser, uploadCertificado, downloadCertificado, deleteUser, getUserStatus, getMyStatus, updateMyStatus, getMe, uploadAvatar }

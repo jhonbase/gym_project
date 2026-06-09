@@ -58,7 +58,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const menuRef = useRef(null)
 
-  const { status: trainerStatus, loading: statusLoading, updateStatus } = useTrainerStatus(user?.rol === 'entrenador' ? user.id : null)
+  const { status: trainerStatus, loading: statusLoading, updateStatus } = useTrainerStatus(user?.rol === 'entrenador')
   const { short, initials } = parseName(user?.nombre)
 
   useEffect(() => {

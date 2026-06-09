@@ -29,6 +29,7 @@ router.get('/:id/certificado', protectRoutes, authorize('entrenador', 'admin'), 
 router.delete('/:id', protectRoutes, authorize('entrenador', 'admin'), userController.deleteUser)
 
 // Disponibilidad
+router.get('/me/status', protectRoutes, authorize('entrenador', 'admin'), userController.getMyStatus)
 router.get('/:id/status', protectRoutes, userController.getUserStatus)
 router.patch('/me/status', protectRoutes, authorize('entrenador', 'admin'), userController.updateMyStatus)
 

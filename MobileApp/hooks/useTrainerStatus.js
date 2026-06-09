@@ -9,14 +9,13 @@ export function useTrainerStatus() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!DEFAULT_TRAINER_ID || DEFAULT_TRAINER_ID === 'ID-REAL-DEL-TRAINER-AQUI') {
+    if (!DEFAULT_TRAINER_ID) {
       setLoading(false)
       setError('Trainer no configurado')
       return
     }
     fetchStatus()
 
-    // Polling cada 60 segundos para mantener status actualizado
     const interval = setInterval(() => {
       fetchStatus()
     }, 60000)
@@ -31,7 +30,6 @@ export function useTrainerStatus() {
       setStatus(res.data.data.disponibilidad)
       setTrainerName(res.data.data.trainer)
     } catch (err) {
-      console.error('Error fetching trainer status:', err)
       setError(err.message)
     } finally {
       setLoading(false)

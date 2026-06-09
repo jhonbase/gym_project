@@ -1,4 +1,3 @@
-// ID del trainer principal (desde variables de entorno)
 export const DEFAULT_TRAINER_ID = process.env.EXPO_PUBLIC_DEFAULT_TRAINER_ID || ''
 
 export const TRAINER_STATUS = {

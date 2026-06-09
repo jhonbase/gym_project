@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import BrandLogo from './BrandLogo.jsx'
 import { useTrainerStatus, ESTADOS } from '../hooks/useTrainerStatus.js'
@@ -54,6 +54,7 @@ function StatusSelector({ currentStatus, onChange, disabled }) {
 export default function Navbar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [open, setOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -76,8 +77,9 @@ export default function Navbar() {
     <nav className="navbar">
       <Link to="/dashboard" className="navbar-brand"><BrandLogo size="md" /></Link>
       <div className="navbar-right">
-        <Link to="/dashboard" className="navbar-link">Inicio</Link>
-        {user?.rol === 'entrenador' && <Link to="/students" className="navbar-link">Estudiantes</Link>}
+        <Link to="/dashboard" className={`navbar-link${location.pathname === '/dashboard' ? ' active' : ''}`}>Inicio</Link>
+        {user?.rol === 'entrenador' && <Link to="/students" className={`navbar-link${location.pathname === '/students' ? ' active' : ''}`}>Estudiantes</Link>}
+        {user?.rol === 'entrenador' && <Link to="/agenda" className={`navbar-link${location.pathname === '/agenda' ? ' active' : ''}`}>Agenda</Link>}
         <div className="navbar-profile" ref={menuRef}>
           <button className="navbar-avatar-btn" onClick={() => setOpen(prev => !prev)} aria-expanded={open} aria-haspopup="true">
             <div className="navbar-avatar-wrapper">

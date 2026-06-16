@@ -15,6 +15,7 @@ import AssessmentResultPage from './pages/AssessmentResultPage.jsx'
 import AssessmentEditPage from './pages/AssessmentEditPage.jsx'
 import StudentProgressPage from './pages/StudentProgressPage.jsx'
 import AgendaPage from './pages/AgendaPage.jsx'
+import GimnasioPage from './pages/GimnasioPage.jsx'
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
                 <Route path="/assessment/:id" element={<AssessmentResultPage />} />
                 <Route path="/assessment/:id/edit" element={<AssessmentEditPage />} />
                 <Route path="/agenda" element={<AgendaPage />} />
+                <Route path="/gimnasio" element={<GimnasioPage />} />
               </Route>
             </Route>
 

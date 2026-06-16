@@ -80,6 +80,7 @@ export default function Navbar() {
         <Link to="/dashboard" className={`navbar-link${location.pathname === '/dashboard' ? ' active' : ''}`}>Inicio</Link>
         {user?.rol === 'entrenador' && <Link to="/students" className={`navbar-link${location.pathname === '/students' ? ' active' : ''}`}>Estudiantes</Link>}
         {user?.rol === 'entrenador' && <Link to="/agenda" className={`navbar-link${location.pathname === '/agenda' ? ' active' : ''}`}>Agenda</Link>}
+        {user?.rol === 'entrenador' && <Link to="/gimnasio" className={`navbar-link${location.pathname === '/gimnasio' ? ' active' : ''}`}>Gimnasio</Link>}
         <div className="navbar-profile" ref={menuRef}>
           <button className="navbar-avatar-btn" onClick={() => setOpen(prev => !prev)} aria-expanded={open} aria-haspopup="true">
             <div className="navbar-avatar-wrapper">

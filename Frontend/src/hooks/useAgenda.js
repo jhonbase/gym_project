@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import apiClient from '../api/client.js'
 
 export const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
@@ -62,16 +62,27 @@ export default function useAgenda() {
     return () => { cancelled = true }
   }, [])
 
-  const festivos = useMemo(() => [], [])
+  const [festivos, setFestivos] = useState([])
+
+  useEffect(() => {
+    const year = new Date().getFullYear()
+    fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/CO`)
+      .then((res) => res.json())
+      .then((data) => setFestivos(data.map((h) => h.date)))
+      .catch(() => setFestivos([]))
+  }, [])
 
   const isClosed = useCallback((date) => {
     const day = date.getDay()
-    // TODO API: GET /api/agenda/horario
     if (!horario[day].open) return true
-    // TODO API: GET /api/agenda/festivos
     const iso = date.toISOString().slice(0, 10)
     return festivos.includes(iso)
   }, [horario, festivos])
+
+  const isHoliday = useCallback((date) => {
+    const iso = date.toISOString().slice(0, 10)
+    return festivos.includes(iso)
+  }, [festivos])
 
   const changeMonth = useCallback((dir) => {
     setCurrentDate((prev) => {
@@ -120,6 +131,7 @@ export default function useAgenda() {
     setHorario,
     festivos,
     isClosed,
+    isHoliday,
     changeMonth,
     goToday,
     addEvent,

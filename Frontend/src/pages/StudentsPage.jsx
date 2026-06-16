@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth.js'
+import { Link } from 'react-router-dom'
 import { useAlerts } from '../context/AlertContext.jsx'
 import apiClient from '../api/client.js'
 import LoadingSpinner from '../components/LoadingSpinner.jsx'
 import SectionCard from '../components/SectionCard.jsx'
-import { hasEnrolledFingerprint, getEnrolledTemplate, generateRandomTemplate } from '../utils/fingerprint.js'
+import { generateRandomTemplate } from '../utils/fingerprint.js'
 
 const IconUser = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E10600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -69,8 +68,6 @@ function formatChipLabel(key, val) {
 }
 
 export default function StudentsPage() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
   const { addAlert } = useAlerts()
   const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(true)
@@ -101,7 +98,6 @@ export default function StudentsPage() {
   })
 
   const [certificadoEps, setCertificadoEps] = useState(null)
-  const [enrollmentError, setEnrollmentError] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
   const [acceptedSensitive, setAcceptedSensitive] = useState(false)
@@ -128,7 +124,7 @@ export default function StudentsPage() {
     try {
       const res = await apiClient.get('/users?rol=usuario')
       setStudents(res.data.data.users || [])
-    } catch (err) {
+    } catch {
       addAlert('error', 'Error al cargar estudiantes')
     } finally {
       setLoading(false)
@@ -284,7 +280,7 @@ if (file.type !== 'application/pdf') {
       await apiClient.delete(`/users/${studentId}`)
       addAlert('success', 'Estudiante eliminado correctamente.')
       loadStudents()
-    } catch (err) {
+    } catch {
       addAlert('error', 'Error al eliminar el estudiante.')
     } finally {
       setDeletingId(null)
@@ -866,7 +862,7 @@ if (file.type !== 'application/pdf') {
                       style={{ marginRight: '0.75rem', marginTop: '0.25rem', width: '1.125rem', height: '1.125rem' }}
                     />
                     <label htmlFor="privacy-checkbox" style={{ color: 'var(--color-muted)', fontSize: '0.8rem', lineHeight: '1.4', cursor: 'pointer' }}>
-                      Declaro que he leído y acepto la política de tratamiento de datos personales, y autorizo el tratamiento de mis datos conforme a las finalidades allí descritas.
+                      Declaro que he leído y acepto la política de tratamiento de  les, y autorizo el tratamiento de mis datos conforme a las finalidades allí descritas.
                     </label>
                   </div>
 

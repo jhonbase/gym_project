@@ -6,7 +6,7 @@ const DURACIONES = ['30 min', '45 min', '1 hora', '1h 30min', '2 horas']
 export default function AgendaPage() {
   const {
     currentDate, selectedDayIso, setSelectedDayIso,
-    events, horario, setHorario, isClosed,
+    events, horario, setHorario, isClosed, isHoliday,
     changeMonth, goToday, addEvent,
     students,
   } = useAgenda()
@@ -176,6 +176,10 @@ export default function AgendaPage() {
               {chip.label}
             </span>
           ))}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#1C1C1C', border: '1px solid #2A2A2A', borderRadius: '9999px', padding: '4px 12px', fontSize: '0.75rem', color: '#BFBFBF' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', flexShrink: 0, backgroundColor: '#E10600' }} />
+            Festivos: Cerrado
+          </span>
           <button onClick={openHorarioModal} style={{ background: 'transparent', border: 'none', color: '#BFBFBF', fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
             {'⚙'} Configurar horario
           </button>
@@ -245,6 +249,7 @@ export default function AgendaPage() {
                 const iso = toISO(year, month, cell.day)
                 const isToday = date.toDateString() === today.toDateString()
                 const closed = isClosed(date)
+                const holiday = isHoliday(date)
                 const isSelected = iso === selectedDayIso
                 const dayEvents = events[iso] || []
 
@@ -287,7 +292,7 @@ export default function AgendaPage() {
                     )}
                     {closed && (
                       <div style={{ fontSize: '9px', color: '#c62828', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, marginTop: '20px', textAlign: 'center', pointerEvents: 'none' }}>
-                        Cerrado
+                        {holiday ? 'FESTIVO' : 'Cerrado'}
                       </div>
                     )}
                     {dayEvents.slice(0, 2).map((ev, ei) => {
